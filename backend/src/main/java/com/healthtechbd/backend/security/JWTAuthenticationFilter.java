@@ -1,6 +1,5 @@
 package com.healthtechbd.backend.security;
 
-import com.healthtechbd.backend.exception.InvalidTokenException;
 import com.healthtechbd.backend.repo.TokenRepository;
 import io.micrometer.common.lang.NonNull;
 import jakarta.servlet.FilterChain;
@@ -41,30 +40,28 @@ public class JWTAuthenticationFilter extends OncePerRequestFilter {
             throws ServletException, IOException {
         String authHeader = request.getHeader("Authorization");
 
-        if (authHeader == null ||!authHeader.startsWith("Bearer ")) {
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             filterChain.doFilter(request, response);
             return;
         }
 
         String token = getJWTFromRequest(request);
 
-        try {
-            if (StringUtils.hasText(token) && jwtService.validateToken(token) && appUserServiceSecurity.verifyUser(token)) {
 
-                String username = jwtService.getUsernameFromJWT(token);
+        if (StringUtils.hasText(token) && jwtService.validateToken(token)) {
 
-                UserDetails userDetails = appUserServiceSecurity.loadUserByUsername(username);
+            String username = jwtService.getUsernameFromJWT(token);
 
-                UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
-                        userDetails, null, userDetails.getAuthorities()
-                );
-                authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+            UserDetails userDetails = appUserServiceSecurity.loadUserByUsername(username);
 
-                SecurityContextHolder.getContext().setAuthentication(authenticationToken);
+            UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
+                    userDetails, null, userDetails.getAuthorities()
+            );
+            authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+
+            SecurityContextHolder.getContext().setAuthentication(authenticationToken);
             }
-        } catch (InvalidTokenException e) {
-            throw new RuntimeException(e);
-        }
+
         filterChain.doFilter(request, response);
     }
 
