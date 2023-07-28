@@ -1,12 +1,7 @@
 package com.healthtechbd.backend.entity;
 
-import lombok.Data;
-import lombok.Getter;
-import lombok.Setter;
-
-
 public enum RoleType {
-    USER("User"),
+    USER("USER"),
     ADMIN("ADMIN"),
     DOCTOR("DOCTOR"),
     PATIENT("PATIENT"),

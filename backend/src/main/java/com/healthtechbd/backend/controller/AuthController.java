@@ -1,13 +1,11 @@
 package com.healthtechbd.backend.controller;
 
-import com.healthtechbd.backend.dto.AppUserDetailsDTO;
 import com.healthtechbd.backend.dto.JWTDTO;
 import com.healthtechbd.backend.dto.SignInDTO;
 import com.healthtechbd.backend.dto.SignUpDTO;
 import com.healthtechbd.backend.entity.AppUser;
 import com.healthtechbd.backend.entity.Role;
 import com.healthtechbd.backend.entity.RoleType;
-import com.healthtechbd.backend.entity.Token;
 import com.healthtechbd.backend.repo.AppUserRepository;
 import com.healthtechbd.backend.repo.RoleRepository;
 import com.healthtechbd.backend.security.AppUserServiceSecurity;
@@ -19,8 +17,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -28,7 +26,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.Collections;
 
 @RestController
-public class AuthenticationController {
+public class AuthController {
     @Autowired
     private AuthenticationManager authenticationManager;
 
@@ -42,6 +40,9 @@ public class AuthenticationController {
     private AppUserServiceSecurity userServiceSecurity;
 
     @Autowired
+    private PasswordEncoder bcryptPasswordEncoder;
+
+    @Autowired
     private JWTService jwtService;
 
     @Autowired
@@ -51,23 +52,25 @@ public class AuthenticationController {
     private ModelMapper modelMapper;
 
     @PostMapping("/signin")
-    public ResponseEntity<?>authenticateAppUser(@RequestBody SignInDTO signInDTO)
-    {
-        Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
-                signInDTO.getEmail(), signInDTO.getPassword()));
-        SecurityContextHolder.getContext().setAuthentication(authentication);
+    public ResponseEntity<?> authenticateAppUser(@RequestBody SignInDTO signInDTO) {
+        try {
+            authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(
+                            signInDTO.getEmail(),
+                            signInDTO.getPassword()
+                    )
+            );
+        } catch (Exception e) {
+            return new ResponseEntity<>("Invaild user email or password", HttpStatus.BAD_REQUEST);
+        }
+        UserDetails userDetails = userServiceSecurity.loadUserByUsername(signInDTO.getEmail());
 
-        String token = jwtService.generateToken(authentication);
-
-        AppUserServiceSecurity appUserServiceSecurity = new AppUserServiceSecurity(userRepository,tokenService);
-
-        AppUserDetailsDTO appUserDetailsDTO = userServiceSecurity.loadAppUserByEmail(signInDTO.getEmail());
+        String token = jwtService.generateToken(userDetails);
 
         JWTDTO jwtdto = new JWTDTO(token);
 
-        appUserDetailsDTO.setJwtdto(jwtdto);
 
-        return new ResponseEntity<>(appUserDetailsDTO, HttpStatus.OK);
+        return new ResponseEntity<>(jwtdto.getAccessToken(), HttpStatus.OK);
     }
 
     @PostMapping("/signup")
@@ -83,35 +86,31 @@ public class AuthenticationController {
             return new ResponseEntity<>("Email can not be empty",HttpStatus.BAD_REQUEST);
 
         if( signupDTO.getPassword() == null || signupDTO.getPassword().trim().length() == 0)
-            return new ResponseEntity<>("Password can not be empty",HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>("Password can not be empty", HttpStatus.BAD_REQUEST);
 
 
-        if(userRepository.existsByEmail(signupDTO.getEmail()))
+        if (userRepository.existsByEmail(signupDTO.getEmail()))
             return new ResponseEntity<>("Email is already taken!", HttpStatus.BAD_REQUEST);
 
 
-        if(userRepository.existsByFirstName(signupDTO.getFirstName()) && userRepository.existsByLastName(signupDTO.getLastName()) )
+        if (userRepository.existsByFirstName(signupDTO.getFirstName()) && userRepository.existsByLastName(signupDTO.getLastName()))
             return new ResponseEntity<>("Username is already taken!", HttpStatus.BAD_REQUEST);
 
-        AppUser user = modelMapper.map(signupDTO,AppUser.class);
+        String password = bcryptPasswordEncoder.encode(signupDTO.getPassword());
+
+        signupDTO.setPassword(password);
+
+        AppUser user = modelMapper.map(signupDTO, AppUser.class);
+
+        user.setAccountVerified(true);
+
+        Role role = new Role();
+        role.setRoleType(RoleType.USER);
+
+        user.setRoles(Collections.singleton(role));
 
         userRepository.save(user);
 
-
-
-
-        Token token = tokenService.createToken(user);
-
-
-
-        return new ResponseEntity<>(token.getToken(), HttpStatus.OK);
+        return new ResponseEntity<>("Sign up Successful",HttpStatus.OK);
     }
-
-
-
-
-
-
-
-
 }

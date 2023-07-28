@@ -1,25 +1,16 @@
 package com.healthtechbd.backend.security;
 
-import java.security.Key;
-import java.util.Date;
-
-import javax.crypto.spec.SecretKeySpec;
+import com.healthtechbd.backend.exception.ApiException;
+import io.jsonwebtoken.*;
+import io.jsonwebtoken.io.Decoders;
+import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
-import com.healthtechbd.backend.exception.ApiException;
-
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.ExpiredJwtException;
-import io.jsonwebtoken.Jws;
-import io.jsonwebtoken.JwtBuilder;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.MalformedJwtException;
-import io.jsonwebtoken.SignatureAlgorithm;
-import io.jsonwebtoken.UnsupportedJwtException;
-import io.jsonwebtoken.security.Keys;
+import java.security.Key;
+import java.util.Date;
 
 @Service
 public class JWTService {
@@ -30,43 +21,35 @@ public class JWTService {
     @Value("${application.security.jwt.refresh-token.expiration}")
     private long refreshExpiration;
 
-    public String generateToken(Authentication authentication) {
-        String username = authentication.getName();
+    public String generateToken(UserDetails userDetails) {
+        String username = userDetails.getUsername();
         Date currentDate = new Date();
         Date expireDate = new Date(currentDate.getTime() + jwtExpiration);
 
-        byte[] jwtSecretBytes = jwtSecret.getBytes();
-        Key key = new SecretKeySpec(jwtSecretBytes, SignatureAlgorithm.HS512.getJcaName());
-
-        JwtBuilder jwtBuilder = Jwts.builder()
+        String token = Jwts.builder()
                 .setSubject(username)
-                .setIssuedAt(currentDate)
+                .setIssuedAt(new Date())
                 .setExpiration(expireDate)
-                .signWith(key, SignatureAlgorithm.HS512);
-
-        String token = jwtBuilder.compact();
+                .signWith(SignatureAlgorithm.HS256, jwtSecret)
+                .compact();
         return token;
     }
 
     public String getUsernameFromJWT(String token) {
-        Key jwtSigningKey = Keys.hmacShaKeyFor(jwtSecret.getBytes());
-        Claims claims = Jwts.parserBuilder()
-                .setSigningKey(jwtSigningKey)
-                .build()
+        Claims claims = Jwts.parser()
+                .setSigningKey(getSignInKey()) // Convert jwtSecret to byte array
                 .parseClaimsJws(token)
                 .getBody();
         return claims.getSubject();
     }
 
+
     public boolean validateToken(String token) {
-        try {
-            Key jwtSigningKey = Keys.hmacShaKeyFor(jwtSecret.getBytes());
-            @SuppressWarnings("unused")
-            Jws<Claims> claimsJws = Jwts.parserBuilder()
-                    .setSigningKey(jwtSigningKey)
-                    .build()
-                    .parseClaimsJws(token);
+        try{
+            Jwts.parser().setSigningKey(getSignInKey()).parseClaimsJws(token);
             return true;
+        }catch (SignatureException ex){
+            throw new ApiException(HttpStatus.BAD_REQUEST, "Invalid JWT signature");
         } catch (MalformedJwtException ex) {
             throw new ApiException(HttpStatus.BAD_REQUEST, "Invalid JWT token");
         } catch (ExpiredJwtException ex) {
@@ -76,6 +59,11 @@ public class JWTService {
         } catch (IllegalArgumentException ex) {
             throw new ApiException(HttpStatus.BAD_REQUEST, "JWT claims string is empty.");
         }
+    }
+
+    private Key getSignInKey() {
+        byte[] keyBytes = Decoders.BASE64.decode(jwtSecret);
+        return Keys.hmacShaKeyFor(keyBytes);
     }
 
 }
