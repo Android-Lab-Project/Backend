@@ -12,28 +12,23 @@ import java.util.Set;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Table(name="doctors",uniqueConstraints = {@UniqueConstraint(columnNames={"email"})})
+@Table(name="doctors")
 
 public class Doctor {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
-    private String firstName;
-
-    @Column(nullable = false)
-    private String lastName;
-
-    @Column(nullable = false)
-    private String email;
-
-    @Column(nullable = false)
-    private String contactNo;
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name="appUser_id", referencedColumnName = "id")
+    AppUser appUser;
 
     @Column(nullable = false)
     private String bio;
 
+    private String currentHospital;
+
+    private String currentDistrict;
 
     @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     @JoinTable(name = "doctor_expertise",
