@@ -70,11 +70,11 @@ public class AuthController {
         JWTDTO jwtdto = new JWTDTO(token);
 
 
-        return new ResponseEntity<>(jwtdto.getAccessToken(), HttpStatus.OK);
+        return new ResponseEntity<>(jwtdto, HttpStatus.OK);
     }
 
     @PostMapping("/signup")
-    public ResponseEntity<?> registerUser(@RequestBody SignUpDTO signupDTO)
+    public ResponseEntity<?> registerAppUser(@RequestBody SignUpDTO signupDTO)
     {
         if( signupDTO.getFirstName() == null || signupDTO.getFirstName().trim().length() == 0)
             return new ResponseEntity<>("First Name can not be empty",HttpStatus.BAD_REQUEST);

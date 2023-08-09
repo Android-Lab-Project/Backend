@@ -1,16 +1,10 @@
 package com.healthtechbd.backend.service;
 
-import com.healthtechbd.backend.entity.AppUser;
 import com.healthtechbd.backend.entity.Token;
 import com.healthtechbd.backend.repo.TokenRepository;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-
-import java.time.LocalDateTime;
-import java.util.Date;
 
 @Service
 public class TokenService {

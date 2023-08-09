@@ -39,8 +39,6 @@ public class AppUser {
     @Column(nullable = false)
     private boolean accountVerified;
 
-
-
     @OneToMany(mappedBy="appUser")
     private List<Token>tokens;
 

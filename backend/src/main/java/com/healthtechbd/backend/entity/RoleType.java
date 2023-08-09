@@ -4,7 +4,8 @@ public enum RoleType {
     USER("USER"),
     ADMIN("ADMIN"),
     DOCTOR("DOCTOR"),
-    PATIENT("PATIENT"),
+    HOSPITAL("HOSPITAL"),
+    AMBULANCE("AMBULANCE"),
     COMPANY("COMPANY");
 
 
@@ -21,3 +22,4 @@ public enum RoleType {
     }
 
 }
+

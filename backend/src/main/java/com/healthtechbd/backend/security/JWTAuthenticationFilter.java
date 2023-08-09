@@ -1,6 +1,5 @@
 package com.healthtechbd.backend.security;
 
-import com.healthtechbd.backend.repo.TokenRepository;
 import io.micrometer.common.lang.NonNull;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -27,8 +26,6 @@ public class JWTAuthenticationFilter extends OncePerRequestFilter {
     private JWTService jwtService;
     @Autowired
     private UserDetailsService userDetailsService;
-    @Autowired
-    private TokenRepository tokenRepository;
 
     @Autowired
     private AppUserServiceSecurity appUserServiceSecurity;

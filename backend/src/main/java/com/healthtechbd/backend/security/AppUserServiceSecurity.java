@@ -6,6 +6,7 @@ import com.healthtechbd.backend.entity.Role;
 import com.healthtechbd.backend.entity.Token;
 import com.healthtechbd.backend.exception.InvalidTokenException;
 import com.healthtechbd.backend.repo.AppUserRepository;
+import com.healthtechbd.backend.repo.TokenRepository;
 import com.healthtechbd.backend.service.TokenService;
 import org.apache.commons.codec.binary.StringUtils;
 import org.modelmapper.ModelMapper;
@@ -30,6 +31,9 @@ public class AppUserServiceSecurity implements UserDetailsService {
 
     @Autowired
     private final AppUserRepository userRepository;
+
+    @Autowired
+    private TokenRepository tokenRepository;
     @Autowired
     private final TokenService tokenService;
 
