@@ -39,9 +39,6 @@ public class AppUser {
     @Column(nullable = false)
     private boolean accountVerified;
 
-    @OneToMany(mappedBy="appUser")
-    private List<Token>tokens;
-
     @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     @JoinTable(name = "user_roles",
             joinColumns = @JoinColumn(name = "user_id", referencedColumnName = "id"),

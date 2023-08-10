@@ -3,12 +3,7 @@ package com.healthtechbd.backend.security;
 import com.healthtechbd.backend.dto.AppUserDetailsDTO;
 import com.healthtechbd.backend.entity.AppUser;
 import com.healthtechbd.backend.entity.Role;
-import com.healthtechbd.backend.entity.Token;
-import com.healthtechbd.backend.exception.InvalidTokenException;
 import com.healthtechbd.backend.repo.AppUserRepository;
-import com.healthtechbd.backend.repo.TokenRepository;
-import com.healthtechbd.backend.service.TokenService;
-import org.apache.commons.codec.binary.StringUtils;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -22,7 +17,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.Collection;
-import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -32,10 +26,6 @@ public class AppUserServiceSecurity implements UserDetailsService {
     @Autowired
     private final AppUserRepository userRepository;
 
-    @Autowired
-    private TokenRepository tokenRepository;
-    @Autowired
-    private final TokenService tokenService;
 
     @Autowired
     private PasswordEncoder bcryptPasswordEncoder;
@@ -43,9 +33,8 @@ public class AppUserServiceSecurity implements UserDetailsService {
     @Autowired
     private ModelMapper modelMapper;
 
-    public AppUserServiceSecurity(AppUserRepository userRepository, TokenService tokenService) {
+    public AppUserServiceSecurity(AppUserRepository userRepository) {
         this.userRepository = userRepository;
-        this.tokenService = tokenService;
     }
 
 
@@ -82,20 +71,4 @@ public class AppUserServiceSecurity implements UserDetailsService {
         return roles.stream().map(role -> new SimpleGrantedAuthority(role.getRoleType().getValue())).collect(Collectors.toList());
     }
 
-    public boolean verifyUser(String token) throws InvalidTokenException {
-
-        Token usertoken = tokenService.findByToken(token);
-        if (Objects.isNull(usertoken) || !StringUtils.equals(token, usertoken.getToken()) || usertoken.isExpired()) {
-            throw new InvalidTokenException("Token is not valid");
-        }
-        AppUser user = userRepository.findById(usertoken.getAppUser().getId()).get();
-        if (Objects.isNull(user)) {
-            return false;
-        }
-        user.setAccountVerified(true);
-        userRepository.save(user);
-
-        tokenService.removeToken(usertoken);
-        return true;
-    }
 }

@@ -4,13 +4,14 @@ import com.healthtechbd.backend.dto.JWTDTO;
 import com.healthtechbd.backend.dto.SignInDTO;
 import com.healthtechbd.backend.dto.SignUpDTO;
 import com.healthtechbd.backend.entity.AppUser;
+import com.healthtechbd.backend.entity.Doctor;
 import com.healthtechbd.backend.entity.Role;
 import com.healthtechbd.backend.entity.RoleType;
 import com.healthtechbd.backend.repo.AppUserRepository;
+import com.healthtechbd.backend.repo.DoctorRepository;
 import com.healthtechbd.backend.repo.RoleRepository;
 import com.healthtechbd.backend.security.AppUserServiceSecurity;
 import com.healthtechbd.backend.security.JWTService;
-import com.healthtechbd.backend.service.TokenService;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -44,9 +45,6 @@ public class AuthController {
 
     @Autowired
     private JWTService jwtService;
-
-    @Autowired
-    private TokenService tokenService;
 
     @Autowired
     private ModelMapper modelMapper;
@@ -112,5 +110,17 @@ public class AuthController {
         userRepository.save(user);
 
         return new ResponseEntity<>("Sign up Successful",HttpStatus.OK);
+    }
+
+    @Autowired
+    private  DoctorRepository doctorRepository;
+
+
+
+    @PostMapping("/doctor")
+    public ResponseEntity<?> saveDoctor(@RequestBody Doctor doctor) {
+
+        Doctor savedDoctor = doctorRepository.save(doctor);
+        return ResponseEntity.status(HttpStatus.CREATED).body(savedDoctor);
     }
 }
