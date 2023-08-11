@@ -1,8 +1,7 @@
 package com.healthtechbd.backend.repo;
 
-import org.springframework.data.jpa.repository.JpaRepository;
-
 import com.healthtechbd.backend.entity.AppUser;
+import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;
 
