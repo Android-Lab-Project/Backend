@@ -13,7 +13,6 @@ import java.util.Set;
 @NoArgsConstructor
 @Entity
 @Table(name="doctors")
-
 public class Doctor {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -32,7 +31,7 @@ public class Doctor {
 
     @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     @JoinTable(name = "doctor_expertise",
-            joinColumns = @JoinColumn(name = "user_id", referencedColumnName = "id"),
+            joinColumns = @JoinColumn(name = "doctor_id", referencedColumnName = "id"),
             inverseJoinColumns = @JoinColumn(name = "expertise_id", referencedColumnName = "id"))
     List<DoctorExpertise> expertise;
 
@@ -41,7 +40,10 @@ public class Doctor {
     @Column(name = "available_day")
     private Set<String> availableDays;
 
-    @OneToMany(mappedBy = "doctor")
+    @OneToMany(cascade = CascadeType.ALL)
+    @JoinTable(name = "doctor_time",
+            joinColumns = @JoinColumn(name = "doctor_id", referencedColumnName = "id"),
+            inverseJoinColumns = @JoinColumn(name = "time_id", referencedColumnName = "id"))
     Set<DoctorAvailableTime>availableTimes;
 
 

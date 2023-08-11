@@ -6,7 +6,6 @@ import com.healthtechbd.backend.dto.SignUpDTO;
 import com.healthtechbd.backend.entity.AppUser;
 import com.healthtechbd.backend.entity.Doctor;
 import com.healthtechbd.backend.entity.Role;
-import com.healthtechbd.backend.entity.RoleType;
 import com.healthtechbd.backend.repo.AppUserRepository;
 import com.healthtechbd.backend.repo.DoctorRepository;
 import com.healthtechbd.backend.repo.RoleRepository;
@@ -103,7 +102,8 @@ public class AuthController {
         user.setAccountVerified(true);
 
         Role role = new Role();
-        role.setRoleType(RoleType.USER);
+        role.setRoleType("USER");
+
 
         user.setRoles(Collections.singleton(role));
 

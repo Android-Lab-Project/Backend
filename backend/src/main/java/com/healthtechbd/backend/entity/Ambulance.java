@@ -5,21 +5,20 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalTime;
-
 @Data
-@AllArgsConstructor
 @NoArgsConstructor
+@AllArgsConstructor
 @Entity
-@Table(name="availableTime")
-public class DoctorAvailableTime {
-
+@Table(name="ambulance")
+public class Ambulance {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private LocalTime startTime;
+    private String name;
 
-    private LocalTime endTime;
+    private String type;
 
+
+    private Long bookingCost;
 }

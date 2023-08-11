@@ -45,7 +45,4 @@ public class AppUser {
             inverseJoinColumns = @JoinColumn(name = "role_id", referencedColumnName = "id"))
     private Set<Role> roles;
 
-
-
-
 }
