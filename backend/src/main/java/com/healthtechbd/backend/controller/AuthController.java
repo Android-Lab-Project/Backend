@@ -11,6 +11,9 @@ import com.healthtechbd.backend.repo.DoctorRepository;
 import com.healthtechbd.backend.repo.RoleRepository;
 import com.healthtechbd.backend.security.AppUserServiceSecurity;
 import com.healthtechbd.backend.security.JWTService;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -22,7 +25,10 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Collections;
-@CrossOrigin(origins  = ("http://localhost:3000"))
+import java.util.HashMap;
+import java.util.Optional;
+
+@CrossOrigin(origins = "*", allowedHeaders = "*", methods = {RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT, RequestMethod.DELETE})
 @RestController
 public class AuthController {
     @Autowired
@@ -46,8 +52,10 @@ public class AuthController {
     @Autowired
     private ModelMapper modelMapper;
 
+
     @PostMapping("/signin")
     public ResponseEntity<?> authenticateAppUser(@RequestBody SignInDTO signInDTO) {
+        AppUser appUser1 = new AppUser();
         try {
             authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(
@@ -59,10 +67,13 @@ public class AuthController {
             return new ResponseEntity<>("Invaild user email or password", HttpStatus.BAD_REQUEST);
         }
         UserDetails userDetails = userServiceSecurity.loadUserByUsername(signInDTO.getEmail());
-
+        Optional<AppUser> appUser = userRepository.findByEmail(signInDTO.getEmail());
+        if(appUser.isPresent()) {
+            appUser1 = appUser.get();
+        }
         String token = jwtService.generateToken(userDetails);
-
-        JWTDTO jwtdto = new JWTDTO(token);
+        System.out.println(appUser1);
+        JWTDTO jwtdto = new JWTDTO(token, appUser1.getId());
 
 
         return new ResponseEntity<>(jwtdto, HttpStatus.OK);
@@ -106,8 +117,9 @@ public class AuthController {
         user.setRoles(Collections.singleton(role));
 
         userRepository.save(user);
+        JsonSender jsonSender = new JsonSender(1, "John");
 
-        return new ResponseEntity<>("Sign up Successful",HttpStatus.OK);
+        return new ResponseEntity<>(jsonSender,HttpStatus.OK);
     }
 
     @Autowired
@@ -115,14 +127,22 @@ public class AuthController {
 
 
 
-    @PostMapping("choose_profession/doctor")
+    @PostMapping("/doctor_registration")
     public ResponseEntity<?> saveDoctor(@RequestBody Doctor doctor) {
 
         Doctor savedDoctor = doctorRepository.save(doctor);
         return ResponseEntity.status(HttpStatus.CREATED).body(savedDoctor);
     }
     @GetMapping("/")
-    public String saveDoctor() {
-        return "Hello";
+    public JsonSender saveDoctor() {
+        JsonSender jsonSender = new JsonSender(1, "John");
+        return jsonSender;
     }
+}
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+class JsonSender {
+    int id;
+    String name;
 }

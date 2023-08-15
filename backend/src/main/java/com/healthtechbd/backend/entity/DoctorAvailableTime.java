@@ -19,7 +19,8 @@ public class DoctorAvailableTime {
     private Long id;
 
     private LocalTime startTime;
-
     private LocalTime endTime;
+    private LocalTime onlineStartTime;
+    private LocalTime onlineEndTime;
 
 }

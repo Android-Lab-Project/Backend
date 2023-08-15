@@ -49,13 +49,14 @@ public class SecurityConfig  {
                 .authorizeRequests()
                 .requestMatchers(HttpMethod.POST, "/signin").permitAll()
                 .requestMatchers(HttpMethod.POST, "/signup").permitAll()
-                .requestMatchers(HttpMethod.POST, "choose_profession/doctor").permitAll()
+                .requestMatchers(HttpMethod.POST, "/doctor_registration").permitAll()
                 .requestMatchers(HttpMethod.GET, "/").permitAll()
 
                         .anyRequest().authenticated();
 
 
         http.addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
+        http.cors();
         return http.build();
     }
 

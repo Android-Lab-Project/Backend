@@ -44,12 +44,11 @@ public class Doctor {
     @CollectionTable(name = "doctor_available_days", joinColumns = @JoinColumn(name = "doctor_id"))
     @Column(name = "available_day")
     private Set<String> availableDays;
-
     @OneToMany(cascade = CascadeType.ALL)
     @JoinTable(name = "doctor_time",
             joinColumns = @JoinColumn(name = "doctor_id", referencedColumnName = "id"),
             inverseJoinColumns = @JoinColumn(name = "time_id", referencedColumnName = "id"))
-    Set<DoctorAvailableTime>availableTimes;
+    Set<Integer>availableTimes;
 
 
 
