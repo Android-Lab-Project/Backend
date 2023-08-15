@@ -117,7 +117,7 @@ public class AuthController {
 
 
 
-    @PostMapping("/doctor")
+    @PostMapping("choose_profession/doctor")
     public ResponseEntity<?> saveDoctor(@RequestBody Doctor doctor) {
 
         Doctor savedDoctor = doctorRepository.save(doctor);

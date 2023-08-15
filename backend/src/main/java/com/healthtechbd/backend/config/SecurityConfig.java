@@ -49,7 +49,7 @@ public class SecurityConfig  {
                 .authorizeRequests()
                 .requestMatchers(HttpMethod.POST, "/signin").permitAll()
                 .requestMatchers(HttpMethod.POST, "/signup").permitAll()
-                .requestMatchers(HttpMethod.POST, "/doctor").permitAll()
+                .requestMatchers(HttpMethod.POST, "choose_profession/doctor").permitAll()
 
                         .anyRequest().authenticated();
 
