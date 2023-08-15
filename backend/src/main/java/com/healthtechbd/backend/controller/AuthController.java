@@ -131,6 +131,7 @@ public class AuthController {
     public ResponseEntity<?> saveDoctor(@RequestBody Doctor doctor) {
 
         Doctor savedDoctor = doctorRepository.save(doctor);
+        System.out.println(savedDoctor);
         return ResponseEntity.status(HttpStatus.CREATED).body(savedDoctor);
     }
     @GetMapping("/")
@@ -146,3 +147,4 @@ class JsonSender {
     int id;
     String name;
 }
+
