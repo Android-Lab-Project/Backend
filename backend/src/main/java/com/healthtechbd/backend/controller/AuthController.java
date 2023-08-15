@@ -19,6 +19,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -117,10 +118,14 @@ public class AuthController {
 
 
 
-    @PostMapping("/doctor")
+    @PostMapping("choose_profession/doctor")
     public ResponseEntity<?> saveDoctor(@RequestBody Doctor doctor) {
 
         Doctor savedDoctor = doctorRepository.save(doctor);
         return ResponseEntity.status(HttpStatus.CREATED).body(savedDoctor);
+    }
+    @GetMapping("/")
+    public String saveDoctor() {
+        return "Hello";
     }
 }

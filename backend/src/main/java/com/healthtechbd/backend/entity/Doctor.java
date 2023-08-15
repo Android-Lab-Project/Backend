@@ -27,7 +27,12 @@ public class Doctor {
 
     private String currentHospital;
 
-    private String currentDistrict;
+    private String place;
+
+    @ElementCollection
+    @CollectionTable(name = "doctor_degress", joinColumns = @JoinColumn(name = "doctor_id"))
+    @Column(name = "degrees")
+    private List<String>degrees;
 
     @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     @JoinTable(name = "doctor_expertise",
