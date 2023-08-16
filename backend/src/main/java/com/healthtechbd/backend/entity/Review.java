@@ -6,18 +6,23 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
-@NoArgsConstructor
 @AllArgsConstructor
+@NoArgsConstructor
 @Entity
-@Table(name="ambulance")
-public class Ambulance {
+@Table(name="reviews")
+public class Review {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String name;
+    private String review;
 
-    private String type;
+    @ManyToOne
+    @JoinColumn(name = "reviewer_id")
+    private AppUser reviewer;
 
-    private Long bookingCost;
+    @ManyToOne
+    @JoinColumn(name = "subject_id")
+    private AppUser subject;
 }

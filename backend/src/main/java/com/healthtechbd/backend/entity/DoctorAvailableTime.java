@@ -6,7 +6,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
-import java.time.LocalTime;
 
 @Data
 @AllArgsConstructor
@@ -24,6 +23,12 @@ public class DoctorAvailableTime {
     private LocalDate date;
 
     private Integer count;
+
+    private Integer onlineCount;
+
+    private Double availTime;
+
+    private Double onlineAvailTime;
 
     private Integer startTime;
     private Integer endTime;

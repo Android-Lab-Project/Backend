@@ -12,12 +12,9 @@ import com.healthtechbd.backend.repo.RoleRepository;
 import com.healthtechbd.backend.security.AppUserServiceSecurity;
 import com.healthtechbd.backend.security.JWTService;
 import com.healthtechbd.backend.service.DoctorService;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import com.healthtechbd.backend.utils.ApiResponse;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.actuate.autoconfigure.observation.ObservationProperties;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -26,9 +23,9 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDate;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 
 @CrossOrigin(origins = "*", allowedHeaders = "*", methods = {RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT, RequestMethod.DELETE})
@@ -67,7 +64,9 @@ public class AuthController {
                     )
             );
         } catch (Exception e) {
-            return new ResponseEntity<>("Invaild user email or password", HttpStatus.BAD_REQUEST);
+            Map<String, String> response = new HashMap<>();
+            response.put("error", "Invaild user email or password");
+            return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
         }
         UserDetails userDetails = userServiceSecurity.loadUserByUsername(signInDTO.getEmail());
         Optional<AppUser> optionalAppUser = userRepository.findByEmail(signInDTO.getEmail());
@@ -84,40 +83,45 @@ public class AuthController {
 
     @PostMapping("/signup")
     public ResponseEntity<?> registerAppUser(@RequestBody SignUpDTO signupDTO) {
+        Map<String, String> errorResponse = new HashMap<>();
+
         if (signupDTO.getFirstName() == null || signupDTO.getFirstName().trim().length() == 0)
-            return new ResponseEntity<>("First Name can not be empty", HttpStatus.BAD_REQUEST);
+            errorResponse.put("error", "First Name can not be empty");
 
         if (signupDTO.getLastName() == null || signupDTO.getLastName().trim().length() == 0)
-            return new ResponseEntity<>("Last Name can not be empty", HttpStatus.BAD_REQUEST);
+            errorResponse.put("error", "Last Name can not be empty");
 
         if (signupDTO.getEmail() == null || signupDTO.getEmail().trim().length() == 0)
-            return new ResponseEntity<>("Email can not be empty", HttpStatus.BAD_REQUEST);
+            errorResponse.put("error", "Email can not be empty");
 
         if (signupDTO.getPassword() == null || signupDTO.getPassword().trim().length() == 0)
-            return new ResponseEntity<>("Password can not be empty", HttpStatus.BAD_REQUEST);
-
+            errorResponse.put("error", "Password can not be empty");
 
         if (userRepository.existsByEmail(signupDTO.getEmail()))
-            return new ResponseEntity<>("Email is already taken!", HttpStatus.BAD_REQUEST);
+            errorResponse.put("error", "Email is already taken!");
+
+        if (!errorResponse.isEmpty()) {
+            return ResponseEntity.badRequest().body(errorResponse);
+        }
 
         String password = bcryptPasswordEncoder.encode(signupDTO.getPassword());
-
         signupDTO.setPassword(password);
 
         AppUser user = modelMapper.map(signupDTO, AppUser.class);
-
         user.setAccountVerified(true);
 
         Role role = new Role();
         role.setRoleType("USER");
+        user.setRoles(Collections.singleton(role));
 
         userRepository.save(user);
 
+        Map<String, String> createResponse = new HashMap<>();
+        createResponse.put("create", "Sign up Successful");
 
-        user.setRoles(Collections.singleton(role));
-
-        return new ResponseEntity<>( HttpStatus.OK);
+        return new ResponseEntity<>(createResponse, HttpStatus.OK);
     }
+
 
     @Autowired
     private DoctorRepository doctorRepository;
@@ -125,19 +129,39 @@ public class AuthController {
 
     @PostMapping("/doctor_registration")
     public ResponseEntity<?> saveDoctor(@RequestBody Doctor doctor) {
+        ApiResponse errorResponse = new ApiResponse();
+
+        if (doctor.getAppUser() == null || doctor.getAppUser().getFirstName() == null ||
+                doctor.getAppUser().getFirstName().trim().length() == 0)
+            ApiResponse.create("error", "First Name can not be empty");
+
+        if (doctor.getAppUser() == null || doctor.getAppUser().getLastName() == null ||
+                doctor.getAppUser().getLastName().trim().length() == 0)
+            ApiResponse.create("error", "Last Name can not be empty");
+
+        if (doctor.getAppUser() == null || doctor.getAppUser().getEmail() == null ||
+                doctor.getAppUser().getEmail().trim().length() == 0)
+            ApiResponse.create("error", "Email can not be empty");
+
+        if (doctor.getAppUser() == null || doctor.getAppUser().getPassword() == null ||
+                doctor.getAppUser().getPassword().trim().length() == 0)
+            ApiResponse.create("error", "Password can not be empty");
+
+        if (!errorResponse.isEmpty()) {
+            return ResponseEntity.badRequest().body(errorResponse);
+        }
 
         Role role = new Role("DOCTOR");
         doctor.getAppUser().setRoles(Collections.singleton(role));
 
-        for(int i=0;i<doctor.getAvailableTimes().size();i++)
-        {
-
-        doctor.getAvailableTimes().get(i).setDate(DoctorService.currentDate(doctor.getAvailableTimes().get(i).getDay()));
-        doctor.getAvailableTimes().get(i).setCount(0);
-
+        for (int i = 0; i < doctor.getAvailableTimes().size(); i++) {
+            doctor.getAvailableTimes().get(i).setDate(DoctorService.currentDate(doctor.getAvailableTimes().get(i).getDay()));
+            doctor.getAvailableTimes().get(i).setCount(0);
+            doctor.getAvailableTimes().get(i).setOnlineCount(0);
         }
+
         Doctor savedDoctor = doctorRepository.save(doctor);
-        return new  ResponseEntity("Sign up successful", HttpStatus.OK);
+        return new ResponseEntity<>(ApiResponse.create("create", "Doctor signup successful"), HttpStatus.OK);
     }
 }
 

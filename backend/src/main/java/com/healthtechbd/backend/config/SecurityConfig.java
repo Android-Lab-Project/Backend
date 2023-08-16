@@ -45,13 +45,14 @@ public class SecurityConfig  {
     protected SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .csrf((csrf) -> csrf.disable())
-                .exceptionHandling((exceptionHandling)->exceptionHandling.authenticationEntryPoint(jwtUnauthorizedEntryPoint))
-                .sessionManagement((sessionManagement)->sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .exceptionHandling((exceptionHandling) -> exceptionHandling.authenticationEntryPoint(jwtUnauthorizedEntryPoint))
+                .sessionManagement((sessionManagement) -> sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeRequests()
                 .requestMatchers(HttpMethod.POST, "/signin").permitAll()
                 .requestMatchers(HttpMethod.POST, "/signup").permitAll()
                 .requestMatchers(HttpMethod.POST, "/doctor_registration").permitAll()
-                .requestMatchers(HttpMethod.GET, "/dashboard/doctor/{id}").hasAnyRole("USER")
+                .requestMatchers(HttpMethod.GET, "/dashboard/doctor/{id}").hasAuthority("USER")
+                .requestMatchers(HttpMethod.GET, "/review/create/{id1}/{id2}").hasAnyAuthority("USER", "DOCTOR", "PHARMACY", "ADMIN", "HOSPITAL")
 
 
                 .anyRequest().authenticated();

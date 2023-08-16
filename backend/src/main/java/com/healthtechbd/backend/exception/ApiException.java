@@ -14,14 +14,18 @@ public class ApiException extends RuntimeException {
     public ApiException(HttpStatus status, String message)
     {
         this.status=status;
-        this.message=message;    
+        this.message = message;
     }
 
-    public ApiException( HttpStatus status,String message1, String message2)
-    {
+    public ApiException(HttpStatus status, String message1, String message2) {
         super(message1);
-        this.status=status;
-        this.message=message2;    
+        this.status = status;
+        this.message = message2;
     }
+
+    public ApiException(String message) {
+        this.message = message;
+    }
+
 
 }

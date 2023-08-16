@@ -4,6 +4,7 @@ import com.healthtechbd.backend.dto.AppUserDetailsDTO;
 import com.healthtechbd.backend.entity.AppUser;
 import com.healthtechbd.backend.entity.Role;
 import com.healthtechbd.backend.repo.AppUserRepository;
+import com.healthtechbd.backend.utils.ApiResponse;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -58,7 +59,8 @@ public class AppUserServiceSecurity implements UserDetailsService {
                         new UsernameNotFoundException("User not found with username or email:" + "okay"));
 
         if (!user.isAccountVerified()) {
-            new ResponseEntity<>("You have to verify First", HttpStatus.OK);
+            ApiResponse errorResponse = ApiResponse.create("error", "Have to verifyfirst");
+            new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
         }
 
         AppUserDetailsDTO userDetails = modelMapper.map(user,AppUserDetailsDTO.class);

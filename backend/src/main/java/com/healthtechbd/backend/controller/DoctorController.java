@@ -3,11 +3,10 @@ package com.healthtechbd.backend.controller;
 import com.healthtechbd.backend.entity.Doctor;
 import com.healthtechbd.backend.repo.DoctorRepository;
 import com.healthtechbd.backend.service.DoctorService;
-import org.modelmapper.internal.bytebuddy.asm.Advice;
+import com.healthtechbd.backend.utils.ApiResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
@@ -21,25 +20,32 @@ public class DoctorController {
     public DoctorRepository doctorRepository;
 
     @GetMapping("/dashboard/doctor/{id}")
-    public ResponseEntity<?> showDoctorDetails(@PathVariable Long id)
-    {
-        Optional<Doctor> optionalDoctor = doctorRepository.findById(id);
+    public ResponseEntity<?> showDoctorDetails(@PathVariable Long id) {
+        Optional<Doctor> optionalDoctor = doctorRepository.findByAppUser_Id(id);
         Doctor doctor = new Doctor();
-        if(optionalDoctor.isPresent())
-        {
+        if (optionalDoctor.isPresent()) {
             doctor = optionalDoctor.get();
-        }
-        else
-        {
-            return new ResponseEntity<>("Doctor not found", HttpStatus.BAD_REQUEST);
+        } else {
+            return new ResponseEntity<>(ApiResponse.create("error", "Doctor not found"), HttpStatus.BAD_REQUEST);
         }
 
+        for (int i = 0; i < doctor.getAvailableTimes().size(); i++) {
+
+            if (doctor.getAvailableTimes().get(i).getDate().isBefore(LocalDate.now())) {
+                doctor.getAvailableTimes().get(i).setDate(DoctorService.nextDate(doctor.getAvailableTimes().get(i).getDay()));
+                doctor.getAvailableTimes().get(i).setCount(0);
+                doctor.getAvailableTimes().get(i).setOnlineCount(0);
+
+            }
 
 
+        }
+
+        DoctorService.setSerialTime(doctor);
 
         doctorRepository.save(doctor);
 
-        return new ResponseEntity<>(doctor,HttpStatus.OK);
+        return new ResponseEntity<>(doctor, HttpStatus.OK);
     }
 
 

@@ -6,18 +6,21 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
-@NoArgsConstructor
 @AllArgsConstructor
+@NoArgsConstructor
 @Entity
-@Table(name="ambulance")
-public class Ambulance {
+@Table(name="medicine_orders")
+public class MedicineOrder {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String name;
+    @OneToOne(fetch = FetchType.EAGER )
+    @JoinColumn(name="medicine_id", referencedColumnName = "id")
+    Medicine medicine;
 
-    private String type;
+    private Long count;
 
-    private Long bookingCost;
+    private Long price;
+
 }
