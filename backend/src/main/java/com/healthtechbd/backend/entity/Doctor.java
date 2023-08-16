@@ -29,10 +29,7 @@ public class Doctor {
 
     private String place;
 
-    @ElementCollection
-    @CollectionTable(name = "doctor_degress", joinColumns = @JoinColumn(name = "doctor_id"))
-    @Column(name = "degrees")
-    private List<String>degrees;
+    private String degrees;
 
     @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     @JoinTable(name = "doctor_expertise",
@@ -40,20 +37,11 @@ public class Doctor {
             inverseJoinColumns = @JoinColumn(name = "expertise_id", referencedColumnName = "id"))
     List<DoctorExpertise> expertise;
 
-    @ElementCollection
-    @CollectionTable(name = "doctor_available_days", joinColumns = @JoinColumn(name = "doctor_id"))
-    @Column(name = "available_day")
-    private Set<String> availableDays;
-    @ElementCollection
-    @CollectionTable(name = "doctor_available_times", joinColumns = @JoinColumn(name = "doctor_id"))
-    @Column(name = "available_times")
-    private Set<Integer>availableTimes;
-
-
-
-
-
-
+    @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @JoinTable(name = "relation_doctor_time",
+            joinColumns = @JoinColumn(name = "doctor_id", referencedColumnName = "id"),
+            inverseJoinColumns = @JoinColumn(name = "time_id", referencedColumnName = "id"))
+    List<DoctorAvailableTime>availableTimes;
 
 
 }
