@@ -1,30 +1,30 @@
 package com.healthtechbd.backend.utils;
 
-import java.util.HashMap;
-import java.util.Map;
+import lombok.NoArgsConstructor;
 
+@NoArgsConstructor
 public class ApiResponse {
-    private Map<String, String> responseMap = new HashMap<>();
+    private String type;
+    private String message;
 
-    private ApiResponse(String key, String value) {
-        responseMap.put(key, value);
+    private ApiResponse(String type, String message) {
+        this.type = type;
+        this.message = message;
     }
 
-    public ApiResponse()
-    {}
-
-
-    public static ApiResponse create(String key, String value) {
-        return new ApiResponse(key, value);
+    public static ApiResponse create(String type, String message) {
+        return new ApiResponse(type, message);
     }
 
-    public boolean isEmpty()
-    {
-        return responseMap.size()==0?true:false;
+    public boolean empty() {
+        return type == null && message == null;
     }
 
+    public String getType() {
+        return type;
+    }
 
-    public Map<String, String> getResponseMap() {
-        return responseMap;
+    public String getMessage() {
+        return message;
     }
 }

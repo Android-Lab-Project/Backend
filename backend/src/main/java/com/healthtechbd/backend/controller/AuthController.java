@@ -147,7 +147,7 @@ public class AuthController {
                 doctor.getAppUser().getPassword().trim().length() == 0)
             ApiResponse.create("error", "Password can not be empty");
 
-        if (!errorResponse.isEmpty()) {
+        if (!errorResponse.empty()) {
             return ResponseEntity.badRequest().body(errorResponse);
         }
 
