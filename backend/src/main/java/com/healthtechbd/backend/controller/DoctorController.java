@@ -34,12 +34,23 @@ public class DoctorController {
             if (doctor.getAvailableTimes().get(i).getDate().isBefore(LocalDate.now())) {
                 doctor.getAvailableTimes().get(i).setDate(DoctorService.nextDate(doctor.getAvailableTimes().get(i).getDay()));
                 doctor.getAvailableTimes().get(i).setCount(0);
-                doctor.getAvailableTimes().get(i).setOnlineCount(0);
-
             }
-
-
         }
+
+//        doctor.getAvailableTimes().get(0).setCount(2);
+//        doctor.getAvailableTimes().get(1).setCount(3);
+
+        for (int i = 0; i < doctor.getAvailableOnlineTimes().size(); i++) {
+
+            if (doctor.getAvailableOnlineTimes().get(i).getDate().isBefore(LocalDate.now())) {
+                doctor.getAvailableOnlineTimes().get(i).setDate(DoctorService.nextDate(doctor.getAvailableTimes().get(i).getDay()));
+                doctor.getAvailableOnlineTimes().get(i).setOnlineCount(0);
+            }
+        }
+
+//        doctor.getAvailableOnlineTimes().get(0).setOnlineCount(2);
+//        doctor.getAvailableOnlineTimes().get(1).setOnlineCount(3);
+
 
         DoctorService.setSerialTime(doctor);
 

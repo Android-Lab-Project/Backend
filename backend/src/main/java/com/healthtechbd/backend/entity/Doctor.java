@@ -38,10 +38,16 @@ public class Doctor {
     List<DoctorExpertise> expertise;
 
     @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
-    @JoinTable(name = "relation_doctor_time",
+    @JoinTable(name = "relation_doctor_offlineTime",
             joinColumns = @JoinColumn(name = "doctor_id", referencedColumnName = "id"),
             inverseJoinColumns = @JoinColumn(name = "time_id", referencedColumnName = "id"))
     List<DoctorAvailableTime>availableTimes;
+
+    @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @JoinTable(name = "relation_doctor_onlineTime",
+            joinColumns = @JoinColumn(name = "doctor_id", referencedColumnName = "id"),
+            inverseJoinColumns = @JoinColumn(name = "onlineTime_id", referencedColumnName = "id"))
+    List<DoctorOnlineAvailableTime>availableOnlineTimes;
 
 
 }

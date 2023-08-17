@@ -1,11 +1,10 @@
 package com.healthtechbd.backend.controller;
 
+import com.healthtechbd.backend.dto.DoctorSignUpDTO;
 import com.healthtechbd.backend.dto.JWTDTO;
 import com.healthtechbd.backend.dto.SignInDTO;
 import com.healthtechbd.backend.dto.SignUpDTO;
-import com.healthtechbd.backend.entity.AppUser;
-import com.healthtechbd.backend.entity.Doctor;
-import com.healthtechbd.backend.entity.Role;
+import com.healthtechbd.backend.entity.*;
 import com.healthtechbd.backend.repo.AppUserRepository;
 import com.healthtechbd.backend.repo.DoctorRepository;
 import com.healthtechbd.backend.repo.RoleRepository;
@@ -23,10 +22,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 @CrossOrigin(origins = "*", allowedHeaders = "*", methods = {RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT, RequestMethod.DELETE})
 @RestController
@@ -64,9 +60,9 @@ public class AuthController {
                     )
             );
         } catch (Exception e) {
-            Map<String, String> response = new HashMap<>();
-            response.put("error", "Invaild user email or password");
-            return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+
+            ApiResponse errorResponse =ApiResponse.create("error", "Invaild user email or password");
+            return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
         }
         UserDetails userDetails = userServiceSecurity.loadUserByUsername(signInDTO.getEmail());
         Optional<AppUser> optionalAppUser = userRepository.findByEmail(signInDTO.getEmail());
@@ -83,24 +79,24 @@ public class AuthController {
 
     @PostMapping("/signup")
     public ResponseEntity<?> registerAppUser(@RequestBody SignUpDTO signupDTO) {
-        Map<String, String> errorResponse = new HashMap<>();
+        ApiResponse errorResponse = new ApiResponse();
 
         if (signupDTO.getFirstName() == null || signupDTO.getFirstName().trim().length() == 0)
-            errorResponse.put("error", "First Name can not be empty");
+            errorResponse = ApiResponse.create("error", "First Name can not be empty");
 
         if (signupDTO.getLastName() == null || signupDTO.getLastName().trim().length() == 0)
-            errorResponse.put("error", "Last Name can not be empty");
+            errorResponse= ApiResponse.create("error", "Last Name can not be empty");
 
         if (signupDTO.getEmail() == null || signupDTO.getEmail().trim().length() == 0)
-            errorResponse.put("error", "Email can not be empty");
+            errorResponse= ApiResponse.create("error", "Email can not be empty");
 
         if (signupDTO.getPassword() == null || signupDTO.getPassword().trim().length() == 0)
-            errorResponse.put("error", "Password can not be empty");
+            errorResponse= ApiResponse.create("error", "Password can not be empty");
 
         if (userRepository.existsByEmail(signupDTO.getEmail()))
-            errorResponse.put("error", "Email is already taken!");
+            errorResponse= ApiResponse.create("error", "Email is already taken!");
 
-        if (!errorResponse.isEmpty()) {
+        if (!errorResponse.empty()) {
             return ResponseEntity.badRequest().body(errorResponse);
         }
 
@@ -116,8 +112,8 @@ public class AuthController {
 
         userRepository.save(user);
 
-        Map<String, String> createResponse = new HashMap<>();
-        createResponse.put("create", "Sign up Successful");
+
+        ApiResponse createResponse = ApiResponse.create("create","Sign up Successful");
 
         return new ResponseEntity<>(createResponse, HttpStatus.OK);
     }
@@ -128,36 +124,68 @@ public class AuthController {
 
 
     @PostMapping("/doctor_registration")
-    public ResponseEntity<?> saveDoctor(@RequestBody Doctor doctor) {
+    public ResponseEntity<?> saveDoctor(@RequestBody DoctorSignUpDTO doctorSignUpDTO) {
         ApiResponse errorResponse = new ApiResponse();
 
-        if (doctor.getAppUser() == null || doctor.getAppUser().getFirstName() == null ||
-                doctor.getAppUser().getFirstName().trim().length() == 0)
-            ApiResponse.create("error", "First Name can not be empty");
+        if (doctorSignUpDTO.getAppUser() == null || doctorSignUpDTO.getAppUser().getFirstName() == null ||
+                doctorSignUpDTO.getAppUser().getFirstName().trim().length() == 0)
+           errorResponse = ApiResponse.create("error", "First Name can not be empty");
 
-        if (doctor.getAppUser() == null || doctor.getAppUser().getLastName() == null ||
-                doctor.getAppUser().getLastName().trim().length() == 0)
-            ApiResponse.create("error", "Last Name can not be empty");
+        if (doctorSignUpDTO.getAppUser() == null || doctorSignUpDTO.getAppUser().getLastName() == null ||
+                doctorSignUpDTO.getAppUser().getLastName().trim().length() == 0)
+            errorResponse = ApiResponse.create("error", "Last Name can not be empty");
 
-        if (doctor.getAppUser() == null || doctor.getAppUser().getEmail() == null ||
-                doctor.getAppUser().getEmail().trim().length() == 0)
-            ApiResponse.create("error", "Email can not be empty");
+        if (doctorSignUpDTO.getAppUser() == null || doctorSignUpDTO.getAppUser().getEmail() == null ||
+                doctorSignUpDTO.getAppUser().getEmail().trim().length() == 0)
+            errorResponse =  ApiResponse.create("error", "Email can not be empty");
 
-        if (doctor.getAppUser() == null || doctor.getAppUser().getPassword() == null ||
-                doctor.getAppUser().getPassword().trim().length() == 0)
-            ApiResponse.create("error", "Password can not be empty");
+        if (doctorSignUpDTO.getAppUser() == null || doctorSignUpDTO.getAppUser().getPassword() == null ||
+                doctorSignUpDTO.getAppUser().getPassword().trim().length() == 0)
+            errorResponse =  ApiResponse.create("error", "Password can not be empty");
+
+        if (userRepository.existsByEmail(doctorSignUpDTO.getAppUser().getEmail()))
+            errorResponse= ApiResponse.create("error", "Email is already taken!");
 
         if (!errorResponse.empty()) {
             return ResponseEntity.badRequest().body(errorResponse);
         }
 
         Role role = new Role("DOCTOR");
-        doctor.getAppUser().setRoles(Collections.singleton(role));
+        doctorSignUpDTO.getAppUser().setRoles(Collections.singleton(role));
 
-        for (int i = 0; i < doctor.getAvailableTimes().size(); i++) {
-            doctor.getAvailableTimes().get(i).setDate(DoctorService.currentDate(doctor.getAvailableTimes().get(i).getDay()));
-            doctor.getAvailableTimes().get(i).setCount(0);
-            doctor.getAvailableTimes().get(i).setOnlineCount(0);
+        Doctor doctor = modelMapper.map(doctorSignUpDTO, Doctor.class);
+
+        String password = bcryptPasswordEncoder.encode(doctor.getAppUser().getPassword());
+        doctor.getAppUser().setPassword(password);
+
+        doctor.setAvailableTimes(new ArrayList<DoctorAvailableTime>());
+
+        for (int i = 0; i < doctorSignUpDTO.getDays().size(); i++) {
+            DoctorAvailableTime doctorAvailableTime = new DoctorAvailableTime();
+            doctorAvailableTime.setDay(doctorSignUpDTO.getDays().get(i));
+            doctorAvailableTime.setDate(DoctorService.currentDate(doctorSignUpDTO.getDays().get(i)));
+            doctorAvailableTime.setStartTime(doctorSignUpDTO.getTimes().get(0));
+            doctorAvailableTime.setEndTime(doctorSignUpDTO.getTimes().get(1));
+            doctorAvailableTime.setAvailTime(0.0);
+            doctorAvailableTime.setCount(0);
+
+            doctor.getAvailableTimes().add(doctorAvailableTime);
+
+        }
+
+        doctor.setAvailableOnlineTimes(new ArrayList<DoctorOnlineAvailableTime>());
+
+        for (int i = 0; i < doctorSignUpDTO.getOnlineDays().size(); i++) {
+            DoctorOnlineAvailableTime doctorOnlineAvailableTime = new DoctorOnlineAvailableTime();
+            doctorOnlineAvailableTime.setDay(doctorSignUpDTO.getDays().get(i));
+            doctorOnlineAvailableTime.setDate(DoctorService.currentDate(doctorSignUpDTO.getDays().get(i)));
+            doctorOnlineAvailableTime.setOnlineStartTime(doctorSignUpDTO.getTimes().get(2));
+            doctorOnlineAvailableTime.setOnlineEndTime(doctorSignUpDTO.getTimes().get(3));
+            doctorOnlineAvailableTime.setOnlineAvailTime(0.0);
+            doctorOnlineAvailableTime.setOnlineCount(0);
+
+            doctor.getAvailableOnlineTimes().add(doctorOnlineAvailableTime);
+
         }
 
         Doctor savedDoctor = doctorRepository.save(doctor);

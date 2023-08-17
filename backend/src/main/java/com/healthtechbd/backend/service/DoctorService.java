@@ -27,13 +27,14 @@ public class DoctorService {
 
     public static void setSerialTime(Doctor doctor) {
         Double serialTime;
-        for (int i = 0; i < doctor.getAvailableTimes().size(); i++) {
+        for (int i = 0; i < doctor.getAvailableTimes().size(); i++)
+        {
             Integer startTime = doctor.getAvailableTimes().get(i).getStartTime();
-            Integer onlineStartTime = doctor.getAvailableTimes().get(i).getOnlineStartTime();
+
             Integer endTime = doctor.getAvailableTimes().get(i).getEndTime();
-            Integer onlineEndTime = doctor.getAvailableTimes().get(i).getOnlineEndTime();
+
             Integer count = doctor.getAvailableTimes().get(i).getCount();
-            Integer onlineCount = doctor.getAvailableTimes().get(i).getOnlineCount();
+
 
             serialTime = startTime * 1.0 + ((count * AppConstants.perConsultTime) / 60) + (((count * AppConstants.perConsultTime) % 60) / 100.0);
             if (serialTime > endTime) {
@@ -42,11 +43,24 @@ public class DoctorService {
                 doctor.getAvailableTimes().get(i).setAvailTime(serialTime);
             }
 
+
+        }
+
+        for (int i = 0; i < doctor.getAvailableOnlineTimes().size(); i++)
+        {
+
+            Integer onlineStartTime = doctor.getAvailableOnlineTimes().get(i).getOnlineStartTime();
+
+            Integer onlineEndTime = doctor.getAvailableOnlineTimes().get(i).getOnlineEndTime();
+
+            Integer onlineCount = doctor.getAvailableOnlineTimes().get(i).getOnlineCount();
+
             serialTime = onlineStartTime * 1.0 + ((onlineCount * AppConstants.perConsultTime) / 60) + (((onlineCount * AppConstants.perConsultTime) % 60) / 100.0);
+
             if (serialTime > onlineEndTime) {
-                doctor.getAvailableTimes().get(i).setOnlineAvailTime(0.0);
+                doctor.getAvailableOnlineTimes().get(i).setOnlineAvailTime(0.0);
             } else {
-                doctor.getAvailableTimes().get(i).setOnlineAvailTime(serialTime);
+                doctor.getAvailableOnlineTimes().get(i).setOnlineAvailTime(serialTime);
             }
         }
     }

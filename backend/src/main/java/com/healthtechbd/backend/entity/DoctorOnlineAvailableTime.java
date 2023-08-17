@@ -11,8 +11,8 @@ import java.time.LocalDate;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Table(name="doctor_availableTime")
-public class DoctorAvailableTime {
+@Table(name="doctor_online_availableTime")
+public class DoctorOnlineAvailableTime {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -22,13 +22,12 @@ public class DoctorAvailableTime {
 
     private LocalDate date;
 
-    private Integer count;
+    private Integer onlineCount;
 
-    private Double availTime;
+    private Double onlineAvailTime;
 
-    private Integer startTime;
+    private Integer onlineStartTime;
 
-    private Integer endTime;
-
+    private Integer onlineEndTime;
 
 }
