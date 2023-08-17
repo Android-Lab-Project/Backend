@@ -6,6 +6,7 @@ import com.healthtechbd.backend.exception.ApiException;
 import com.healthtechbd.backend.repo.AppUserRepository;
 import com.healthtechbd.backend.repo.ReviewRepository;
 import com.healthtechbd.backend.utils.ApiResponse;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -25,10 +26,11 @@ public class ReviewController {
     @Autowired
     private AppUserRepository userRepository;
 
-    @PostMapping("/review/create/{id1}/{id2}")
-    public ResponseEntity<?> saveReview(@RequestParam(name="review") String reviewStr , @PathVariable(name="id1") Long id1, @PathVariable(name="id2") Long id2 )
+    @PostMapping("/review/create/{id2}")
+    public ResponseEntity<?> saveReview(@RequestParam(name="review") String reviewStr , @PathVariable(name="id2") Long id2 , HttpServletRequest request)
     {
-        Optional<AppUser> optionalReviewer = userRepository.findById(id1);
+        String userEmail = (String) request.getAttribute("username");
+        Optional<AppUser> optionalReviewer = userRepository.findByEmail(userEmail);
         Optional<AppUser> optionalSubject = userRepository.findById(id2);
 
         AppUser reviewer=null,subject=null;
