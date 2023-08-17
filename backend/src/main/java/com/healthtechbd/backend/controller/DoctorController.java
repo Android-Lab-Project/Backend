@@ -10,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
 
 @CrossOrigin(origins = "*", allowedHeaders = "*", methods = {RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT, RequestMethod.DELETE})
@@ -37,8 +38,6 @@ public class DoctorController {
             }
         }
 
-//        doctor.getAvailableTimes().get(0).setCount(2);
-//        doctor.getAvailableTimes().get(1).setCount(3);
 
         for (int i = 0; i < doctor.getAvailableOnlineTimes().size(); i++) {
 
@@ -48,9 +47,6 @@ public class DoctorController {
             }
         }
 
-//        doctor.getAvailableOnlineTimes().get(0).setOnlineCount(2);
-//        doctor.getAvailableOnlineTimes().get(1).setOnlineCount(3);
-
 
         DoctorService.setSerialTime(doctor);
 
@@ -58,6 +54,45 @@ public class DoctorController {
 
         return new ResponseEntity<>(doctor, HttpStatus.OK);
     }
+
+    @GetMapping("/dashboard/doctor/all")
+    public ResponseEntity<?> showAllDoctorDetails()
+    {
+        List<Doctor>allDoctors = DoctorService.getAllDoctors();
+
+        for(int it=0;it<allDoctors.size();it++)
+        {
+            Doctor doctor = allDoctors.get(it);
+
+            for (int i = 0; i < doctor.getAvailableTimes().size(); i++) {
+
+                if (doctor.getAvailableTimes().get(i).getDate().isBefore(LocalDate.now())) {
+                    doctor.getAvailableTimes().get(i).setDate(DoctorService.nextDate(doctor.getAvailableTimes().get(i).getDay()));
+                    doctor.getAvailableTimes().get(i).setCount(0);
+                }
+            }
+
+
+            for (int i = 0; i < doctor.getAvailableOnlineTimes().size(); i++) {
+
+                if (doctor.getAvailableOnlineTimes().get(i).getDate().isBefore(LocalDate.now())) {
+                    doctor.getAvailableOnlineTimes().get(i).setDate(DoctorService.nextDate(doctor.getAvailableTimes().get(i).getDay()));
+                    doctor.getAvailableOnlineTimes().get(i).setOnlineCount(0);
+                }
+            }
+
+
+            DoctorService.setSerialTime(doctor);
+
+            doctorRepository.save(doctor);
+
+        }
+
+        return new ResponseEntity<>(allDoctors, HttpStatus.OK);
+
+
+    }
+
 
 
 }

@@ -1,16 +1,26 @@
 package com.healthtechbd.backend.service;
 
 import com.healthtechbd.backend.entity.Doctor;
+import com.healthtechbd.backend.repo.DoctorRepository;
 import com.healthtechbd.backend.utils.AppConstants;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.temporal.TemporalAdjusters;
+import java.util.List;
 
 @Service
 public class DoctorService {
 
+
+    private static DoctorRepository doctorRepository;
+
+    @Autowired
+    public DoctorService(DoctorRepository doctorRepository) {
+        this.doctorRepository = doctorRepository;
+    }
     public static LocalDate currentDate(String day) {
         DayOfWeek inputDay = DayOfWeek.valueOf(day.toUpperCase());
         LocalDate now = LocalDate.now();
@@ -23,6 +33,10 @@ public class DoctorService {
         LocalDate now = LocalDate.now();
         LocalDate nextWeekDate = now.with(TemporalAdjusters.next(inputDay));
         return nextWeekDate;
+    }
+
+    public static List<Doctor> getAllDoctors() {
+        return doctorRepository.findAll();
     }
 
     public static void setSerialTime(Doctor doctor) {
