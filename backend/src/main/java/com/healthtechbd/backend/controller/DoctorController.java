@@ -20,7 +20,7 @@ public class DoctorController {
     @Autowired
     public DoctorRepository doctorRepository;
 
-    @GetMapping("/dashboard/doctor/{id}")
+    @GetMapping("/doctor/{id}")
     public ResponseEntity<?> showDoctorDetails(@PathVariable Long id) {
         Optional<Doctor> optionalDoctor = doctorRepository.findByAppUser_Id(id);
         Doctor doctor = new Doctor();
@@ -55,7 +55,7 @@ public class DoctorController {
         return new ResponseEntity<>(doctor, HttpStatus.OK);
     }
 
-    @GetMapping("/dashboard/doctor/all")
+    @GetMapping("/doctor/all")
     public ResponseEntity<?> showAllDoctorDetails()
     {
         List<Doctor>allDoctors = DoctorService.getAllDoctors();

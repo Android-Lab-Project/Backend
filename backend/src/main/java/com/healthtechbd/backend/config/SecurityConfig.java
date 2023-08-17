@@ -51,8 +51,8 @@ public class SecurityConfig  {
                 .requestMatchers(HttpMethod.POST, "/signin").permitAll()
                 .requestMatchers(HttpMethod.POST, "/signup").permitAll()
                 .requestMatchers(HttpMethod.POST, "/doctor_registration").permitAll()
-                .requestMatchers(HttpMethod.GET, "/dashboard/doctor/{id}").permitAll()
-                .requestMatchers(HttpMethod.GET, "/dashboard/doctor/all").permitAll()
+                .requestMatchers(HttpMethod.GET, "/doctor/{id}").permitAll()
+                .requestMatchers(HttpMethod.GET, "/doctor/all").permitAll()
                 .requestMatchers(HttpMethod.GET, "/review/create/{id1}/{id2}").permitAll()
                 .anyRequest().authenticated();
 
