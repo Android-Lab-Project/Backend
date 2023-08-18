@@ -3,8 +3,8 @@ package com.healthtechbd.backend.utils;
 import com.healthtechbd.backend.entity.AppUser;
 
 public class RegistrationResponse {
-    private ApiResponse response;
-    private AppUser user;
+    private final ApiResponse response;
+    private final AppUser user;
 
     public RegistrationResponse(ApiResponse response, AppUser user) {
         this.response = response;

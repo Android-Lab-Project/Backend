@@ -29,10 +29,6 @@ public class ApiResponse {
     }
 
     public boolean haveError() {
-        if(type.equals("error"))
-        {
-            return true;
-        }
-        return false;
+        return type.equals("error");
     }
 }

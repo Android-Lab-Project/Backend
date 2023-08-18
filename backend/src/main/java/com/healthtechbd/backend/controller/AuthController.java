@@ -15,7 +15,6 @@ import com.healthtechbd.backend.service.DoctorService;
 import com.healthtechbd.backend.service.UserService;
 import com.healthtechbd.backend.utils.ApiResponse;
 import com.healthtechbd.backend.utils.RegistrationResponse;
-import org.antlr.v4.runtime.misc.LogManager;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -27,7 +26,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Optional;
 
 @CrossOrigin(origins = "*", allowedHeaders = "*", methods = {RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT, RequestMethod.DELETE})
@@ -152,8 +150,7 @@ public class AuthController {
     }
 
     @PostMapping("/ambulanceProvider_registration")
-    public ResponseEntity<?> registerAmbulanceProvider(@RequestBody AmbulanceProvider ambulanceProvider)
-    {
+    public ResponseEntity<?> registerAmbulanceProvider(@RequestBody AmbulanceProvider ambulanceProvider) {
 
         SignUpDTO signUpDTO = modelMapper.map(ambulanceProvider.getAppUser(), SignUpDTO.class);
 
@@ -165,8 +162,7 @@ public class AuthController {
 
         ambulanceProvider.setAppUser(response.getUser());
 
-        for(int i=0;i<ambulanceProvider.getAmbulances().size();i++)
-        {
+        for (int i = 0; i < ambulanceProvider.getAmbulances().size(); i++) {
             ambulanceProvider.getAmbulances().get(i).setAmbulanceProvider(ambulanceProvider);
             ambulanceProvider.getAmbulances().get(i).setAppUser(ambulanceProvider.getAppUser());
 
@@ -176,8 +172,7 @@ public class AuthController {
         ambulanceProviderRepository.save(ambulanceProvider);
 
 
-        return new ResponseEntity<>(ApiResponse.create("create","Sign up Successful"),HttpStatus.OK);
-
+        return new ResponseEntity<>(ApiResponse.create("create", "Sign up Successful"), HttpStatus.OK);
 
 
     }

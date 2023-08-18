@@ -58,7 +58,7 @@ public class DoctorController {
 
         doctorRepository.save(doctor);
 
-        DoctorDTO doctorDTO = modelMapper.map(doctor,DoctorDTO.class);
+        DoctorDTO doctorDTO = modelMapper.map(doctor, DoctorDTO.class);
 
         doctorDTO.setId(doctor.getAppUser().getId());
         doctorDTO.setFirstName(doctor.getAppUser().getFirstName());
@@ -101,10 +101,9 @@ public class DoctorController {
 
         }
 
-        List<DoctorDTO> allDoctorsDTO  = new ArrayList<>();
+        List<DoctorDTO> allDoctorsDTO = new ArrayList<>();
 
-        for(int i=0;i<allDoctors.size();i++)
-        {
+        for (int i = 0; i < allDoctors.size(); i++) {
             allDoctorsDTO.add(modelMapper.map(allDoctors.get(i), DoctorDTO.class));
             allDoctorsDTO.get(i).setId(allDoctors.get(i).getAppUser().getId());
             allDoctorsDTO.get(i).setFirstName(allDoctors.get(i).getAppUser().getFirstName());

@@ -11,8 +11,8 @@ import org.springframework.stereotype.Component;
 @Component
 @Order(1)
 public class BasicControlLogHandler {
-    long startTime;
     private final Logger logger = LoggerFactory.getLogger(BasicControlLogHandler.class);
+    long startTime;
 
     @Before("execution(* com.healthtechbd.backend.controller..*(..))")
     public void before(JoinPoint joinPoint) {

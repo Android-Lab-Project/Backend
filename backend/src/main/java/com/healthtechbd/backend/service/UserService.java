@@ -4,12 +4,12 @@ import com.healthtechbd.backend.dto.SignUpDTO;
 import com.healthtechbd.backend.entity.AppUser;
 import com.healthtechbd.backend.entity.Role;
 import com.healthtechbd.backend.repo.AppUserRepository;
+import com.healthtechbd.backend.utils.ApiResponse;
 import com.healthtechbd.backend.utils.RegistrationResponse;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import com.healthtechbd.backend.utils.ApiResponse;
 
 import java.util.Collections;
 
@@ -17,15 +17,15 @@ import java.util.Collections;
 public class UserService {
 
     @Autowired
-    private  AppUserRepository userRepository;
+    private AppUserRepository userRepository;
 
     @Autowired
-    private  ModelMapper modelMapper;
+    private ModelMapper modelMapper;
 
     @Autowired
-    private  PasswordEncoder bcryptPasswordEncoder;
+    private PasswordEncoder bcryptPasswordEncoder;
 
-    public  RegistrationResponse registerUser(SignUpDTO signUpDTO, String roleType) {
+    public RegistrationResponse registerUser(SignUpDTO signUpDTO, String roleType) {
         ApiResponse errorResponse = new ApiResponse();
 
         if (signUpDTO.getFirstName() == null || signUpDTO.getFirstName().trim().length() == 0)
@@ -44,7 +44,7 @@ public class UserService {
             errorResponse = ApiResponse.create("error", "Email is already taken!");
 
         if (!errorResponse.empty()) {
-            return new RegistrationResponse(errorResponse,null);
+            return new RegistrationResponse(errorResponse, null);
         }
 
         String password = bcryptPasswordEncoder.encode(signUpDTO.getPassword());
@@ -58,6 +58,6 @@ public class UserService {
 
         userRepository.save(user);
 
-        return new RegistrationResponse(ApiResponse.create("create","Sign up successful"),user);
+        return new RegistrationResponse(ApiResponse.create("create", "Sign up successful"), user);
     }
 }
