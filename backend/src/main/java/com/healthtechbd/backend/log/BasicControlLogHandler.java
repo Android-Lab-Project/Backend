@@ -12,7 +12,7 @@ import org.springframework.stereotype.Component;
 @Order(1)
 public class BasicControlLogHandler {
     long startTime;
-    private Logger logger = LoggerFactory.getLogger(BasicControlLogHandler.class);
+    private final Logger logger = LoggerFactory.getLogger(BasicControlLogHandler.class);
 
     @Before("execution(* com.healthtechbd.backend.controller..*(..))")
     public void before(JoinPoint joinPoint) {

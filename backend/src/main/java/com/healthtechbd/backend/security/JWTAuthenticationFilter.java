@@ -31,7 +31,6 @@ public class JWTAuthenticationFilter extends OncePerRequestFilter {
     private AppUserServiceSecurity appUserServiceSecurity;
 
 
-
     @Override
     protected void doFilterInternal(@NonNull HttpServletRequest request, @NonNull HttpServletResponse response, @NonNull FilterChain filterChain)
             throws ServletException, IOException {
@@ -58,7 +57,7 @@ public class JWTAuthenticationFilter extends OncePerRequestFilter {
 
             SecurityContextHolder.getContext().setAuthentication(authenticationToken);
             request.setAttribute("username", username);
-            }
+        }
 
 
         filterChain.doFilter(request, response);

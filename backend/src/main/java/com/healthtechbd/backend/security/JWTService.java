@@ -45,10 +45,10 @@ public class JWTService {
 
 
     public boolean validateToken(String token) {
-        try{
+        try {
             Jwts.parser().setSigningKey(getSignInKey()).parseClaimsJws(token);
             return true;
-        }catch (SignatureException ex){
+        } catch (SignatureException ex) {
             throw new ApiException(HttpStatus.BAD_REQUEST, "Invalid JWT signature");
         } catch (MalformedJwtException ex) {
             throw new ApiException(HttpStatus.BAD_REQUEST, "Invalid JWT token");

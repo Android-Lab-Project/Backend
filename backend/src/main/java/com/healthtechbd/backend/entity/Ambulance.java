@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name="ambulance")
+@Table(name = "ambulance")
 public class Ambulance {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -20,4 +20,8 @@ public class Ambulance {
     private String type;
 
     private Long bookingCost;
+
+    @ManyToOne
+            @JoinColumn(name="ambulanceProvider_id",referencedColumnName = "id")
+    AmbulanceProvider ambulanceProvider;
 }

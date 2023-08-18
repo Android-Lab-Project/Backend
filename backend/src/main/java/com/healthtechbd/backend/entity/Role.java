@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name="roles")
+@Table(name = "roles")
 public class Role {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -17,8 +17,7 @@ public class Role {
 
     private String roleType;
 
-    public Role(String roleType)
-    {
+    public Role(String roleType) {
         this.roleType = roleType;
     }
 

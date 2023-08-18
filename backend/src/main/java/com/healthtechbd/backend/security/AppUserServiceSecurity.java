@@ -44,13 +44,13 @@ public class AppUserServiceSecurity implements UserDetailsService {
         AppUser user = userRepository.findByEmail(userEmail).
                 orElseThrow(() -> new UsernameNotFoundException(("User not found with this email address ")));
 
-            if(user.isAccountVerified())
-            {
-                return new org.springframework.security.core.userdetails.User(user.getEmail(),
-                        user.getPassword(), true, true, true, true, mapRolesToAuthorities(user.getRoles()));
-            }
 
-            return null;
+        if (user.isAccountVerified()) {
+            return new org.springframework.security.core.userdetails.User(user.getEmail(),
+                    user.getPassword(), true, true, true, true, mapRolesToAuthorities(user.getRoles()));
+        }
+
+        return null;
     }
 
     public AppUserDetailsDTO loadAppUserByEmail(String userEmail) throws UsernameNotFoundException {
@@ -63,7 +63,7 @@ public class AppUserServiceSecurity implements UserDetailsService {
             new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
         }
 
-        AppUserDetailsDTO userDetails = modelMapper.map(user,AppUserDetailsDTO.class);
+        AppUserDetailsDTO userDetails = modelMapper.map(user, AppUserDetailsDTO.class);
         return userDetails;
 
     }

@@ -9,16 +9,14 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Table(name="medicine_orders")
+@Table(name = "medicine_orders")
 public class MedicineOrder {
+    @OneToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "medicine_id", referencedColumnName = "id")
+    Medicine medicine;
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
-    @OneToOne(fetch = FetchType.EAGER )
-    @JoinColumn(name="medicine_id", referencedColumnName = "id")
-    Medicine medicine;
-
     private Long count;
 
     private Long price;

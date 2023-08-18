@@ -9,17 +9,14 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Table(name="pharmacy")
-public class Pharmacy
-{
+@Table(name = "pharmacy")
+public class Pharmacy {
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "appUser_id", referencedColumnName = "id")
+    AppUser appUser;
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
-    @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name="appUser_id", referencedColumnName = "id")
-    AppUser appUser;
-
     @Column(nullable = false)
     private String bio;
 

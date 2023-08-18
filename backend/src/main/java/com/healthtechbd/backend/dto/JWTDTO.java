@@ -5,7 +5,7 @@ import lombok.Data;
 @Data
 public class JWTDTO {
     private String accessToken;
-    private String tokenType ="Bearer";
+    private String tokenType = "Bearer";
     private long id;
 
     public JWTDTO(String accessToken, long id) {

@@ -1,15 +1,18 @@
 package com.healthtechbd.backend.controller;
 
+import com.healthtechbd.backend.dto.DoctorDTO;
 import com.healthtechbd.backend.entity.Doctor;
 import com.healthtechbd.backend.repo.DoctorRepository;
 import com.healthtechbd.backend.service.DoctorService;
 import com.healthtechbd.backend.utils.ApiResponse;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -19,6 +22,9 @@ public class DoctorController {
 
     @Autowired
     public DoctorRepository doctorRepository;
+
+    @Autowired
+    private ModelMapper modelMapper;
 
     @GetMapping("/dashboard/doctor/{id}")
     public ResponseEntity<?> showDoctorDetails(@PathVariable Long id) {
@@ -52,16 +58,23 @@ public class DoctorController {
 
         doctorRepository.save(doctor);
 
-        return new ResponseEntity<>(doctor, HttpStatus.OK);
+        DoctorDTO doctorDTO = modelMapper.map(doctor,DoctorDTO.class);
+
+        doctorDTO.setId(doctor.getAppUser().getId());
+        doctorDTO.setFirstName(doctor.getAppUser().getFirstName());
+        doctorDTO.setLastName(doctor.getAppUser().getLastName());
+        doctorDTO.setEmail(doctor.getAppUser().getEmail());
+        doctorDTO.setContactNo(doctor.getAppUser().getContactNo());
+
+
+        return new ResponseEntity<>(doctorDTO, HttpStatus.OK);
     }
 
     @GetMapping("/dashboard/doctor/all")
-    public ResponseEntity<?> showAllDoctorDetails()
-    {
-        List<Doctor>allDoctors = DoctorService.getAllDoctors();
+    public ResponseEntity<?> showAllDoctorDetails() {
+        List<Doctor> allDoctors = DoctorService.getAllDoctors();
 
-        for(int it=0;it<allDoctors.size();it++)
-        {
+        for (int it = 0; it < allDoctors.size(); it++) {
             Doctor doctor = allDoctors.get(it);
 
             for (int i = 0; i < doctor.getAvailableTimes().size(); i++) {
@@ -88,11 +101,21 @@ public class DoctorController {
 
         }
 
-        return new ResponseEntity<>(allDoctors, HttpStatus.OK);
+        List<DoctorDTO> allDoctorsDTO  = new ArrayList<>();
+
+        for(int i=0;i<allDoctors.size();i++)
+        {
+            allDoctorsDTO.add(modelMapper.map(allDoctors.get(i), DoctorDTO.class));
+            allDoctorsDTO.get(i).setId(allDoctors.get(i).getAppUser().getId());
+            allDoctorsDTO.get(i).setFirstName(allDoctors.get(i).getAppUser().getFirstName());
+            allDoctorsDTO.get(i).setLastName(allDoctors.get(i).getAppUser().getLastName());
+            allDoctorsDTO.get(i).setEmail(allDoctors.get(i).getAppUser().getEmail());
+            allDoctorsDTO.get(i).setContactNo(allDoctors.get(i).getAppUser().getContactNo());
+        }
+        return new ResponseEntity<>(allDoctorsDTO, HttpStatus.OK);
 
 
     }
-
 
 
 }

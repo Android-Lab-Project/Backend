@@ -22,7 +22,9 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Optional;
 
 @CrossOrigin(origins = "*", allowedHeaders = "*", methods = {RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT, RequestMethod.DELETE})
 @RestController
@@ -48,6 +50,9 @@ public class AuthController {
     @Autowired
     private ModelMapper modelMapper;
 
+    @Autowired
+    private DoctorRepository doctorRepository;
+
 
     @PostMapping("/signin")
     public ResponseEntity<?> authenticateAppUser(@RequestBody SignInDTO signInDTO) {
@@ -61,12 +66,12 @@ public class AuthController {
             );
         } catch (Exception e) {
 
-            ApiResponse errorResponse =ApiResponse.create("error", "Invaild user email or password");
+            ApiResponse errorResponse = ApiResponse.create("error", "Invaild user email or password");
             return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
         }
         UserDetails userDetails = userServiceSecurity.loadUserByUsername(signInDTO.getEmail());
         Optional<AppUser> optionalAppUser = userRepository.findByEmail(signInDTO.getEmail());
-        AppUser appUser= new AppUser();
+        AppUser appUser = new AppUser();
         if (optionalAppUser.isPresent()) {
             appUser = optionalAppUser.get();
         }
@@ -85,16 +90,16 @@ public class AuthController {
             errorResponse = ApiResponse.create("error", "First Name can not be empty");
 
         if (signupDTO.getLastName() == null || signupDTO.getLastName().trim().length() == 0)
-            errorResponse= ApiResponse.create("error", "Last Name can not be empty");
+            errorResponse = ApiResponse.create("error", "Last Name can not be empty");
 
         if (signupDTO.getEmail() == null || signupDTO.getEmail().trim().length() == 0)
-            errorResponse= ApiResponse.create("error", "Email can not be empty");
+            errorResponse = ApiResponse.create("error", "Email can not be empty");
 
         if (signupDTO.getPassword() == null || signupDTO.getPassword().trim().length() == 0)
-            errorResponse= ApiResponse.create("error", "Password can not be empty");
+            errorResponse = ApiResponse.create("error", "Password can not be empty");
 
         if (userRepository.existsByEmail(signupDTO.getEmail()))
-            errorResponse= ApiResponse.create("error", "Email is already taken!");
+            errorResponse = ApiResponse.create("error", "Email is already taken!");
 
         if (!errorResponse.empty()) {
             return ResponseEntity.badRequest().body(errorResponse);
@@ -113,15 +118,10 @@ public class AuthController {
         userRepository.save(user);
 
 
-        ApiResponse createResponse = ApiResponse.create("create","Sign up Successful");
+        ApiResponse createResponse = ApiResponse.create("create", "Sign up Successful");
 
         return new ResponseEntity<>(createResponse, HttpStatus.OK);
     }
-
-
-    @Autowired
-    private DoctorRepository doctorRepository;
-
 
     @PostMapping("/doctor_registration")
     public ResponseEntity<?> saveDoctor(@RequestBody DoctorSignUpDTO doctorSignUpDTO) {
@@ -129,7 +129,7 @@ public class AuthController {
 
         if (doctorSignUpDTO.getAppUser() == null || doctorSignUpDTO.getAppUser().getFirstName() == null ||
                 doctorSignUpDTO.getAppUser().getFirstName().trim().length() == 0)
-           errorResponse = ApiResponse.create("error", "First Name can not be empty");
+            errorResponse = ApiResponse.create("error", "First Name can not be empty");
 
         if (doctorSignUpDTO.getAppUser() == null || doctorSignUpDTO.getAppUser().getLastName() == null ||
                 doctorSignUpDTO.getAppUser().getLastName().trim().length() == 0)
@@ -137,14 +137,14 @@ public class AuthController {
 
         if (doctorSignUpDTO.getAppUser() == null || doctorSignUpDTO.getAppUser().getEmail() == null ||
                 doctorSignUpDTO.getAppUser().getEmail().trim().length() == 0)
-            errorResponse =  ApiResponse.create("error", "Email can not be empty");
+            errorResponse = ApiResponse.create("error", "Email can not be empty");
 
         if (doctorSignUpDTO.getAppUser() == null || doctorSignUpDTO.getAppUser().getPassword() == null ||
                 doctorSignUpDTO.getAppUser().getPassword().trim().length() == 0)
-            errorResponse =  ApiResponse.create("error", "Password can not be empty");
+            errorResponse = ApiResponse.create("error", "Password can not be empty");
 
         if (userRepository.existsByEmail(doctorSignUpDTO.getAppUser().getEmail()))
-            errorResponse= ApiResponse.create("error", "Email is already taken!");
+            errorResponse = ApiResponse.create("error", "Email is already taken!");
 
         if (!errorResponse.empty()) {
             return ResponseEntity.badRequest().body(errorResponse);
@@ -191,5 +191,17 @@ public class AuthController {
         Doctor savedDoctor = doctorRepository.save(doctor);
         return new ResponseEntity<>(ApiResponse.create("create", "Doctor signup successful"), HttpStatus.OK);
     }
+
+    @PostMapping("/ambulanceProvider_registration")
+    public ResponseEntity<?> saveAmbulanceProvider(@RequestBody AmbulanceProvider ambulanceProvider)
+    {
+
+
+
+
+
+    }
+
+
 }
 

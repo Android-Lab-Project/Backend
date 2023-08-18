@@ -13,13 +13,13 @@ import java.util.Set;
 @NoArgsConstructor
 @Entity
 @ToString
-@Table(name="appUser",uniqueConstraints = {@UniqueConstraint(columnNames={"email"})})
+@Table(name = "appUser", uniqueConstraints = {@UniqueConstraint(columnNames = {"email"})})
 public class AppUser {
-    
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    
+
     @Column(nullable = false)
     private String firstName;
 

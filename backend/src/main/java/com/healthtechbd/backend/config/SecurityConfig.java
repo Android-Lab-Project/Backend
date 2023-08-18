@@ -1,4 +1,5 @@
 package com.healthtechbd.backend.config;
+
 import com.healthtechbd.backend.security.JWTAuthenticationFilter;
 import com.healthtechbd.backend.security.JWTUnauthorizedEntryPoint;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,7 +21,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity
-public class SecurityConfig  {
+public class SecurityConfig {
     @Autowired
     private JWTUnauthorizedEntryPoint jwtUnauthorizedEntryPoint;
 
@@ -51,8 +52,8 @@ public class SecurityConfig  {
                 .requestMatchers(HttpMethod.POST, "/signin").permitAll()
                 .requestMatchers(HttpMethod.POST, "/signup").permitAll()
                 .requestMatchers(HttpMethod.POST, "/doctor_registration").permitAll()
-                .requestMatchers(HttpMethod.GET, "/dashboard/doctor/{id}").permitAll()
-                .requestMatchers(HttpMethod.GET, "/dashboard/doctor/all").permitAll()
+                .requestMatchers(HttpMethod.GET, "/doctor/{id}").permitAll()
+                .requestMatchers(HttpMethod.GET, "/doctor/all").permitAll()
                 .requestMatchers(HttpMethod.GET, "/review/create/{id2}").permitAll()
                 .anyRequest().authenticated();
 
@@ -61,9 +62,6 @@ public class SecurityConfig  {
         http.cors(Customizer.withDefaults());
         return http.build();
     }
-
-
-
 
 
 }
