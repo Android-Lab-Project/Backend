@@ -54,7 +54,7 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.POST, "/doctor_registration").permitAll()
                 .requestMatchers(HttpMethod.GET, "/doctor/{id}").permitAll()
                 .requestMatchers(HttpMethod.GET, "/doctor/all").permitAll()
-                .requestMatchers(HttpMethod.GET, "/review/create/{id2}").permitAll()
+                .requestMatchers(HttpMethod.POST, "/ambulanceProvider_registration").permitAll()
                 .anyRequest().authenticated();
 
 

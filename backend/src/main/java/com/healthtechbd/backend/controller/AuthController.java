@@ -5,13 +5,17 @@ import com.healthtechbd.backend.dto.JWTDTO;
 import com.healthtechbd.backend.dto.SignInDTO;
 import com.healthtechbd.backend.dto.SignUpDTO;
 import com.healthtechbd.backend.entity.*;
+import com.healthtechbd.backend.repo.AmbulanceProviderRepository;
 import com.healthtechbd.backend.repo.AppUserRepository;
 import com.healthtechbd.backend.repo.DoctorRepository;
 import com.healthtechbd.backend.repo.RoleRepository;
 import com.healthtechbd.backend.security.AppUserServiceSecurity;
 import com.healthtechbd.backend.security.JWTService;
 import com.healthtechbd.backend.service.DoctorService;
+import com.healthtechbd.backend.service.UserService;
 import com.healthtechbd.backend.utils.ApiResponse;
+import com.healthtechbd.backend.utils.RegistrationResponse;
+import org.antlr.v4.runtime.misc.LogManager;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -42,10 +46,16 @@ public class AuthController {
     private AppUserServiceSecurity userServiceSecurity;
 
     @Autowired
+    private AmbulanceProviderRepository ambulanceProviderRepository;
+
+    @Autowired
     private PasswordEncoder bcryptPasswordEncoder;
 
     @Autowired
     private JWTService jwtService;
+
+    @Autowired
+    private UserService userService;
 
     @Autowired
     private ModelMapper modelMapper;
@@ -83,80 +93,29 @@ public class AuthController {
     }
 
     @PostMapping("/signup")
-    public ResponseEntity<?> registerAppUser(@RequestBody SignUpDTO signupDTO) {
-        ApiResponse errorResponse = new ApiResponse();
-
-        if (signupDTO.getFirstName() == null || signupDTO.getFirstName().trim().length() == 0)
-            errorResponse = ApiResponse.create("error", "First Name can not be empty");
-
-        if (signupDTO.getLastName() == null || signupDTO.getLastName().trim().length() == 0)
-            errorResponse = ApiResponse.create("error", "Last Name can not be empty");
-
-        if (signupDTO.getEmail() == null || signupDTO.getEmail().trim().length() == 0)
-            errorResponse = ApiResponse.create("error", "Email can not be empty");
-
-        if (signupDTO.getPassword() == null || signupDTO.getPassword().trim().length() == 0)
-            errorResponse = ApiResponse.create("error", "Password can not be empty");
-
-        if (userRepository.existsByEmail(signupDTO.getEmail()))
-            errorResponse = ApiResponse.create("error", "Email is already taken!");
-
-        if (!errorResponse.empty()) {
-            return ResponseEntity.badRequest().body(errorResponse);
+    public ResponseEntity<?> registerAppUser(@RequestBody SignUpDTO signUpDTO) {
+        RegistrationResponse response = userService.registerUser(signUpDTO, "USER");
+        if (response.getResponse().haveError()) {
+            return ResponseEntity.badRequest().body(response.getResponse());
         }
-
-        String password = bcryptPasswordEncoder.encode(signupDTO.getPassword());
-        signupDTO.setPassword(password);
-
-        AppUser user = modelMapper.map(signupDTO, AppUser.class);
-        user.setAccountVerified(true);
-
-        Role role = new Role();
-        role.setRoleType("USER");
-        user.setRoles(Collections.singleton(role));
-
-        userRepository.save(user);
-
-
-        ApiResponse createResponse = ApiResponse.create("create", "Sign up Successful");
-
-        return new ResponseEntity<>(createResponse, HttpStatus.OK);
+        return ResponseEntity.ok(response.getResponse());
     }
 
     @PostMapping("/doctor_registration")
-    public ResponseEntity<?> saveDoctor(@RequestBody DoctorSignUpDTO doctorSignUpDTO) {
-        ApiResponse errorResponse = new ApiResponse();
+    public ResponseEntity<?> registerDoctor(@RequestBody DoctorSignUpDTO doctorSignUpDTO) {
 
-        if (doctorSignUpDTO.getAppUser() == null || doctorSignUpDTO.getAppUser().getFirstName() == null ||
-                doctorSignUpDTO.getAppUser().getFirstName().trim().length() == 0)
-            errorResponse = ApiResponse.create("error", "First Name can not be empty");
+        SignUpDTO signUpDTO = modelMapper.map(doctorSignUpDTO.getAppUser(), SignUpDTO.class);
 
-        if (doctorSignUpDTO.getAppUser() == null || doctorSignUpDTO.getAppUser().getLastName() == null ||
-                doctorSignUpDTO.getAppUser().getLastName().trim().length() == 0)
-            errorResponse = ApiResponse.create("error", "Last Name can not be empty");
+        RegistrationResponse response = userService.registerUser(signUpDTO, "DOCTOR");
 
-        if (doctorSignUpDTO.getAppUser() == null || doctorSignUpDTO.getAppUser().getEmail() == null ||
-                doctorSignUpDTO.getAppUser().getEmail().trim().length() == 0)
-            errorResponse = ApiResponse.create("error", "Email can not be empty");
-
-        if (doctorSignUpDTO.getAppUser() == null || doctorSignUpDTO.getAppUser().getPassword() == null ||
-                doctorSignUpDTO.getAppUser().getPassword().trim().length() == 0)
-            errorResponse = ApiResponse.create("error", "Password can not be empty");
-
-        if (userRepository.existsByEmail(doctorSignUpDTO.getAppUser().getEmail()))
-            errorResponse = ApiResponse.create("error", "Email is already taken!");
-
-        if (!errorResponse.empty()) {
-            return ResponseEntity.badRequest().body(errorResponse);
+        if (response.getResponse().haveError()) {
+            return ResponseEntity.badRequest().body(response.getResponse());
         }
 
-        Role role = new Role("DOCTOR");
-        doctorSignUpDTO.getAppUser().setRoles(Collections.singleton(role));
+        doctorSignUpDTO.setAppUser(response.getUser());
 
         Doctor doctor = modelMapper.map(doctorSignUpDTO, Doctor.class);
 
-        String password = bcryptPasswordEncoder.encode(doctor.getAppUser().getPassword());
-        doctor.getAppUser().setPassword(password);
 
         doctor.setAvailableTimes(new ArrayList<DoctorAvailableTime>());
 
@@ -193,10 +152,31 @@ public class AuthController {
     }
 
     @PostMapping("/ambulanceProvider_registration")
-    public ResponseEntity<?> saveAmbulanceProvider(@RequestBody AmbulanceProvider ambulanceProvider)
+    public ResponseEntity<?> registerAmbulanceProvider(@RequestBody AmbulanceProvider ambulanceProvider)
     {
 
+        SignUpDTO signUpDTO = modelMapper.map(ambulanceProvider.getAppUser(), SignUpDTO.class);
 
+        RegistrationResponse response = userService.registerUser(signUpDTO, "AMBULANCE");
+
+        if (response.getResponse().haveError()) {
+            return ResponseEntity.badRequest().body(response.getResponse());
+        }
+
+        ambulanceProvider.setAppUser(response.getUser());
+
+        for(int i=0;i<ambulanceProvider.getAmbulances().size();i++)
+        {
+            ambulanceProvider.getAmbulances().get(i).setAmbulanceProvider(ambulanceProvider);
+            ambulanceProvider.getAmbulances().get(i).setAppUser(ambulanceProvider.getAppUser());
+
+        }
+
+
+        ambulanceProviderRepository.save(ambulanceProvider);
+
+
+        return new ResponseEntity<>(ApiResponse.create("create","Sign up Successful"),HttpStatus.OK);
 
 
 

@@ -27,4 +27,12 @@ public class ApiResponse {
     public String getMessage() {
         return message;
     }
+
+    public boolean haveError() {
+        if(type.equals("error"))
+        {
+            return true;
+        }
+        return false;
+    }
 }
