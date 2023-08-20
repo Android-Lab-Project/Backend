@@ -26,7 +26,7 @@ public class DoctorController {
     @Autowired
     private ModelMapper modelMapper;
 
-    @GetMapping("/dashboard/doctor/{id}")
+    @GetMapping("/doctor/{id}")
     public ResponseEntity<?> showDoctorDetails(@PathVariable Long id) {
         Optional<Doctor> optionalDoctor = doctorRepository.findByAppUser_Id(id);
         Doctor doctor = new Doctor();
@@ -70,9 +70,13 @@ public class DoctorController {
         return new ResponseEntity<>(doctorDTO, HttpStatus.OK);
     }
 
-    @GetMapping("/dashboard/doctor/all")
+    @GetMapping("/doctor/all")
     public ResponseEntity<?> showAllDoctorDetails() {
         List<Doctor> allDoctors = DoctorService.getAllDoctors();
+
+        if (allDoctors.size() == 0) {
+            return new ResponseEntity<>(ApiResponse.create("error", "No Doctor Found"), HttpStatus.BAD_REQUEST);
+        }
 
         for (int it = 0; it < allDoctors.size(); it++) {
             Doctor doctor = allDoctors.get(it);

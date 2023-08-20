@@ -5,16 +5,14 @@ import com.healthtechbd.backend.dto.JWTDTO;
 import com.healthtechbd.backend.dto.SignInDTO;
 import com.healthtechbd.backend.dto.SignUpDTO;
 import com.healthtechbd.backend.entity.*;
-import com.healthtechbd.backend.repo.AmbulanceProviderRepository;
-import com.healthtechbd.backend.repo.AppUserRepository;
-import com.healthtechbd.backend.repo.DoctorRepository;
-import com.healthtechbd.backend.repo.RoleRepository;
+import com.healthtechbd.backend.repo.*;
 import com.healthtechbd.backend.security.AppUserServiceSecurity;
 import com.healthtechbd.backend.security.JWTService;
 import com.healthtechbd.backend.service.DoctorService;
 import com.healthtechbd.backend.service.UserService;
 import com.healthtechbd.backend.utils.ApiResponse;
 import com.healthtechbd.backend.utils.RegistrationResponse;
+import jakarta.servlet.http.HttpServletRequest;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -26,7 +24,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @CrossOrigin(origins = "*", allowedHeaders = "*", methods = {RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT, RequestMethod.DELETE})
 @RestController
@@ -45,6 +45,15 @@ public class AuthController {
 
     @Autowired
     private AmbulanceProviderRepository ambulanceProviderRepository;
+
+    @Autowired
+    private MedicineRepository medicineRepository;
+
+    @Autowired
+    private PharmacyRepository pharmacyRepository;
+
+    @Autowired
+    private HospitalRepository hospitalRepository;
 
     @Autowired
     private PasswordEncoder bcryptPasswordEncoder;
@@ -96,6 +105,7 @@ public class AuthController {
         if (response.getResponse().haveError()) {
             return ResponseEntity.badRequest().body(response.getResponse());
         }
+        userRepository.save(response.getUser());
         return ResponseEntity.ok(response.getResponse());
     }
 
@@ -164,8 +174,6 @@ public class AuthController {
 
         for (int i = 0; i < ambulanceProvider.getAmbulances().size(); i++) {
             ambulanceProvider.getAmbulances().get(i).setAmbulanceProvider(ambulanceProvider);
-            ambulanceProvider.getAmbulances().get(i).setAppUser(ambulanceProvider.getAppUser());
-
         }
 
 
@@ -176,6 +184,152 @@ public class AuthController {
 
 
     }
+
+    @PostMapping("/add_medicine")
+    public ResponseEntity<?> addMedicine(@RequestBody Medicine medicine)
+    {
+        if(medicine.getName()==null || medicine.getName().trim().length()==0)
+        {
+            return new ResponseEntity<>(ApiResponse.create("error","Medicine name is empty"),HttpStatus.BAD_REQUEST);
+        }
+        if(medicine.getCompany()==null || medicine.getCompany().trim().length()==0)
+        {
+            return new ResponseEntity<>(ApiResponse.create("error","Company name is empty"),HttpStatus.BAD_REQUEST);
+        }
+        if(medicine.getPrice()==null || medicine.getPrice()<=0)
+        {
+            return new ResponseEntity<>(ApiResponse.create("error", "Invalid or empty medicine price"), HttpStatus.BAD_REQUEST);
+        }
+        if(medicineRepository.existsByName(medicine.getName()) && medicineRepository.existsByCompany(medicine.getCompany()))
+        {
+            return  new ResponseEntity<>(ApiResponse.create("error","Medicine already exists"),HttpStatus.BAD_REQUEST);
+        }
+
+        medicineRepository.save(medicine);
+
+        return new ResponseEntity<>(ApiResponse.create("create","Medicine successfully added"),HttpStatus.OK);
+
+
+    }
+
+    @PostMapping("/pharmacy_registration")
+    public ResponseEntity<?> registerPharmacy(@RequestBody Pharmacy pharmacy)
+    {
+        SignUpDTO signUpDTO = modelMapper.map(pharmacy.getAppUser(),SignUpDTO.class);
+        RegistrationResponse response = userService.registerUser(signUpDTO, "PHARMACY");
+
+        if (response.getResponse().haveError()) {
+            return ResponseEntity.badRequest().body(response.getResponse());
+        }
+        pharmacy.setAppUser(response.getUser());
+
+        pharmacyRepository.save(pharmacy);
+
+        return new ResponseEntity<>(ApiResponse.create("create","Sign up successful"),HttpStatus.OK);
+    }
+
+    @PostMapping("/hospital_registration")
+    public ResponseEntity<?> registerHospital(@RequestBody Hospital hospital)
+    {
+        SignUpDTO signUpDTO = modelMapper.map(hospital.getAppUser(),SignUpDTO.class);
+        RegistrationResponse response = userService.registerUser(signUpDTO, "HOSPITAL");
+
+        if (response.getResponse().haveError()) {
+            return ResponseEntity.badRequest().body(response.getResponse());
+        }
+        if(hospital.getHospitalName()==null || hospital.getHospitalName().trim().length()==0)
+        {
+            return new ResponseEntity<>(ApiResponse.create("error","Hospital name is empty"),HttpStatus.BAD_REQUEST);
+        }
+        hospital.setAppUser(response.getUser());
+
+        for (int i = 0; i < hospital.getDiagnosisList().size(); i++) {
+            hospital.getDiagnosisList().get(i).setHospital(hospital);
+        }
+
+       hospitalRepository.save(hospital);
+
+        return new ResponseEntity<>(ApiResponse.create("create","Sign up successful"),HttpStatus.OK);
+    }
+
+    @DeleteMapping("/delete/user")
+    public ResponseEntity<?>deleteUser(HttpServletRequest request)
+    {
+        String userEmail = (String) request.getAttribute("username");
+        Optional<AppUser>optionalAppUser = userRepository.findByEmail(userEmail);
+        AppUser appUser=null;
+        if(optionalAppUser.isPresent())
+        {
+            appUser = optionalAppUser.get();
+        }
+        else
+        {
+            return new ResponseEntity<>(ApiResponse.create("error","User does not exist"),HttpStatus.BAD_REQUEST);
+        }
+
+        Long id = appUser.getId();
+
+        List<Role> roles = appUser.getRoles();
+
+
+        for(int i=0;i<roles.size();i++)
+        {
+            if(roles.get(i).getRoleType().equals("USER"))
+            {
+               userRepository.delete(appUser);
+            }
+            if(roles.get(i).getRoleType().equals("DOCTOR"))
+            {
+
+                Optional<Doctor> doctor = doctorRepository.findByAppUser_Id(id);
+
+                if(!doctor.isPresent())
+                {
+                    return new ResponseEntity<>(ApiResponse.create("error","User does not exist"),HttpStatus.BAD_REQUEST);
+                }
+                doctorRepository.delete(doctor.get());
+            }
+            if(roles.get(i).getRoleType().equals("HOSPITAL"))
+            {
+                Optional<Hospital> hospital = hospitalRepository.findByAppUser_Id(id);
+
+                if(!hospital.isPresent())
+                {
+                    return new ResponseEntity<>(ApiResponse.create("error","User does not exist"),HttpStatus.BAD_REQUEST);
+                }
+
+                hospitalRepository.delete(hospital.get());
+            }
+            if(roles.get(i).getRoleType().equals("PHARMACY"))
+            {
+                Optional<Pharmacy> pharmacy = pharmacyRepository.findByAppUser_Id(id);
+
+                if(!pharmacy.isPresent())
+                {
+                    return new ResponseEntity<>(ApiResponse.create("error","User does not exist"),HttpStatus.BAD_REQUEST);
+                }
+
+                pharmacyRepository.delete(pharmacy.get());
+            }
+            if(roles.get(i).getRoleType().equals("AMBULANCE"))
+            {
+                Optional<AmbulanceProvider> ambulanceProvider = ambulanceProviderRepository.findByAppUser_Id(id);
+
+                if(!ambulanceProvider.isPresent())
+                {
+                    return new ResponseEntity<>(ApiResponse.create("error","User does not exist"),HttpStatus.BAD_REQUEST);
+                }
+
+                ambulanceProviderRepository.delete(ambulanceProvider.get());
+            }
+        }
+
+        return new ResponseEntity<>(ApiResponse.create("delete","User is deleted"),HttpStatus.OK);
+    }
+
+
+
+
 
 
 }

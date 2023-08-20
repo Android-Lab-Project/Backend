@@ -5,6 +5,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -26,5 +28,6 @@ public class Hospital {
     @Column(nullable = false)
     private String place;
 
-
+    @OneToMany(mappedBy = "hospital", cascade = CascadeType.ALL)
+    List<Diagnosis> diagnosisList;
 }

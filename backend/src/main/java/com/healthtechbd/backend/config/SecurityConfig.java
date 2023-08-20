@@ -55,6 +55,15 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.GET, "/doctor/{id}").permitAll()
                 .requestMatchers(HttpMethod.GET, "/doctor/all").permitAll()
                 .requestMatchers(HttpMethod.POST, "/ambulanceProvider_registration").permitAll()
+                .requestMatchers(HttpMethod.GET, "/ambulance/all").permitAll()
+                .requestMatchers(HttpMethod.POST, "/add_medicine").permitAll()
+                .requestMatchers(HttpMethod.GET, "/medicine/all").permitAll()
+                .requestMatchers(HttpMethod.POST, "/pharmacy_registration").permitAll()
+                .requestMatchers(HttpMethod.POST, "/hospital_registration").permitAll()
+                .requestMatchers(HttpMethod.GET, "/diagnosis/all").permitAll()
+                .requestMatchers(HttpMethod.DELETE, "/delete/user").permitAll()
+                .requestMatchers(HttpMethod.DELETE, "/delete/medicine/{id}").permitAll()
+
                 .anyRequest().authenticated();
 
 

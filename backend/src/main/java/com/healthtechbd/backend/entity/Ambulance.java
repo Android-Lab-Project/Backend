@@ -14,9 +14,7 @@ public class Ambulance {
     @ManyToOne
     @JoinColumn(name = "ambulanceProvider_id", referencedColumnName = "id")
     AmbulanceProvider ambulanceProvider;
-    @ManyToOne
-    @JoinColumn(name = "appUser_id", referencedColumnName = "id")
-    AppUser appUser;
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

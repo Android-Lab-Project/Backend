@@ -54,9 +54,7 @@ public class UserService {
         user.setAccountVerified(true);
 
         Role role = new Role(roleType);
-        user.setRoles(Collections.singleton(role));
-
-        userRepository.save(user);
+        user.setRoles(Collections.singletonList(role));
 
         return new RegistrationResponse(ApiResponse.create("create", "Sign up successful"), user);
     }
