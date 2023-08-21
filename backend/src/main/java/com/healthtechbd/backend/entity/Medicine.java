@@ -19,6 +19,15 @@ public class Medicine {
 
     private String company;
 
+    private String dp;
+
     private Long price;
+
+    @PrePersist
+    public void setDefaultDp() {
+        if (dp == null) {
+            dp = "default.png";
+        }
+    }
 
 }

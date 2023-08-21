@@ -22,5 +22,13 @@ public class Diagnosis {
     private String name;
     private String type;
     private String description;
+    private String dp;
     private Long cost;
+
+    @PrePersist
+    public void setDefaultDp() {
+        if (dp == null) {
+            dp = "default.png";
+        }
+    }
 }

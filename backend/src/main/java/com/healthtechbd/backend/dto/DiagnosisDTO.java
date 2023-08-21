@@ -13,6 +13,7 @@ public class DiagnosisDTO {
     private String hospitalName;
     private String type;
     private String description;
+    private String dp;
     private Long cost;
     private Long appUser_id;
 }

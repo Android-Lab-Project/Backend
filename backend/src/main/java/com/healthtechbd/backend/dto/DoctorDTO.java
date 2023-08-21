@@ -22,6 +22,7 @@ public class DoctorDTO {
     private String email;
     private String contactNo;
     private String bio;
+    private String dp;
     private String currentHospital;
     private String place;
     private String degrees;

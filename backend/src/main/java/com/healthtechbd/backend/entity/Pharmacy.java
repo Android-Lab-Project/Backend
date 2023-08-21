@@ -22,4 +22,6 @@ public class Pharmacy {
 
     @Column(nullable = false)
     private String place;
+
+
 }

@@ -11,6 +11,7 @@ public class AmbulanceDTO {
     private Long id;
     private String name;
     private String type;
+    private String dp;
     private Long bookingCost;
     private Long appUser_id;
 }

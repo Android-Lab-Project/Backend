@@ -23,6 +23,8 @@ public class DoctorSignUpDTO {
 
     private String degrees;
 
+    private String dp;
+
     private List<String> days;
     private List<String> onlineDays;
     private List<Integer> times;

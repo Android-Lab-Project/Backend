@@ -33,6 +33,8 @@ public class AppUser {
     @Column(nullable = false)
     private String password;
 
+    private String dp;
+
     @Column(nullable = false)
     private String contactNo;
 
@@ -45,4 +47,10 @@ public class AppUser {
             inverseJoinColumns = @JoinColumn(name = "role_id", referencedColumnName = "id"))
     private List<Role> roles;
 
+    @PrePersist
+    public void setDefaultDp() {
+        if (dp == null) {
+            dp = "default.png";
+        }
+    }
 }
