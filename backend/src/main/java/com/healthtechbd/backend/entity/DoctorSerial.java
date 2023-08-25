@@ -11,22 +11,26 @@ import java.time.LocalDate;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Table(name = "medicine_orders")
-public class MedicineOrder {
-
-
-    LocalDate date;
-    @ManyToOne
-    @JoinColumn(name = "user_id", referencedColumnName = "id")
-    AppUser user;
-    @ManyToOne
-    @JoinColumn(name = "pharmacy_id", referencedColumnName = "id")
-    AppUser pharmacy;
+@Table(name = "doctor_serials")
+public class DoctorSerial {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private String description;
+
+    private String type;
+
     private Long price;
 
+    private LocalDate date;
+
+    private Double time;
+
+    @ManyToOne
+    @JoinColumn(name = "user_id",referencedColumnName = "id")
+    private AppUser user;
+
+    @ManyToOne
+    @JoinColumn(name="doctor_id",referencedColumnName = "id")
+    private AppUser doctor;
 
 }

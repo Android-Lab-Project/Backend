@@ -1,8 +1,6 @@
 package com.healthtechbd.backend.controller;
 
-import com.healthtechbd.backend.dto.AmbulanceDTO;
 import com.healthtechbd.backend.dto.DiagnosisDTO;
-import com.healthtechbd.backend.entity.Ambulance;
 import com.healthtechbd.backend.entity.Diagnosis;
 import com.healthtechbd.backend.repo.DiagnosisRepository;
 import com.healthtechbd.backend.utils.ApiResponse;
@@ -29,8 +27,7 @@ public class DiagnosisController {
     private ModelMapper modelMapper;
 
     @GetMapping("/diagnosis/all")
-    public ResponseEntity<?>showAllDiagnosisDetails()
-    {
+    public ResponseEntity<?> showAllDiagnosisDetails() {
         List<Diagnosis> diagnoses = diagnosisRepository.findAll();
 
         if (diagnoses.size() == 0) {
@@ -48,5 +45,6 @@ public class DiagnosisController {
 
         return new ResponseEntity<>(diagnosisDTOS, HttpStatus.OK);
     }
+
 
 }

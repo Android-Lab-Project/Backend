@@ -11,26 +11,18 @@ import java.time.LocalDate;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Table(name = "diagnosis")
-public class Diagnosis {
-
+@Table(name = "diagnosis_orders")
+public class DiagnosisOrder {
+    LocalDate date;
+    @ManyToOne
+    @JoinColumn(name = "user_id", referencedColumnName = "id")
+    AppUser user;
     @ManyToOne
     @JoinColumn(name = "hospital_id", referencedColumnName = "id")
-    Hospital hospital;
-
+    AppUser hospital;
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private String name;
     private String description;
-    LocalDate date;
-    private String dp;
-    private Long cost;
-
-    @PrePersist
-    public void setDefaultDp() {
-        if (dp == null) {
-            dp = "default.png";
-        }
-    }
+    private Long price;
 }

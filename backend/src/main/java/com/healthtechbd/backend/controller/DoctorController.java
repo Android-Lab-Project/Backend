@@ -1,10 +1,15 @@
 package com.healthtechbd.backend.controller;
 
 import com.healthtechbd.backend.dto.DoctorDTO;
+import com.healthtechbd.backend.dto.StatisticsDTO;
+import com.healthtechbd.backend.entity.AppUser;
 import com.healthtechbd.backend.entity.Doctor;
+import com.healthtechbd.backend.repo.AppUserRepository;
 import com.healthtechbd.backend.repo.DoctorRepository;
+import com.healthtechbd.backend.repo.DoctorSerialRepository;
 import com.healthtechbd.backend.service.DoctorService;
 import com.healthtechbd.backend.utils.ApiResponse;
+import jakarta.servlet.http.HttpServletRequest;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -21,7 +26,13 @@ import java.util.Optional;
 public class DoctorController {
 
     @Autowired
-    public DoctorRepository doctorRepository;
+    private DoctorRepository doctorRepository;
+
+    @Autowired
+    private AppUserRepository userRepository;
+
+    @Autowired
+    private DoctorSerialRepository doctorSerialRepository;
 
     @Autowired
     private ModelMapper modelMapper;
@@ -117,7 +128,51 @@ public class DoctorController {
         }
         return new ResponseEntity<>(allDoctorsDTO, HttpStatus.OK);
 
+    }
 
+    @GetMapping("/doctor/statistics")
+    public ResponseEntity<?> getHospitalStatistics(HttpServletRequest request) {
+        String userEmail = (String) request.getAttribute("username");
+
+        Optional<AppUser> optionalAppUser = userRepository.findByEmail(userEmail);
+
+        AppUser doctor = new AppUser();
+
+        if (optionalAppUser.isPresent()) {
+            doctor = optionalAppUser.get();
+        } else {
+            return new ResponseEntity<>(ApiResponse.create("error", "Hospital not found"), HttpStatus.OK);
+        }
+
+        StatisticsDTO doctorStatisticsDTO = new StatisticsDTO();
+
+        doctorStatisticsDTO.set_7DaysCount(doctorSerialRepository.countSerialsByDoctorAndDate(doctor.getId(), LocalDate.now().minusDays(7), LocalDate.now()));
+
+        doctorStatisticsDTO.set_30DaysCount(doctorSerialRepository.countSerialsByDoctorAndDate(doctor.getId(), LocalDate.now().minusDays(30), LocalDate.now()));
+
+        doctorStatisticsDTO.setTotalCount(doctorSerialRepository.countSerialsByDoctor(doctor.getId()));
+
+        doctorStatisticsDTO.set_7DaysIncome(doctorSerialRepository.sumPriceByDoctorAndDate(
+                doctor.getId(), LocalDate.now().minusDays(7), LocalDate.now()));
+
+
+        doctorStatisticsDTO.set_30DaysIncome(doctorSerialRepository.sumPriceByDoctorAndDate(
+                doctor.getId(), LocalDate.now().minusDays(30), LocalDate.now()));
+
+        doctorStatisticsDTO.setTotalIncome(doctorSerialRepository.sumPriceByDoctor(doctor.getId()));
+
+        List<Object[]> incomeList = doctorSerialRepository.sumPriceByDoctorAndDateGroupByDate(
+                doctor.getId(), LocalDate.now().minusDays(30), LocalDate.now());
+
+        doctorStatisticsDTO.setDates(new ArrayList<>());
+        doctorStatisticsDTO.setIncomes(new ArrayList<>());
+
+        for (var i : incomeList) {
+            doctorStatisticsDTO.getDates().add((LocalDate) i[0]);
+            doctorStatisticsDTO.getIncomes().add((Long) i[1]);
+        }
+
+        return new ResponseEntity<>(doctorStatisticsDTO, HttpStatus.OK);
     }
 
 

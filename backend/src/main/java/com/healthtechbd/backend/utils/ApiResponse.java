@@ -31,4 +31,12 @@ public class ApiResponse {
     public boolean haveError() {
         return type.equals("error");
     }
+
+    @Override
+    public String toString() {
+        return "{" +
+                "type= " + "\"" + type + "\"" +
+                ", message= " + "\"" + message + "\"" +
+                "}";
+    }
 }
