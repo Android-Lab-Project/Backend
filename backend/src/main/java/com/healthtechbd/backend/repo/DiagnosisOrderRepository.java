@@ -24,6 +24,7 @@ public interface DiagnosisOrderRepository extends JpaRepository<DiagnosisOrder, 
             "WHERE do.hospital.id = :hospitalId")
     Long countSerialsByHospital(
             @Param("hospitalId") Long hospitalId);
+
     @Query("SELECT do.date, SUM(do.price) " +
             "FROM DiagnosisOrder do " +
             "WHERE do.hospital.id = :hospitalId " +
@@ -48,4 +49,6 @@ public interface DiagnosisOrderRepository extends JpaRepository<DiagnosisOrder, 
             "WHERE do.hospital.id = :hospitalId")
     Long sumPriceByHospital(
             @Param("hospitalId") Long hospitalId);
+
+    List<DiagnosisOrder> findByUser_Id(Long user_id);
 }

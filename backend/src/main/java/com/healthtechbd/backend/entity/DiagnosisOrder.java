@@ -13,7 +13,7 @@ import java.time.LocalDate;
 @Entity
 @Table(name = "diagnosis_orders")
 public class DiagnosisOrder {
-    LocalDate date;
+
     @ManyToOne
     @JoinColumn(name = "user_id", referencedColumnName = "id")
     AppUser user;
@@ -25,4 +25,7 @@ public class DiagnosisOrder {
     private Long id;
     private String description;
     private Long price;
+    private String reportURL;
+    private LocalDate date;
+    private Double time;
 }

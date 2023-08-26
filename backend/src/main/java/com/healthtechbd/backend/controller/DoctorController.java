@@ -8,6 +8,7 @@ import com.healthtechbd.backend.repo.AppUserRepository;
 import com.healthtechbd.backend.repo.DoctorRepository;
 import com.healthtechbd.backend.repo.DoctorSerialRepository;
 import com.healthtechbd.backend.service.DoctorService;
+import com.healthtechbd.backend.service.UserService;
 import com.healthtechbd.backend.utils.ApiResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import org.modelmapper.ModelMapper;
@@ -36,6 +37,9 @@ public class DoctorController {
 
     @Autowired
     private ModelMapper modelMapper;
+
+    @Autowired
+    private UserService userService;
 
     @GetMapping("/doctor/{id}")
     public ResponseEntity<?> showDoctorDetails(@PathVariable Long id) {
@@ -132,15 +136,9 @@ public class DoctorController {
 
     @GetMapping("/doctor/statistics")
     public ResponseEntity<?> getHospitalStatistics(HttpServletRequest request) {
-        String userEmail = (String) request.getAttribute("username");
 
-        Optional<AppUser> optionalAppUser = userRepository.findByEmail(userEmail);
-
-        AppUser doctor = new AppUser();
-
-        if (optionalAppUser.isPresent()) {
-            doctor = optionalAppUser.get();
-        } else {
+        AppUser doctor = userService.returnUser(request);
+        if (doctor == null) {
             return new ResponseEntity<>(ApiResponse.create("error", "Hospital not found"), HttpStatus.OK);
         }
 

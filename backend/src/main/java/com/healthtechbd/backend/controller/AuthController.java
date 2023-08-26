@@ -108,7 +108,7 @@ public class AuthController {
         return ResponseEntity.ok(response.getResponse());
     }
 
-    @PostMapping("/doctor_registration")
+    @PostMapping("/register/doctor")
     public ResponseEntity<?> registerDoctor(@RequestBody DoctorSignUpDTO doctorSignUpDTO) {
 
         SignUpDTO signUpDTO = modelMapper.map(doctorSignUpDTO.getAppUser(), SignUpDTO.class);
@@ -158,7 +158,7 @@ public class AuthController {
         return new ResponseEntity<>(ApiResponse.create("create", "Doctor signup successful"), HttpStatus.OK);
     }
 
-    @PostMapping("/ambulanceProvider_registration")
+    @PostMapping("/register/ambulanceProvider")
     public ResponseEntity<?> registerAmbulanceProvider(@RequestBody AmbulanceProvider ambulanceProvider) {
 
         SignUpDTO signUpDTO = modelMapper.map(ambulanceProvider.getAppUser(), SignUpDTO.class);
@@ -184,29 +184,8 @@ public class AuthController {
 
     }
 
-    @PostMapping("/add_medicine")
-    public ResponseEntity<?> addMedicine(@RequestBody Medicine medicine) {
-        if (medicine.getName() == null || medicine.getName().trim().length() == 0) {
-            return new ResponseEntity<>(ApiResponse.create("error", "Medicine name is empty"), HttpStatus.BAD_REQUEST);
-        }
-        if (medicine.getCompany() == null || medicine.getCompany().trim().length() == 0) {
-            return new ResponseEntity<>(ApiResponse.create("error", "Company name is empty"), HttpStatus.BAD_REQUEST);
-        }
-        if (medicine.getPrice() == null || medicine.getPrice() <= 0) {
-            return new ResponseEntity<>(ApiResponse.create("error", "Invalid or empty medicine price"), HttpStatus.BAD_REQUEST);
-        }
-        if (medicineRepository.existsByName(medicine.getName()) && medicineRepository.existsByCompany(medicine.getCompany())) {
-            return new ResponseEntity<>(ApiResponse.create("error", "Medicine already exists"), HttpStatus.BAD_REQUEST);
-        }
 
-        medicineRepository.save(medicine);
-
-        return new ResponseEntity<>(ApiResponse.create("create", "Medicine successfully added"), HttpStatus.OK);
-
-
-    }
-
-    @PostMapping("/pharmacy_registration")
+    @PostMapping("/register/pharmacy")
     public ResponseEntity<?> registerPharmacy(@RequestBody Pharmacy pharmacy) {
         SignUpDTO signUpDTO = modelMapper.map(pharmacy.getAppUser(), SignUpDTO.class);
         RegistrationResponse response = userService.registerUser(signUpDTO, "PHARMACY");
@@ -221,7 +200,7 @@ public class AuthController {
         return new ResponseEntity<>(ApiResponse.create("create", "Sign up successful"), HttpStatus.OK);
     }
 
-    @PostMapping("/hospital_registration")
+    @PostMapping("/register/hospital")
     public ResponseEntity<?> registerHospital(@RequestBody Hospital hospital) {
         SignUpDTO signUpDTO = modelMapper.map(hospital.getAppUser(), SignUpDTO.class);
         RegistrationResponse response = userService.registerUser(signUpDTO, "HOSPITAL");
@@ -245,12 +224,10 @@ public class AuthController {
 
     @DeleteMapping("/delete/user")
     public ResponseEntity<?> deleteUser(HttpServletRequest request) {
-        String userEmail = (String) request.getAttribute("username");
-        Optional<AppUser> optionalAppUser = userRepository.findByEmail(userEmail);
-        AppUser appUser = null;
-        if (optionalAppUser.isPresent()) {
-            appUser = optionalAppUser.get();
-        } else {
+
+        AppUser appUser = userService.returnUser(request);
+
+        if (appUser == null) {
             return new ResponseEntity<>(ApiResponse.create("error", "User does not exist"), HttpStatus.BAD_REQUEST);
         }
 

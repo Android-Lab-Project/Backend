@@ -5,14 +5,11 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
-@AllArgsConstructor
 @NoArgsConstructor
-public class DiagnosisDTO {
-
+@AllArgsConstructor
+public class AddDiagnosisDTO {
     private String name;
-    private String hospitalName;
-    private String type;
     private String description;
     private Long cost;
-    private Long appUser_id;
+    private Double time;
 }

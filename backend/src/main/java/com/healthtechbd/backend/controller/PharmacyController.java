@@ -4,6 +4,7 @@ import com.healthtechbd.backend.dto.StatisticsDTO;
 import com.healthtechbd.backend.entity.AppUser;
 import com.healthtechbd.backend.repo.AppUserRepository;
 import com.healthtechbd.backend.repo.MedicineOrderRepository;
+import com.healthtechbd.backend.service.UserService;
 import com.healthtechbd.backend.utils.ApiResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,7 +18,6 @@ import org.springframework.web.bind.annotation.RestController;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 @CrossOrigin(origins = "*", allowedHeaders = "*", methods = {RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT, RequestMethod.DELETE})
 @RestController
@@ -29,17 +29,13 @@ public class PharmacyController {
     @Autowired
     private MedicineOrderRepository medicineOrderRepository;
 
+    @Autowired
+    private UserService userService;
+
     @GetMapping("/pharmacy/statistics")
     public ResponseEntity<?> getPharmacyStatistics(HttpServletRequest request) {
-        String userEmail = (String) request.getAttribute("username");
-
-        Optional<AppUser> optionalAppUser = userRepository.findByEmail(userEmail);
-
-        AppUser pharmacy = new AppUser();
-
-        if (optionalAppUser.isPresent()) {
-            pharmacy = optionalAppUser.get();
-        } else {
+        AppUser pharmacy = userService.returnUser(request);
+        if (pharmacy == null) {
             return new ResponseEntity<>(ApiResponse.create("error", "pharmacy not found"), HttpStatus.OK);
         }
 

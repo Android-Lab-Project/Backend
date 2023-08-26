@@ -23,6 +23,7 @@ public interface MedicineOrderRepository extends JpaRepository<MedicineOrder, Lo
             "WHERE mo.pharmacy.id = :pharmacyId")
     Long countSerialsByPharmacy(
             @Param("pharmacyId") Long pharmacyId);
+
     @Query("SELECT mo.date, SUM(mo.price) " +
             "FROM MedicineOrder mo " +
             "WHERE mo.pharmacy.id = :pharmacyId " +

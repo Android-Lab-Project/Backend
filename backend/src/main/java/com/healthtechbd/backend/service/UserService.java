@@ -6,12 +6,14 @@ import com.healthtechbd.backend.entity.Role;
 import com.healthtechbd.backend.repo.AppUserRepository;
 import com.healthtechbd.backend.utils.ApiResponse;
 import com.healthtechbd.backend.utils.RegistrationResponse;
+import jakarta.servlet.http.HttpServletRequest;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.Collections;
+import java.util.Optional;
 
 @Service
 public class UserService {
@@ -24,6 +26,21 @@ public class UserService {
 
     @Autowired
     private PasswordEncoder bcryptPasswordEncoder;
+
+    public AppUser returnUser(HttpServletRequest request) {
+        String userEmail = (String) request.getAttribute("username");
+
+        Optional<AppUser> optionalAppUser = userRepository.findByEmail(userEmail);
+
+        AppUser user = new AppUser();
+
+        if (optionalAppUser.isPresent()) {
+            user = optionalAppUser.get();
+            return user;
+        } else {
+            return null;
+        }
+    }
 
     public RegistrationResponse registerUser(SignUpDTO signUpDTO, String roleType) {
         ApiResponse errorResponse = new ApiResponse();
@@ -58,4 +75,5 @@ public class UserService {
 
         return new RegistrationResponse(ApiResponse.create("create", "Sign up successful"), user);
     }
+
 }

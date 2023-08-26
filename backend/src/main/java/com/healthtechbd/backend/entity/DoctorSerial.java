@@ -25,12 +25,14 @@ public class DoctorSerial {
 
     private Double time;
 
+    private String prescription;
+
     @ManyToOne
-    @JoinColumn(name = "user_id",referencedColumnName = "id")
+    @JoinColumn(name = "user_id", referencedColumnName = "id")
     private AppUser user;
 
     @ManyToOne
-    @JoinColumn(name="doctor_id",referencedColumnName = "id")
+    @JoinColumn(name = "doctor_id", referencedColumnName = "id")
     private AppUser doctor;
 
 }

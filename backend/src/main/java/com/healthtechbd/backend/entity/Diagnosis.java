@@ -5,8 +5,6 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDate;
-
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -23,14 +21,7 @@ public class Diagnosis {
     private Long id;
     private String name;
     private String description;
-    LocalDate date;
-    private String dp;
+
     private Long cost;
 
-    @PrePersist
-    public void setDefaultDp() {
-        if (dp == null) {
-            dp = "default.png";
-        }
-    }
 }

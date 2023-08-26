@@ -1,7 +1,6 @@
 package com.healthtechbd.backend.repo;
 
 import com.healthtechbd.backend.entity.DoctorSerial;
-import org.hibernate.type.descriptor.converter.spi.JpaAttributeConverter;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -9,7 +8,7 @@ import org.springframework.data.repository.query.Param;
 import java.time.LocalDate;
 import java.util.List;
 
-public interface DoctorSerialRepository extends JpaRepository<DoctorSerial,Long> {
+public interface DoctorSerialRepository extends JpaRepository<DoctorSerial, Long> {
     @Query("SELECT COUNT(ds.id) " +
             "FROM DoctorSerial ds " +
             "WHERE ds.doctor.id = :doctorId " +
@@ -49,4 +48,6 @@ public interface DoctorSerialRepository extends JpaRepository<DoctorSerial,Long>
             "WHERE ds.doctor.id = :doctorId")
     Long sumPriceByDoctor(
             @Param("doctorId") Long doctorId);
+
+    List<DoctorSerial> findByUser_Id(Long user_id);
 }
