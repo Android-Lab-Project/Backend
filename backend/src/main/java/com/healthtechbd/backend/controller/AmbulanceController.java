@@ -1,11 +1,13 @@
 package com.healthtechbd.backend.controller;
 
 import com.healthtechbd.backend.dto.AmbulanceDTO;
+import com.healthtechbd.backend.dto.StatisticsDTO;
 import com.healthtechbd.backend.entity.Ambulance;
 import com.healthtechbd.backend.entity.AmbulanceProvider;
 import com.healthtechbd.backend.entity.AppUser;
 import com.healthtechbd.backend.repo.AmbulanceProviderRepository;
 import com.healthtechbd.backend.repo.AmbulanceRepository;
+import com.healthtechbd.backend.repo.AmbulanceTripRepository;
 import com.healthtechbd.backend.service.UserService;
 import com.healthtechbd.backend.utils.ApiResponse;
 import jakarta.servlet.http.HttpServletRequest;
@@ -15,6 +17,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -28,6 +31,9 @@ public class AmbulanceController {
 
     @Autowired
     private AmbulanceProviderRepository ambulanceProviderRepository;
+
+    @Autowired
+    private AmbulanceTripRepository ambulanceTripRepository;
 
     @Autowired
     private ModelMapper modelMapper;
@@ -64,6 +70,9 @@ public class AmbulanceController {
 
         return new ResponseEntity<>(ApiResponse.create("create","Ambulance added"), HttpStatus.OK);
     }
+
+
+
 
 
 

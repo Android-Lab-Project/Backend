@@ -40,44 +40,6 @@ public class HospitalController {
     @Autowired
     private TimeService timeService;
 
-    @GetMapping("/hospital/statistics")
-    public ResponseEntity<?> getHospitalStatistics(HttpServletRequest request) {
-        AppUser hospital = userService.returnUser(request);
-        if (hospital == null) {
-            return new ResponseEntity<>(ApiResponse.create("error", "Hospital not found"), HttpStatus.OK);
-        }
-
-        StatisticsDTO statisticsDTO = new StatisticsDTO();
-
-        statisticsDTO.set_7DaysCount(diagnosisOrderRepository.countSerialsByHospitalAndDate(hospital.getId(), LocalDate.now().minusDays(7), LocalDate.now()));
-
-        statisticsDTO.set_30DaysCount(diagnosisOrderRepository.countSerialsByHospitalAndDate(hospital.getId(), LocalDate.now().minusDays(30), LocalDate.now()));
-
-        statisticsDTO.setTotalCount(diagnosisOrderRepository.countSerialsByHospital(hospital.getId()));
-
-        statisticsDTO.set_7DaysIncome(diagnosisOrderRepository.sumPriceByHospitalAndDate(
-                hospital.getId(), LocalDate.now().minusDays(7), LocalDate.now()));
-
-
-        statisticsDTO.set_30DaysIncome(diagnosisOrderRepository.sumPriceByHospitalAndDate(
-                hospital.getId(), LocalDate.now().minusDays(30), LocalDate.now()));
-
-        statisticsDTO.setTotalIncome(diagnosisOrderRepository.sumPriceByHospital(hospital.getId()));
-
-        List<Object[]> incomeList = diagnosisOrderRepository.sumPriceByHospitalAndDateGroupByDate(
-                hospital.getId(), LocalDate.now().minusDays(30), LocalDate.now());
-
-        statisticsDTO.setDates(new ArrayList<>());
-        statisticsDTO.setIncomes(new ArrayList<>());
-
-        for (var i : incomeList) {
-            statisticsDTO.getDates().add((LocalDate) i[0]);
-            statisticsDTO.getIncomes().add((Long) i[1]);
-        }
-
-        return new ResponseEntity<>(statisticsDTO, HttpStatus.OK);
-    }
-
     @GetMapping("/dashboard/hospital/pending")
     public ResponseEntity<?>getAllPendingReports(HttpServletRequest request)
     {

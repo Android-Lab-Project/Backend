@@ -3,6 +3,7 @@ package com.healthtechbd.backend.controller;
 import com.healthtechbd.backend.dto.*;
 import com.healthtechbd.backend.entity.*;
 import com.healthtechbd.backend.repo.*;
+import com.healthtechbd.backend.service.TimeService;
 import com.healthtechbd.backend.service.UserService;
 import com.healthtechbd.backend.utils.ApiResponse;
 import jakarta.servlet.http.HttpServletRequest;
@@ -13,6 +14,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -55,15 +57,18 @@ public class UserController {
     private UserService userService;
 
     @Autowired
+    private TimeService timeService;
+
+    @Autowired
     private ModelMapper modelMapper;
 
     @GetMapping("/dashboard/reports&prescriptions")
     public ResponseEntity<?> getAllReportsPrescriptions(HttpServletRequest request) {
         AppUser appUser = userService.returnUser(request);
 
-        List<DoctorSerial> doctorSerials = doctorSerialRepository.findByUser_Id(appUser.getId());
+        List<DoctorSerial> doctorSerials = doctorSerialRepository.findByUser_IdAndPrescriptionIsNotNull(appUser.getId());
 
-        List<DiagnosisOrder> diagnosisOrders = diagnosisOrderRepository.findByUser_Id(appUser.getId());
+        List<DiagnosisOrder> diagnosisOrders = diagnosisOrderRepository.findByUser_IdAndReportURLIsNotNull(appUser.getId());
 
         rpDTO rps = new rpDTO();
 
@@ -227,14 +232,6 @@ public class UserController {
 
             userdetails = appUser;
         }
-        else if(appUser.getRoles().get(0).getRoleType().equals("DOCTOR"))
-        {
-            Optional<Doctor> optional = doctorRepository.findByAppUser_Id(appUser.getId());
-
-            optional.get().getAppUser().setPassword(null);
-
-            userdetails = optional.get();
-        }
         else if(appUser.getRoles().get(0).getRoleType().equals("HOSPITAL"))
         {
             Optional<Hospital> optional = hospitalRepository.findByAppUser_Id(appUser.getId());
@@ -268,6 +265,154 @@ public class UserController {
         return new ResponseEntity<>(userdetails,HttpStatus.OK);
     }
 
+    @GetMapping("/statistics")
+    public ResponseEntity<?> getStatistics(HttpServletRequest request) {
+        AppUser user = userService.returnUser(request);
+        if (user == null) {
+            return new ResponseEntity<>(ApiResponse.create("error", "user not found"), HttpStatus.OK);
+        }
+
+        StatisticsDTO statisticsDTO = new StatisticsDTO();
+
+        LocalDate now = LocalDate.now();
+        LocalDate sevenDaysAgo = now.minusDays(7);
+        LocalDate thirtyDaysAgo = now.minusDays(30);
+
+        String roleType = user.getRoles().get(0).getRoleType();
+
+        if ("DOCTOR".equalsIgnoreCase(roleType)) {
+            // Doctor statistics logic
+            statisticsDTO.set_7DaysCount(doctorSerialRepository.countSerialsByDoctorAndDate(user.getId(), sevenDaysAgo, now));
+            statisticsDTO.set_30DaysCount(doctorSerialRepository.countSerialsByDoctorAndDate(user.getId(), thirtyDaysAgo, now));
+            statisticsDTO.setTotalCount(doctorSerialRepository.countSerialsByDoctor(user.getId()));
+            statisticsDTO.set_7DaysIncome(doctorSerialRepository.sumPriceByDoctorAndDate(user.getId(), sevenDaysAgo, now));
+            statisticsDTO.set_30DaysIncome(doctorSerialRepository.sumPriceByDoctorAndDate(user.getId(), thirtyDaysAgo, now));
+            statisticsDTO.setTotalIncome(doctorSerialRepository.sumPriceByDoctor(user.getId()));
+
+            List<Object[]> incomeList = doctorSerialRepository.sumPriceByDoctorAndDateGroupByDate(user.getId(), thirtyDaysAgo, now);
+
+            statisticsDTO.setDates(new ArrayList<>());
+            statisticsDTO.setIncomes(new ArrayList<>());
+
+            for (var i : incomeList) {
+                statisticsDTO.getDates().add((LocalDate) i[0]);
+                statisticsDTO.getIncomes().add((Long) i[1]);
+            }
+        } else if ("PHARMACY".equalsIgnoreCase(roleType)) {
+            // Pharmacy statistics logic
+            statisticsDTO.set_7DaysCount(medicineOrderRepository.countSerialsByPharmacyAndDate(user.getId(), sevenDaysAgo, now));
+            statisticsDTO.set_30DaysCount(medicineOrderRepository.countSerialsByPharmacyAndDate(user.getId(), thirtyDaysAgo, now));
+            statisticsDTO.setTotalCount(medicineOrderRepository.countSerialsByPharmacy(user.getId()));
+            statisticsDTO.set_7DaysIncome(medicineOrderRepository.sumPriceByPharmacyAndDate(user.getId(), sevenDaysAgo, now));
+            statisticsDTO.set_30DaysIncome(medicineOrderRepository.sumPriceByPharmacyAndDate(user.getId(), thirtyDaysAgo, now));
+            statisticsDTO.setTotalIncome(medicineOrderRepository.sumPriceByPharmacy(user.getId()));
+
+            List<Object[]> incomeList = medicineOrderRepository.sumPriceByPharmacyAndDateGroupByDate(user.getId(), thirtyDaysAgo, now);
+
+            statisticsDTO.setDates(new ArrayList<>());
+            statisticsDTO.setIncomes(new ArrayList<>());
+
+            for (var i : incomeList) {
+                statisticsDTO.getDates().add((LocalDate) i[0]);
+                statisticsDTO.getIncomes().add((Long) i[1]);
+            }
+        } else if ("HOSPITAL".equalsIgnoreCase(roleType)) {
+            // Hospital statistics logic
+            statisticsDTO.set_7DaysCount(diagnosisOrderRepository.countSerialsByHospitalAndDate(user.getId(), sevenDaysAgo, now));
+            statisticsDTO.set_30DaysCount(diagnosisOrderRepository.countSerialsByHospitalAndDate(user.getId(), thirtyDaysAgo, now));
+            statisticsDTO.setTotalCount(diagnosisOrderRepository.countSerialsByHospital(user.getId()));
+            statisticsDTO.set_7DaysIncome(diagnosisOrderRepository.sumPriceByHospitalAndDate(user.getId(), sevenDaysAgo, now));
+            statisticsDTO.set_30DaysIncome(diagnosisOrderRepository.sumPriceByHospitalAndDate(user.getId(), thirtyDaysAgo, now));
+            statisticsDTO.setTotalIncome(diagnosisOrderRepository.sumPriceByHospital(user.getId()));
+
+            List<Object[]> incomeList = diagnosisOrderRepository.sumPriceByHospitalAndDateGroupByDate(user.getId(), thirtyDaysAgo, now);
+
+            statisticsDTO.setDates(new ArrayList<>());
+            statisticsDTO.setIncomes(new ArrayList<>());
+
+            for (var i : incomeList) {
+                statisticsDTO.getDates().add((LocalDate) i[0]);
+                statisticsDTO.getIncomes().add((Long) i[1]);
+            }
+        } else if ("AMBULANCE".equalsIgnoreCase(roleType)) {
+            // Ambulance statistics logic
+            statisticsDTO.set_7DaysCount(ambulanceTripRepository.countTripsByAmbulanceProviderAndDate(user.getId(), sevenDaysAgo, now));
+            statisticsDTO.set_30DaysCount(ambulanceTripRepository.countTripsByAmbulanceProviderAndDate(user.getId(), thirtyDaysAgo, now));
+            statisticsDTO.setTotalCount(ambulanceTripRepository.countTripsByAmbulanceProvider(user.getId()));
+            statisticsDTO.set_7DaysIncome(ambulanceTripRepository.sumPriceByAmbulanceProviderAndDate(user.getId(), sevenDaysAgo, now));
+            statisticsDTO.set_30DaysIncome(ambulanceTripRepository.sumPriceByAmbulanceProviderAndDate(user.getId(), thirtyDaysAgo, now));
+            statisticsDTO.setTotalIncome(ambulanceTripRepository.sumPriceByAmbulanceProvider(user.getId()));
+
+            List<Object[]> incomeList = ambulanceTripRepository.sumPriceByAmbulanceProviderAndDateGroupByDate(user.getId(), thirtyDaysAgo, now);
+
+            statisticsDTO.setDates(new ArrayList<>());
+            statisticsDTO.setIncomes(new ArrayList<>());
+
+            for (var i : incomeList) {
+                statisticsDTO.getDates().add((LocalDate) i[0]);
+                statisticsDTO.getIncomes().add((Long) i[1]);
+            }
+        } else {
+            return new ResponseEntity<>(ApiResponse.create("error", "invalid role type"), HttpStatus.BAD_REQUEST);
+        }
+
+        return new ResponseEntity<>(statisticsDTO, HttpStatus.OK);
+    }
+
+
+    @GetMapping("/dashboard/user/upcoming/doctorserial")
+    public ResponseEntity<?> getAllUpcomingForUser(HttpServletRequest request) {
+        AppUser user = userService.returnUser(request);
+
+        Double time = timeService.convertTimeToDouble(LocalTime.now());
+
+        List<DoctorSerial> upcomingDoctorSerials = doctorSerialRepository.findByDateAndTimeAndUserId(LocalDate.now(), time, user.getId());
+
+        if (upcomingDoctorSerials.size() == 0) {
+            return new ResponseEntity<>(ApiResponse.create("error", "No upcoming found"), HttpStatus.OK);
+        }
+
+        List<UserDoctorSerialViewDTO> userDoctorSerialDTOs = new ArrayList<>();
+
+        for (var doctorSerial : upcomingDoctorSerials) {
+            UserDoctorSerialViewDTO userDoctorSerialDTO = new UserDoctorSerialViewDTO();
+            userDoctorSerialDTO.setId(doctorSerial.getId());
+            userDoctorSerialDTO.setTime(doctorSerial.getTime());
+            userDoctorSerialDTO.setDoctorName(doctorSerial.getDoctor().getFirstName() + " " + doctorSerial.getDoctor().getLastName());
+
+            userDoctorSerialDTOs.add(userDoctorSerialDTO);
+        }
+
+        return new ResponseEntity<>(userDoctorSerialDTOs, HttpStatus.OK);
+    }
+
+    @GetMapping("/dashboard/user/upcoming/diagnosis")
+    public ResponseEntity<?> getAllUpcoming(HttpServletRequest request) {
+        AppUser user = userService.returnUser(request);
+
+        Double time = timeService.convertTimeToDouble(LocalTime.now());
+
+        List<DiagnosisOrder> upcomingDiagnosisOrders = diagnosisOrderRepository.findByDateAndTimeAndUserId(LocalDate.now(), time, user.getId());
+
+        if (upcomingDiagnosisOrders.size() == 0) {
+            return new ResponseEntity<>(ApiResponse.create("error", "No upcoming found"), HttpStatus.OK);
+        }
+
+        List<UserDiagnosisOrderViewDTO> userDiagnosisOrderViewDTOS = new ArrayList<>();
+
+        for (var diagnosisOrder : upcomingDiagnosisOrders) {
+            UserDiagnosisOrderViewDTO userDiagnosisOrderViewDTO = new UserDiagnosisOrderViewDTO();
+            userDiagnosisOrderViewDTO.setId(diagnosisOrder.getId());
+            userDiagnosisOrderViewDTO.setDescription(diagnosisOrder.getDescription());
+            userDiagnosisOrderViewDTO.setTime(diagnosisOrder.getTime());
+            userDiagnosisOrderViewDTO.setPlace(diagnosisOrder.getPlace());
+            userDiagnosisOrderViewDTO.setHospitalName(hospitalRepository.findByAppUser_Id(diagnosisOrder.getHospital().getId()).get().getHospitalName());
+
+            userDiagnosisOrderViewDTOS.add(userDiagnosisOrderViewDTO);
+        }
+
+        return new ResponseEntity<>(userDiagnosisOrderViewDTOS, HttpStatus.OK);
+    }
 
 
 }

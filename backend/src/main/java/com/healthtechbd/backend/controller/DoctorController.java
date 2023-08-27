@@ -66,7 +66,6 @@ public class DoctorController {
             }
         }
 
-
         for (int i = 0; i < doctor.getAvailableOnlineTimes().size(); i++) {
 
             if (doctor.getAvailableOnlineTimes().get(i).getDate().isBefore(LocalDate.now())) {
@@ -139,45 +138,6 @@ public class DoctorController {
         }
         return new ResponseEntity<>(allDoctorsDTO, HttpStatus.OK);
 
-    }
-
-    @GetMapping("/doctor/statistics")
-    public ResponseEntity<?> getHospitalStatistics(HttpServletRequest request) {
-
-        AppUser doctor = userService.returnUser(request);
-        if (doctor == null) {
-            return new ResponseEntity<>(ApiResponse.create("error", "Hospital not found"), HttpStatus.OK);
-        }
-
-        StatisticsDTO doctorStatisticsDTO = new StatisticsDTO();
-
-        doctorStatisticsDTO.set_7DaysCount(doctorSerialRepository.countSerialsByDoctorAndDate(doctor.getId(), LocalDate.now().minusDays(7), LocalDate.now()));
-
-        doctorStatisticsDTO.set_30DaysCount(doctorSerialRepository.countSerialsByDoctorAndDate(doctor.getId(), LocalDate.now().minusDays(30), LocalDate.now()));
-
-        doctorStatisticsDTO.setTotalCount(doctorSerialRepository.countSerialsByDoctor(doctor.getId()));
-
-        doctorStatisticsDTO.set_7DaysIncome(doctorSerialRepository.sumPriceByDoctorAndDate(
-                doctor.getId(), LocalDate.now().minusDays(7), LocalDate.now()));
-
-
-        doctorStatisticsDTO.set_30DaysIncome(doctorSerialRepository.sumPriceByDoctorAndDate(
-                doctor.getId(), LocalDate.now().minusDays(30), LocalDate.now()));
-
-        doctorStatisticsDTO.setTotalIncome(doctorSerialRepository.sumPriceByDoctor(doctor.getId()));
-
-        List<Object[]> incomeList = doctorSerialRepository.sumPriceByDoctorAndDateGroupByDate(
-                doctor.getId(), LocalDate.now().minusDays(30), LocalDate.now());
-
-        doctorStatisticsDTO.setDates(new ArrayList<>());
-        doctorStatisticsDTO.setIncomes(new ArrayList<>());
-
-        for (var i : incomeList) {
-            doctorStatisticsDTO.getDates().add((LocalDate) i[0]);
-            doctorStatisticsDTO.getIncomes().add((Long) i[1]);
-        }
-
-        return new ResponseEntity<>(doctorStatisticsDTO, HttpStatus.OK);
     }
 
     @GetMapping("/dashboard/doctor/pending")
