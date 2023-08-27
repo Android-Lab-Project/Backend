@@ -22,7 +22,7 @@ public class DoctorAvailableTime {
 
     private LocalDate date;
 
-    private Integer count;
+    public Integer count;
 
     private Double availTime;
 

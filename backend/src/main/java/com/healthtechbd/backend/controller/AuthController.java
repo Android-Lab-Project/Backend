@@ -171,10 +171,6 @@ public class AuthController {
 
         ambulanceProvider.setAppUser(response.getUser());
 
-        for (int i = 0; i < ambulanceProvider.getAmbulances().size(); i++) {
-            ambulanceProvider.getAmbulances().get(i).setAmbulanceProvider(ambulanceProvider);
-        }
-
 
         ambulanceProviderRepository.save(ambulanceProvider);
 

@@ -24,6 +24,7 @@ public class DiagnosisOrder {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String description;
+    private String place;
     private Long price;
     private String reportURL;
     private LocalDate date;

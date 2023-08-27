@@ -20,7 +20,5 @@ public class AmbulanceProvider {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String bio;
-
-    @OneToMany(mappedBy = "ambulanceProvider", cascade = CascadeType.ALL)
-    private List<Ambulance> ambulances;
+    private String place;
 }

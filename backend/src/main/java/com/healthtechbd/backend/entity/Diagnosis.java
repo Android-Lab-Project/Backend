@@ -22,6 +22,6 @@ public class Diagnosis {
     private String name;
     private String description;
 
-    private Long cost;
+    private Long price;
 
 }

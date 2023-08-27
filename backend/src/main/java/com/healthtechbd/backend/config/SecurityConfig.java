@@ -51,6 +51,7 @@ public class SecurityConfig {
                 .authorizeRequests()
                 .requestMatchers(HttpMethod.POST, "/signin").permitAll()
                 .requestMatchers(HttpMethod.POST, "/signup").permitAll()
+                .requestMatchers(HttpMethod.GET, "/profile").permitAll()
                 .requestMatchers(HttpMethod.POST, "/register/*").permitAll()
                 .requestMatchers(HttpMethod.GET, "/doctor/**").permitAll()
                 .requestMatchers(HttpMethod.POST, "/doctor/**").permitAll()
@@ -67,11 +68,10 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.GET, "/diagnosis/**").permitAll()
                 .requestMatchers(HttpMethod.POST, "/diagnosis/**").permitAll()
                 .requestMatchers(HttpMethod.POST, "/add/**").permitAll()
+                .requestMatchers(HttpMethod.GET, "/review/**").permitAll()
                 .requestMatchers(HttpMethod.DELETE, "/delete/**").permitAll()
                 .requestMatchers(HttpMethod.POST, "/doctorserial/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/doctorserial/**").permitAll()
-
-
                 .anyRequest().authenticated();
 
 

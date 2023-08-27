@@ -1,16 +1,21 @@
 package com.healthtechbd.backend.controller;
 
+import com.healthtechbd.backend.dto.ReviewDTO;
 import com.healthtechbd.backend.entity.AppUser;
 import com.healthtechbd.backend.entity.Review;
 import com.healthtechbd.backend.repo.AppUserRepository;
 import com.healthtechbd.backend.repo.ReviewRepository;
+import com.healthtechbd.backend.service.UserService;
 import com.healthtechbd.backend.utils.ApiResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.repository.query.Param;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 @CrossOrigin(origins = "*", allowedHeaders = "*", methods = {RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT, RequestMethod.DELETE})
@@ -23,35 +28,36 @@ public class ReviewController {
     @Autowired
     private AppUserRepository userRepository;
 
-    @PostMapping("/review/create/{id2}")
-    public ResponseEntity<?> saveReview(@RequestParam(name = "review") String reviewStr, @PathVariable(name = "id2") Long id2, HttpServletRequest request) {
-        String userEmail = (String) request.getAttribute("username");
-        Optional<AppUser> optionalReviewer = userRepository.findByEmail(userEmail);
-        Optional<AppUser> optionalSubject = userRepository.findById(id2);
+    @Autowired
+    private UserService userService;
 
-        AppUser reviewer = null, subject = null;
+    @GetMapping("/review/{id}")
+    public ResponseEntity<?>getAllReviews(@PathVariable(name="id")Long id)
+    {
+        Optional<AppUser> opSubject = userRepository.findById(id);
 
-        if (optionalReviewer.isPresent()) {
-            reviewer = optionalReviewer.get();
-        } else {
-            return new ResponseEntity<>(ApiResponse.create("error", "Reviewer not found"), HttpStatus.BAD_REQUEST);
+        List<Review> reviewList = reviewRepository.findBySubject_Id(opSubject.get().getId());
+
+        if(reviewList.size()==0)
+        {
+            return new ResponseEntity<>(ApiResponse.create("empty","No review found"),HttpStatus.OK);
         }
 
-        if (optionalSubject.isPresent()) {
-            subject = optionalSubject.get();
-        } else {
-            return new ResponseEntity<>(ApiResponse.create("error", "Subject not found"), HttpStatus.BAD_REQUEST);
+        List<ReviewDTO>reviewDTOS = new ArrayList<>();
+
+        for(var i:reviewList)
+        {
+            ReviewDTO reviewDTO = new ReviewDTO();
+
+            reviewDTO.setReviewerId(i.getReviewer().getId());
+            reviewDTO.setStarCount(i.getStarCount());
+            reviewDTO.setReview(i.getReview());
+            reviewDTO.setReviewerName(i.getReviewer().getFirstName()+" "+i.getReviewer().getLastName());
+
+            reviewDTOS.add(reviewDTO);
         }
 
-        Review review = new Review();
-        review.setReview(reviewStr);
-        review.setReviewer(reviewer);
-        review.setSubject(subject);
-
-        reviewRepository.save(review);
-        ApiResponse createResponse = ApiResponse.create("create", "Review Saved");
-        return new ResponseEntity<>(createResponse, HttpStatus.OK);
-
+        return new ResponseEntity<>(reviewDTOS,HttpStatus.OK);
     }
 
 

@@ -2,8 +2,10 @@ package com.healthtechbd.backend.controller;
 
 import com.healthtechbd.backend.dto.DoctorSerialDTO;
 import com.healthtechbd.backend.entity.AppUser;
+import com.healthtechbd.backend.entity.Doctor;
 import com.healthtechbd.backend.entity.DoctorSerial;
 import com.healthtechbd.backend.repo.AppUserRepository;
+import com.healthtechbd.backend.repo.DoctorRepository;
 import com.healthtechbd.backend.repo.DoctorSerialRepository;
 import com.healthtechbd.backend.service.UserService;
 import com.healthtechbd.backend.utils.ApiResponse;
@@ -23,6 +25,9 @@ public class DoctorSerialController {
     private AppUserRepository userRepository;
 
     @Autowired
+    private DoctorRepository doctorRepository;
+
+    @Autowired
     private DoctorSerialRepository doctorSerialRepository;
 
     @Autowired
@@ -30,21 +35,5 @@ public class DoctorSerialController {
 
     @Autowired
     private UserService userService;
-
-    @PostMapping("/doctorserial/create")
-    public ResponseEntity<?> createDoctorSerial(@RequestBody DoctorSerialDTO doctorSerialDTO, HttpServletRequest request) {
-        AppUser user = userService.returnUser(request);
-
-        Optional<AppUser> opDoctor = userRepository.findById(doctorSerialDTO.getDoctor_id());
-
-        DoctorSerial doctorSerial = modelMapper.map(doctorSerialDTO, DoctorSerial.class);
-
-        doctorSerial.setUser(user);
-        doctorSerial.setDoctor(opDoctor.get());
-
-        doctorSerialRepository.save(doctorSerial);
-
-        return new ResponseEntity<>(ApiResponse.create("create", "doctor Serial added"), HttpStatus.OK);
-    }
 
 }

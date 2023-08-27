@@ -16,6 +16,8 @@ public class Review {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    private Long starCount;
+
     private String review;
 
     @ManyToOne

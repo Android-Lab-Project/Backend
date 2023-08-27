@@ -21,7 +21,6 @@ public class Ambulance {
     private String name;
     private String type;
     private String dp;
-    private Long bookingCost;
 
     @PrePersist
     public void setDefaultDp() {

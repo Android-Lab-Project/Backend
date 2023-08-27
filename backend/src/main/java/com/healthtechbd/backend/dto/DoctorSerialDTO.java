@@ -18,7 +18,5 @@ public class DoctorSerialDTO {
 
     private Double time;
 
-    private String prescription;
-
     private Long doctor_id;
 }

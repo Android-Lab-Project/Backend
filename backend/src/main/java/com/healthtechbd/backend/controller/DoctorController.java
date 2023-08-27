@@ -1,13 +1,16 @@
 package com.healthtechbd.backend.controller;
 
 import com.healthtechbd.backend.dto.DoctorDTO;
+import com.healthtechbd.backend.dto.DoctorSerialViewDTO;
 import com.healthtechbd.backend.dto.StatisticsDTO;
 import com.healthtechbd.backend.entity.AppUser;
 import com.healthtechbd.backend.entity.Doctor;
+import com.healthtechbd.backend.entity.DoctorSerial;
 import com.healthtechbd.backend.repo.AppUserRepository;
 import com.healthtechbd.backend.repo.DoctorRepository;
 import com.healthtechbd.backend.repo.DoctorSerialRepository;
 import com.healthtechbd.backend.service.DoctorService;
+import com.healthtechbd.backend.service.TimeService;
 import com.healthtechbd.backend.service.UserService;
 import com.healthtechbd.backend.utils.ApiResponse;
 import jakarta.servlet.http.HttpServletRequest;
@@ -18,6 +21,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -40,6 +44,9 @@ public class DoctorController {
 
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private TimeService timeService;
 
     @GetMapping("/doctor/{id}")
     public ResponseEntity<?> showDoctorDetails(@PathVariable Long id) {
@@ -172,6 +179,59 @@ public class DoctorController {
 
         return new ResponseEntity<>(doctorStatisticsDTO, HttpStatus.OK);
     }
+
+    @GetMapping("/dashboard/doctor/pending")
+    public ResponseEntity<?> getAllPendingPrescriptions(HttpServletRequest request) {
+        AppUser doctor = userService.returnUser(request);
+
+        List<DoctorSerial> pendingDoctorSerials = doctorSerialRepository.findByPrescriptionIsNullAndDoctorId(doctor.getId());
+
+        if (pendingDoctorSerials.size() == 0) {
+            return new ResponseEntity<>(ApiResponse.create("error", "No pending found"), HttpStatus.OK);
+        }
+
+        List<DoctorSerialViewDTO> doctorSerialViewDTOS = new ArrayList<>();
+
+        for (var doctorSerial : pendingDoctorSerials) {
+            DoctorSerialViewDTO doctorSerialViewDTO = new DoctorSerialViewDTO();
+            doctorSerialViewDTO.setId(doctorSerial.getId());
+            doctorSerialViewDTO.setTime(doctorSerial.getTime());
+            doctorSerialViewDTO.setPatientName(doctorSerial.getUser().getFirstName() + " " + doctorSerial.getUser().getLastName());
+
+            doctorSerialViewDTOS.add(doctorSerialViewDTO);
+        }
+
+        return new ResponseEntity<>(doctorSerialViewDTOS, HttpStatus.OK);
+    }
+
+    @GetMapping("/dashboard/doctor/upcoming")
+    public ResponseEntity<?> getAllUpcoming(HttpServletRequest request) {
+        AppUser doctor = userService.returnUser(request);
+
+        Double time = timeService.convertTimeToDouble(LocalTime.now());
+
+        List<DoctorSerial> upcomingDoctorSerials = doctorSerialRepository.findByDateAndTimeAndDoctorId(LocalDate.now(), time, doctor.getId());
+
+        if (upcomingDoctorSerials.size() == 0) {
+            return new ResponseEntity<>(ApiResponse.create("error", "No upcoming found"), HttpStatus.OK);
+        }
+
+        List<DoctorSerialViewDTO> doctorSerialViewDTOS = new ArrayList<>();
+
+        for (var doctorSerial : upcomingDoctorSerials) {
+            DoctorSerialViewDTO doctorSerialViewDTO = new DoctorSerialViewDTO();
+            doctorSerialViewDTO.setId(doctorSerial.getId());
+            doctorSerialViewDTO.setTime(doctorSerial.getTime());
+            doctorSerialViewDTO.setPatientName(doctorSerial.getUser().getFirstName() + " " + doctorSerial.getUser().getLastName());
+
+            doctorSerialViewDTOS.add(doctorSerialViewDTO);
+        }
+
+        return new ResponseEntity<>(doctorSerialViewDTOS, HttpStatus.OK);
+    }
+
+
+
 
 
 }

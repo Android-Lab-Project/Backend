@@ -5,11 +5,12 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
-@NoArgsConstructor
 @AllArgsConstructor
-public class AmbulanceDTO {
+@NoArgsConstructor
+public class DoctorSerialViewDTO {
     private Long id;
-    private String name;
-    private String type;
-    private String dp;
+
+    private String patientName;
+
+    private Double time;
 }
