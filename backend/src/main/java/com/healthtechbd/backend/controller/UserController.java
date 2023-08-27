@@ -136,7 +136,7 @@ public class UserController {
 
         Doctor doctor = optionalDoctor.get();
 
-        if(doctorSerialDTO.getType().equals("online"))
+        if(doctorSerialDTO.getType().equalsIgnoreCase("online"))
         {
             for(int i=0;i<doctor.getAvailableOnlineTimes().size();i++)
             {
@@ -147,7 +147,7 @@ public class UserController {
             }
         }
 
-        if(doctorSerialDTO.getType().equals("offline"))
+        if(doctorSerialDTO.getType().equalsIgnoreCase("offline"))
         {
             for(int i=0;i<doctor.getAvailableTimes().size();i++)
             {
@@ -174,6 +174,7 @@ public class UserController {
         }
 
         medicineOrder.setUser(user);
+        medicineOrder.setDelivered(0);
         medicineOrderRepository.save(medicineOrder);
 
         return new ResponseEntity<>(ApiResponse.create("create", "medicine order created"), HttpStatus.OK);
@@ -369,7 +370,7 @@ public class UserController {
         List<DoctorSerial> upcomingDoctorSerials = doctorSerialRepository.findByDateAndTimeAndUserId(LocalDate.now(), time, user.getId());
 
         if (upcomingDoctorSerials.size() == 0) {
-            return new ResponseEntity<>(ApiResponse.create("error", "No upcoming found"), HttpStatus.OK);
+            return new ResponseEntity<>(ApiResponse.create("empty", "No upcoming found"), HttpStatus.OK);
         }
 
         List<UserDoctorSerialViewDTO> userDoctorSerialDTOs = new ArrayList<>();
@@ -395,7 +396,7 @@ public class UserController {
         List<DiagnosisOrder> upcomingDiagnosisOrders = diagnosisOrderRepository.findByDateAndTimeAndUserId(LocalDate.now(), time, user.getId());
 
         if (upcomingDiagnosisOrders.size() == 0) {
-            return new ResponseEntity<>(ApiResponse.create("error", "No upcoming found"), HttpStatus.OK);
+            return new ResponseEntity<>(ApiResponse.create("empty", "No upcoming found"), HttpStatus.OK);
         }
 
         List<UserDiagnosisOrderViewDTO> userDiagnosisOrderViewDTOS = new ArrayList<>();
@@ -413,6 +414,52 @@ public class UserController {
 
         return new ResponseEntity<>(userDiagnosisOrderViewDTOS, HttpStatus.OK);
     }
+
+    @GetMapping("/medicineorder/undelivered")
+    public ResponseEntity<?>getAllUndelivered(HttpServletRequest request)
+    {
+        AppUser user = userService.returnUser(request);
+        if (user == null) {
+            return new ResponseEntity<>(ApiResponse.create("error", "user not found"), HttpStatus.BAD_REQUEST);
+        }
+
+        String roleType = user.getRoles().get(0).getRoleType();
+
+        List<MedicineOrder>medicineOrders = new ArrayList<>();
+
+        if(roleType.equalsIgnoreCase("USER"))
+        {
+            medicineOrders = medicineOrderRepository.findUndeliveredOrdersByUser(user.getId());
+        }
+        else if(roleType.equalsIgnoreCase("PHARMACY"))
+        {
+            medicineOrders = medicineOrderRepository.findUndeliveredOrdersByPharmacy(user.getId());
+        }
+
+        if(medicineOrders.size()==0)
+        {
+            return new ResponseEntity<>(ApiResponse.create("empty", "Undelivered not found"), HttpStatus.OK);
+        }
+
+        List<MedicineOrderViewDTO>medicineOrderViewDTOS = new ArrayList<>();
+
+        for(var medicineOrder:medicineOrders)
+        {
+            MedicineOrderViewDTO medicineOrderViewDTO = new MedicineOrderViewDTO();
+            medicineOrderViewDTO.setId(medicineOrder.getId());
+            medicineOrderViewDTO.setUserId(medicineOrder.getUser().getId());
+            medicineOrderViewDTO.setPharmacyId(medicineOrder.getPharmacy().getId());
+            medicineOrderViewDTO.setUserName(medicineOrder.getUser().getFirstName()+" "+medicineOrder.getUser().getLastName());
+            medicineOrderViewDTO.setPharmacyName(medicineOrder.getPharmacy().getFirstName()+" "+medicineOrder.getPharmacy().getLastName());
+            medicineOrderViewDTO.setDescription(medicineOrder.getDescription());
+            medicineOrderViewDTO.setPrice(medicineOrder.getPrice());
+
+            medicineOrderViewDTOS.add(medicineOrderViewDTO);
+        }
+
+        return new ResponseEntity<>(medicineOrderViewDTOS,HttpStatus.OK);
+    }
+
 
 
 }

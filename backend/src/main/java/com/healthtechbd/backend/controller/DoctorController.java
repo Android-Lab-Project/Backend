@@ -147,7 +147,7 @@ public class DoctorController {
         List<DoctorSerial> pendingDoctorSerials = doctorSerialRepository.findByPrescriptionIsNullAndDoctorId(doctor.getId());
 
         if (pendingDoctorSerials.size() == 0) {
-            return new ResponseEntity<>(ApiResponse.create("error", "No pending found"), HttpStatus.OK);
+            return new ResponseEntity<>(ApiResponse.create("empty", "No pending found"), HttpStatus.OK);
         }
 
         List<DoctorSerialViewDTO> doctorSerialViewDTOS = new ArrayList<>();
@@ -173,7 +173,7 @@ public class DoctorController {
         List<DoctorSerial> upcomingDoctorSerials = doctorSerialRepository.findByDateAndTimeAndDoctorId(LocalDate.now(), time, doctor.getId());
 
         if (upcomingDoctorSerials.size() == 0) {
-            return new ResponseEntity<>(ApiResponse.create("error", "No upcoming found"), HttpStatus.OK);
+            return new ResponseEntity<>(ApiResponse.create("empty", "No upcoming found"), HttpStatus.OK);
         }
 
         List<DoctorSerialViewDTO> doctorSerialViewDTOS = new ArrayList<>();

@@ -49,7 +49,7 @@ public class HospitalController {
 
         if(diagnosisOrders.size()==0)
         {
-            return new ResponseEntity<>(ApiResponse.create("error","No pending found"),HttpStatus.OK);
+            return new ResponseEntity<>(ApiResponse.create("empty","No pending found"),HttpStatus.OK);
         }
 
         List<DiagnosisViewDTO> diagnosisViewDTOS = new ArrayList<>();
@@ -80,7 +80,7 @@ public class HospitalController {
 
         if(diagnosisOrders.size()==0)
         {
-            return new ResponseEntity<>(ApiResponse.create("error","No upcoming found"),HttpStatus.OK);
+            return new ResponseEntity<>(ApiResponse.create("empty","No upcoming found"),HttpStatus.OK);
         }
 
         List<DiagnosisViewDTO> diagnosisViewDTOS = new ArrayList<>();
