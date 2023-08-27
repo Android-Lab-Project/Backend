@@ -11,6 +11,7 @@ public class AppUserDetailsDTO {
     private String firstName;
     private String lastName;
     private String email;
+    private String dp;
     private String contactNo;
     private Set<Role> roles;
     private JWTDTO jwtdto;

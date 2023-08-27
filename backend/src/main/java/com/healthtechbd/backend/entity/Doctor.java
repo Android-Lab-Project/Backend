@@ -6,48 +6,40 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.util.List;
-import java.util.Set;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Table(name="doctors")
+@Table(name = "doctors")
 public class Doctor {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
 
     @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name="appUser_id", referencedColumnName = "id")
+    @JoinColumn(name = "appUser_id", referencedColumnName = "id")
     AppUser appUser;
-
-    @Column(nullable = false)
-    private String bio;
-
-    private String currentHospital;
-
-    private String place;
-
-    private String degrees;
-
     @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     @JoinTable(name = "doctor_expertise",
             joinColumns = @JoinColumn(name = "doctor_id", referencedColumnName = "id"),
             inverseJoinColumns = @JoinColumn(name = "expertise_id", referencedColumnName = "id"))
     List<DoctorExpertise> expertise;
-
     @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     @JoinTable(name = "relation_doctor_offlineTime",
             joinColumns = @JoinColumn(name = "doctor_id", referencedColumnName = "id"),
             inverseJoinColumns = @JoinColumn(name = "time_id", referencedColumnName = "id"))
-    List<DoctorAvailableTime>availableTimes;
-
+    List<DoctorAvailableTime> availableTimes;
     @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     @JoinTable(name = "relation_doctor_onlineTime",
             joinColumns = @JoinColumn(name = "doctor_id", referencedColumnName = "id"),
             inverseJoinColumns = @JoinColumn(name = "onlineTime_id", referencedColumnName = "id"))
-    List<DoctorOnlineAvailableTime>availableOnlineTimes;
+    List<DoctorOnlineAvailableTime> availableOnlineTimes;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+    @Column(nullable = false)
+    private String bio;
+    private String currentHospital;
+    private String place;
+    private String degrees;
 
 
 }

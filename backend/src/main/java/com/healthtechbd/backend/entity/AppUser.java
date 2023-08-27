@@ -6,20 +6,20 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 
-import java.util.Set;
+import java.util.List;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
 @ToString
-@Table(name="appUser",uniqueConstraints = {@UniqueConstraint(columnNames={"email"})})
+@Table(name = "appUser", uniqueConstraints = {@UniqueConstraint(columnNames = {"email"})})
 public class AppUser {
-    
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    
+
     @Column(nullable = false)
     private String firstName;
 
@@ -32,6 +32,8 @@ public class AppUser {
     @Column(nullable = false)
     private String password;
 
+    private String dp;
+
     @Column(nullable = false)
     private String contactNo;
 
@@ -42,6 +44,12 @@ public class AppUser {
     @JoinTable(name = "user_roles",
             joinColumns = @JoinColumn(name = "user_id", referencedColumnName = "id"),
             inverseJoinColumns = @JoinColumn(name = "role_id", referencedColumnName = "id"))
-    private Set<Role> roles;
+    private List<Role> roles;
 
+    @PrePersist
+    public void setDefaultDp() {
+        if (dp == null) {
+            dp = "default.png";
+        }
+    }
 }

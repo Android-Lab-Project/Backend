@@ -5,13 +5,14 @@ import com.healthtechbd.backend.dto.JWTDTO;
 import com.healthtechbd.backend.dto.SignInDTO;
 import com.healthtechbd.backend.dto.SignUpDTO;
 import com.healthtechbd.backend.entity.*;
-import com.healthtechbd.backend.repo.AppUserRepository;
-import com.healthtechbd.backend.repo.DoctorRepository;
-import com.healthtechbd.backend.repo.RoleRepository;
+import com.healthtechbd.backend.repo.*;
 import com.healthtechbd.backend.security.AppUserServiceSecurity;
 import com.healthtechbd.backend.security.JWTService;
 import com.healthtechbd.backend.service.DoctorService;
+import com.healthtechbd.backend.service.UserService;
 import com.healthtechbd.backend.utils.ApiResponse;
+import com.healthtechbd.backend.utils.RegistrationResponse;
+import jakarta.servlet.http.HttpServletRequest;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -22,7 +23,9 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 
 @CrossOrigin(origins = "*", allowedHeaders = "*", methods = {RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT, RequestMethod.DELETE})
 @RestController
@@ -40,13 +43,31 @@ public class AuthController {
     private AppUserServiceSecurity userServiceSecurity;
 
     @Autowired
+    private AmbulanceProviderRepository ambulanceProviderRepository;
+
+    @Autowired
+    private MedicineRepository medicineRepository;
+
+    @Autowired
+    private PharmacyRepository pharmacyRepository;
+
+    @Autowired
+    private HospitalRepository hospitalRepository;
+
+    @Autowired
     private PasswordEncoder bcryptPasswordEncoder;
 
     @Autowired
     private JWTService jwtService;
 
     @Autowired
+    private UserService userService;
+
+    @Autowired
     private ModelMapper modelMapper;
+
+    @Autowired
+    private DoctorRepository doctorRepository;
 
 
     @PostMapping("/signin")
@@ -61,12 +82,12 @@ public class AuthController {
             );
         } catch (Exception e) {
 
-            ApiResponse errorResponse =ApiResponse.create("error", "Invaild user email or password");
+            ApiResponse errorResponse = ApiResponse.create("error", "Invaild user email or password");
             return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
         }
         UserDetails userDetails = userServiceSecurity.loadUserByUsername(signInDTO.getEmail());
         Optional<AppUser> optionalAppUser = userRepository.findByEmail(signInDTO.getEmail());
-        AppUser appUser= new AppUser();
+        AppUser appUser = new AppUser();
         if (optionalAppUser.isPresent()) {
             appUser = optionalAppUser.get();
         }
@@ -78,85 +99,30 @@ public class AuthController {
     }
 
     @PostMapping("/signup")
-    public ResponseEntity<?> registerAppUser(@RequestBody SignUpDTO signupDTO) {
-        ApiResponse errorResponse = new ApiResponse();
-
-        if (signupDTO.getFirstName() == null || signupDTO.getFirstName().trim().length() == 0)
-            errorResponse = ApiResponse.create("error", "First Name can not be empty");
-
-        if (signupDTO.getLastName() == null || signupDTO.getLastName().trim().length() == 0)
-            errorResponse= ApiResponse.create("error", "Last Name can not be empty");
-
-        if (signupDTO.getEmail() == null || signupDTO.getEmail().trim().length() == 0)
-            errorResponse= ApiResponse.create("error", "Email can not be empty");
-
-        if (signupDTO.getPassword() == null || signupDTO.getPassword().trim().length() == 0)
-            errorResponse= ApiResponse.create("error", "Password can not be empty");
-
-        if (userRepository.existsByEmail(signupDTO.getEmail()))
-            errorResponse= ApiResponse.create("error", "Email is already taken!");
-
-        if (!errorResponse.empty()) {
-            return ResponseEntity.badRequest().body(errorResponse);
+    public ResponseEntity<?> registerAppUser(@RequestBody SignUpDTO signUpDTO) {
+        RegistrationResponse response = userService.registerUser(signUpDTO, "USER");
+        if (response.getResponse().haveError()) {
+            return ResponseEntity.badRequest().body(response.getResponse());
         }
-
-        String password = bcryptPasswordEncoder.encode(signupDTO.getPassword());
-        signupDTO.setPassword(password);
-
-        AppUser user = modelMapper.map(signupDTO, AppUser.class);
-        user.setAccountVerified(true);
-
-        Role role = new Role();
-        role.setRoleType("USER");
-        user.setRoles(Collections.singleton(role));
-
-        userRepository.save(user);
-
-
-        ApiResponse createResponse = ApiResponse.create("create","Sign up Successful");
-
-        return new ResponseEntity<>(createResponse, HttpStatus.OK);
+        userRepository.save(response.getUser());
+        return ResponseEntity.ok(response.getResponse());
     }
 
+    @PostMapping("/register/doctor")
+    public ResponseEntity<?> registerDoctor(@RequestBody DoctorSignUpDTO doctorSignUpDTO) {
 
-    @Autowired
-    private DoctorRepository doctorRepository;
+        SignUpDTO signUpDTO = modelMapper.map(doctorSignUpDTO.getAppUser(), SignUpDTO.class);
 
+        RegistrationResponse response = userService.registerUser(signUpDTO, "DOCTOR");
 
-    @PostMapping("/doctor_registration")
-    public ResponseEntity<?> saveDoctor(@RequestBody DoctorSignUpDTO doctorSignUpDTO) {
-        ApiResponse errorResponse = new ApiResponse();
-
-        if (doctorSignUpDTO.getAppUser() == null || doctorSignUpDTO.getAppUser().getFirstName() == null ||
-                doctorSignUpDTO.getAppUser().getFirstName().trim().length() == 0)
-           errorResponse = ApiResponse.create("error", "First Name can not be empty");
-
-        if (doctorSignUpDTO.getAppUser() == null || doctorSignUpDTO.getAppUser().getLastName() == null ||
-                doctorSignUpDTO.getAppUser().getLastName().trim().length() == 0)
-            errorResponse = ApiResponse.create("error", "Last Name can not be empty");
-
-        if (doctorSignUpDTO.getAppUser() == null || doctorSignUpDTO.getAppUser().getEmail() == null ||
-                doctorSignUpDTO.getAppUser().getEmail().trim().length() == 0)
-            errorResponse =  ApiResponse.create("error", "Email can not be empty");
-
-        if (doctorSignUpDTO.getAppUser() == null || doctorSignUpDTO.getAppUser().getPassword() == null ||
-                doctorSignUpDTO.getAppUser().getPassword().trim().length() == 0)
-            errorResponse =  ApiResponse.create("error", "Password can not be empty");
-
-        if (userRepository.existsByEmail(doctorSignUpDTO.getAppUser().getEmail()))
-            errorResponse= ApiResponse.create("error", "Email is already taken!");
-
-        if (!errorResponse.empty()) {
-            return ResponseEntity.badRequest().body(errorResponse);
+        if (response.getResponse().haveError()) {
+            return ResponseEntity.badRequest().body(response.getResponse());
         }
 
-        Role role = new Role("DOCTOR");
-        doctorSignUpDTO.getAppUser().setRoles(Collections.singleton(role));
+        doctorSignUpDTO.setAppUser(response.getUser());
 
         Doctor doctor = modelMapper.map(doctorSignUpDTO, Doctor.class);
 
-        String password = bcryptPasswordEncoder.encode(doctor.getAppUser().getPassword());
-        doctor.getAppUser().setPassword(password);
 
         doctor.setAvailableTimes(new ArrayList<DoctorAvailableTime>());
 
@@ -191,5 +157,130 @@ public class AuthController {
         Doctor savedDoctor = doctorRepository.save(doctor);
         return new ResponseEntity<>(ApiResponse.create("create", "Doctor signup successful"), HttpStatus.OK);
     }
+
+    @PostMapping("/register/ambulanceProvider")
+    public ResponseEntity<?> registerAmbulanceProvider(@RequestBody AmbulanceProvider ambulanceProvider) {
+
+        SignUpDTO signUpDTO = modelMapper.map(ambulanceProvider.getAppUser(), SignUpDTO.class);
+
+        RegistrationResponse response = userService.registerUser(signUpDTO, "AMBULANCE");
+
+        if (response.getResponse().haveError()) {
+            return ResponseEntity.badRequest().body(response.getResponse());
+        }
+
+        ambulanceProvider.setAppUser(response.getUser());
+
+        for (int i = 0; i < ambulanceProvider.getAmbulances().size(); i++) {
+            ambulanceProvider.getAmbulances().get(i).setAmbulanceProvider(ambulanceProvider);
+        }
+
+
+        ambulanceProviderRepository.save(ambulanceProvider);
+
+
+        return new ResponseEntity<>(ApiResponse.create("create", "Sign up Successful"), HttpStatus.OK);
+
+
+    }
+
+
+    @PostMapping("/register/pharmacy")
+    public ResponseEntity<?> registerPharmacy(@RequestBody Pharmacy pharmacy) {
+        SignUpDTO signUpDTO = modelMapper.map(pharmacy.getAppUser(), SignUpDTO.class);
+        RegistrationResponse response = userService.registerUser(signUpDTO, "PHARMACY");
+
+        if (response.getResponse().haveError()) {
+            return ResponseEntity.badRequest().body(response.getResponse());
+        }
+        pharmacy.setAppUser(response.getUser());
+
+        pharmacyRepository.save(pharmacy);
+
+        return new ResponseEntity<>(ApiResponse.create("create", "Sign up successful"), HttpStatus.OK);
+    }
+
+    @PostMapping("/register/hospital")
+    public ResponseEntity<?> registerHospital(@RequestBody Hospital hospital) {
+        SignUpDTO signUpDTO = modelMapper.map(hospital.getAppUser(), SignUpDTO.class);
+        RegistrationResponse response = userService.registerUser(signUpDTO, "HOSPITAL");
+
+        if (response.getResponse().haveError()) {
+            return ResponseEntity.badRequest().body(response.getResponse());
+        }
+        if (hospital.getHospitalName() == null || hospital.getHospitalName().trim().length() == 0) {
+            return new ResponseEntity<>(ApiResponse.create("error", "Hospital name is empty"), HttpStatus.BAD_REQUEST);
+        }
+        hospital.setAppUser(response.getUser());
+
+        for (int i = 0; i < hospital.getDiagnosisList().size(); i++) {
+            hospital.getDiagnosisList().get(i).setHospital(hospital);
+        }
+
+        hospitalRepository.save(hospital);
+
+        return new ResponseEntity<>(ApiResponse.create("create", "Sign up successful"), HttpStatus.OK);
+    }
+
+    @DeleteMapping("/delete/user")
+    public ResponseEntity<?> deleteUser(HttpServletRequest request) {
+
+        AppUser appUser = userService.returnUser(request);
+
+        if (appUser == null) {
+            return new ResponseEntity<>(ApiResponse.create("error", "User does not exist"), HttpStatus.BAD_REQUEST);
+        }
+
+        Long id = appUser.getId();
+
+        List<Role> roles = appUser.getRoles();
+
+
+        for (int i = 0; i < roles.size(); i++) {
+            if (roles.get(i).getRoleType().equals("USER")) {
+                userRepository.delete(appUser);
+            }
+            if (roles.get(i).getRoleType().equals("DOCTOR")) {
+
+                Optional<Doctor> doctor = doctorRepository.findByAppUser_Id(id);
+
+                if (!doctor.isPresent()) {
+                    return new ResponseEntity<>(ApiResponse.create("error", "User does not exist"), HttpStatus.BAD_REQUEST);
+                }
+                doctorRepository.delete(doctor.get());
+            }
+            if (roles.get(i).getRoleType().equals("HOSPITAL")) {
+                Optional<Hospital> hospital = hospitalRepository.findByAppUser_Id(id);
+
+                if (!hospital.isPresent()) {
+                    return new ResponseEntity<>(ApiResponse.create("error", "User does not exist"), HttpStatus.BAD_REQUEST);
+                }
+
+                hospitalRepository.delete(hospital.get());
+            }
+            if (roles.get(i).getRoleType().equals("PHARMACY")) {
+                Optional<Pharmacy> pharmacy = pharmacyRepository.findByAppUser_Id(id);
+
+                if (!pharmacy.isPresent()) {
+                    return new ResponseEntity<>(ApiResponse.create("error", "User does not exist"), HttpStatus.BAD_REQUEST);
+                }
+
+                pharmacyRepository.delete(pharmacy.get());
+            }
+            if (roles.get(i).getRoleType().equals("AMBULANCE")) {
+                Optional<AmbulanceProvider> ambulanceProvider = ambulanceProviderRepository.findByAppUser_Id(id);
+
+                if (!ambulanceProvider.isPresent()) {
+                    return new ResponseEntity<>(ApiResponse.create("error", "User does not exist"), HttpStatus.BAD_REQUEST);
+                }
+
+                ambulanceProviderRepository.delete(ambulanceProvider.get());
+            }
+        }
+
+        return new ResponseEntity<>(ApiResponse.create("delete", "User is deleted"), HttpStatus.OK);
+    }
+
+
 }
 

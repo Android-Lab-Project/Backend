@@ -1,4 +1,5 @@
 package com.healthtechbd.backend.config;
+
 import com.healthtechbd.backend.security.JWTAuthenticationFilter;
 import com.healthtechbd.backend.security.JWTUnauthorizedEntryPoint;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,7 +21,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity
-public class SecurityConfig  {
+public class SecurityConfig {
     @Autowired
     private JWTUnauthorizedEntryPoint jwtUnauthorizedEntryPoint;
 
@@ -50,10 +51,27 @@ public class SecurityConfig  {
                 .authorizeRequests()
                 .requestMatchers(HttpMethod.POST, "/signin").permitAll()
                 .requestMatchers(HttpMethod.POST, "/signup").permitAll()
-                .requestMatchers(HttpMethod.POST, "/doctor_registration").permitAll()
-                .requestMatchers(HttpMethod.GET, "/doctor/{id}").permitAll()
-                .requestMatchers(HttpMethod.GET, "/doctor/all").permitAll()
-                .requestMatchers(HttpMethod.GET, "/review/create/{id1}/{id2}").permitAll()
+                .requestMatchers(HttpMethod.POST, "/register/*").permitAll()
+                .requestMatchers(HttpMethod.GET, "/doctor/**").permitAll()
+                .requestMatchers(HttpMethod.POST, "/doctor/**").permitAll()
+                .requestMatchers(HttpMethod.GET, "/ambulance/**").permitAll()
+                .requestMatchers(HttpMethod.POST, "/ambulance/**").permitAll()
+                .requestMatchers(HttpMethod.POST, "/pharmacy/**").permitAll()
+                .requestMatchers(HttpMethod.GET, "/pharmacy/**").permitAll()
+                .requestMatchers(HttpMethod.POST, "/hospital/**").permitAll()
+                .requestMatchers(HttpMethod.GET, "/hospital/**").permitAll()
+                .requestMatchers(HttpMethod.GET, "/dashboard/**").permitAll()
+                .requestMatchers(HttpMethod.POST, "/dashboard/**").permitAll()
+                .requestMatchers(HttpMethod.GET, "/medicine/**").permitAll()
+                .requestMatchers(HttpMethod.POST, "/medicine/**").permitAll()
+                .requestMatchers(HttpMethod.GET, "/diagnosis/**").permitAll()
+                .requestMatchers(HttpMethod.POST, "/diagnosis/**").permitAll()
+                .requestMatchers(HttpMethod.POST, "/add/**").permitAll()
+                .requestMatchers(HttpMethod.DELETE, "/delete/**").permitAll()
+                .requestMatchers(HttpMethod.POST, "/doctorserial/**").permitAll()
+                .requestMatchers(HttpMethod.GET, "/doctorserial/**").permitAll()
+
+
                 .anyRequest().authenticated();
 
 
@@ -61,9 +79,6 @@ public class SecurityConfig  {
         http.cors(Customizer.withDefaults());
         return http.build();
     }
-
-
-
 
 
 }

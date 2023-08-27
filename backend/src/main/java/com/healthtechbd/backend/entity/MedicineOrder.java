@@ -5,22 +5,28 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDate;
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Table(name="medicine_orders")
+@Table(name = "medicine_orders")
 public class MedicineOrder {
+
+
+    LocalDate date;
+    @ManyToOne
+    @JoinColumn(name = "user_id", referencedColumnName = "id")
+    AppUser user;
+    @ManyToOne
+    @JoinColumn(name = "pharmacy_id", referencedColumnName = "id")
+    AppUser pharmacy;
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
-    @OneToOne(fetch = FetchType.EAGER )
-    @JoinColumn(name="medicine_id", referencedColumnName = "id")
-    Medicine medicine;
-
-    private Long count;
-
+    private String description;
     private Long price;
+
 
 }

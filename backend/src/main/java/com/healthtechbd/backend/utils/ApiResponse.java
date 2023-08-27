@@ -27,4 +27,16 @@ public class ApiResponse {
     public String getMessage() {
         return message;
     }
+
+    public boolean haveError() {
+        return type.equals("error");
+    }
+
+    @Override
+    public String toString() {
+        return "{" +
+                "type= " + "\"" + type + "\"" +
+                ", message= " + "\"" + message + "\"" +
+                "}";
+    }
 }

@@ -19,8 +19,9 @@ public class DoctorService {
 
     @Autowired
     public DoctorService(DoctorRepository doctorRepository) {
-        this.doctorRepository = doctorRepository;
+        DoctorService.doctorRepository = doctorRepository;
     }
+
     public static LocalDate currentDate(String day) {
         DayOfWeek inputDay = DayOfWeek.valueOf(day.toUpperCase());
         LocalDate now = LocalDate.now();
@@ -41,8 +42,7 @@ public class DoctorService {
 
     public static void setSerialTime(Doctor doctor) {
         Double serialTime;
-        for (int i = 0; i < doctor.getAvailableTimes().size(); i++)
-        {
+        for (int i = 0; i < doctor.getAvailableTimes().size(); i++) {
             Integer startTime = doctor.getAvailableTimes().get(i).getStartTime();
 
             Integer endTime = doctor.getAvailableTimes().get(i).getEndTime();
@@ -60,8 +60,7 @@ public class DoctorService {
 
         }
 
-        for (int i = 0; i < doctor.getAvailableOnlineTimes().size(); i++)
-        {
+        for (int i = 0; i < doctor.getAvailableOnlineTimes().size(); i++) {
 
             Integer onlineStartTime = doctor.getAvailableOnlineTimes().get(i).getOnlineStartTime();
 

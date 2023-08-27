@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>bKash Payment Test</title>
+</head>
+<body>
+<h1>Welcome to bKash Payment Test</h1>
+<p>Click the button below to initiate the bKash payment:</p>
+
+<button id="bkashButton">Proceed to bKash Payment</button>
+
+<script>
+        // Add a click event listener to the button
+        document.getElementById("bkashButton").addEventListener("click", function() {
+            // Replace this with the actual bkashURL you received from the backend
+            var bkashURL = " https://sandbox.payment.bkash.com/redirect/tokenized/?paymentID=TR0011kIRbq631692897287567&hash=yKO3rnfCubXDW9)Gdl1fKfDmN7piFxmg*.958(dQoIK9eKK43Iu.*50DJBh(RuxzkqoFfwt4QE0OuqchYGk7HmtHzU45rGD!uZJP1692897287828&mode=0011&apiVersion=v1.2.0-beta";
+
+            // Redirect the user to the bKash payment page
+            window.location.href = bkashURL;
+        });
+    </script>
+</body>
+</html>

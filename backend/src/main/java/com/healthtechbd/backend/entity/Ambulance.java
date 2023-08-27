@@ -9,15 +9,24 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name="ambulance")
+@Table(name = "ambulance")
 public class Ambulance {
+    @ManyToOne
+    @JoinColumn(name = "ambulanceProvider_id", referencedColumnName = "id")
+    AmbulanceProvider ambulanceProvider;
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
     private String name;
-
     private String type;
-
+    private String dp;
     private Long bookingCost;
+
+    @PrePersist
+    public void setDefaultDp() {
+        if (dp == null) {
+            dp = "default.png";
+        }
+    }
 }

@@ -9,14 +9,25 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Table(name="medicines")
+@Table(name = "medicines")
 public class Medicine {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    private String name;
+
     private String company;
 
+    private String dp;
+
     private Long price;
+
+    @PrePersist
+    public void setDefaultDp() {
+        if (dp == null) {
+            dp = "default.png";
+        }
+    }
 
 }
