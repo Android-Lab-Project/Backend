@@ -3,6 +3,7 @@ package com.healthtechbd.backend.dto;
 import com.healthtechbd.backend.entity.Role;
 import lombok.Data;
 
+import java.util.List;
 import java.util.Set;
 
 @Data
@@ -13,7 +14,7 @@ public class AppUserDetailsDTO {
     private String email;
     private String dp;
     private String contactNo;
-    private Set<Role> roles;
+    private List<Role> roles;
     private JWTDTO jwtdto;
 
 }

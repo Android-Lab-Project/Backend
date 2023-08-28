@@ -209,10 +209,6 @@ public class AuthController {
         }
         hospital.setAppUser(response.getUser());
 
-        for (int i = 0; i < hospital.getDiagnosisList().size(); i++) {
-            hospital.getDiagnosisList().get(i).setHospital(hospital);
-        }
-
         hospitalRepository.save(hospital);
 
         return new ResponseEntity<>(ApiResponse.create("create", "Sign up successful"), HttpStatus.OK);

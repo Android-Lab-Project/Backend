@@ -21,7 +21,7 @@ import java.util.Optional;
 
 @CrossOrigin(origins = "*", allowedHeaders = "*", methods = {RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT, RequestMethod.DELETE})
 @RestController
-public class UserController {
+public class AppUserController {
 
     @Autowired
     private AppUserRepository userRepository;
@@ -46,6 +46,9 @@ public class UserController {
 
     @Autowired
     private MedicineOrderRepository medicineOrderRepository;
+
+    @Autowired
+    private DiagnosisRepository diagnosisRepository;
 
     @Autowired
     private AmbulanceTripRepository ambulanceTripRepository;
@@ -231,33 +234,52 @@ public class UserController {
         Object userdetails =null;
         if(appUser.getRoles().get(0).getRoleType().equals("USER"))
         {
-            appUser.setPassword(null);
+            UserDTO userDTO = modelMapper.map(appUser,UserDTO.class);
 
-            userdetails = appUser;
+            userdetails = userDTO;
         }
         else if(appUser.getRoles().get(0).getRoleType().equals("HOSPITAL"))
         {
             Optional<Hospital> optional = hospitalRepository.findByAppUser_Id(appUser.getId());
 
-            optional.get().getAppUser().setPassword(null);
+            HospitalDTO hospitalDTO = modelMapper.map(optional.get(),HospitalDTO.class);
+            hospitalDTO.setId(appUser.getId());
+            hospitalDTO.setFirstName(appUser.getFirstName());
+            hospitalDTO.setLastName(appUser.getLastName());
+            hospitalDTO.setEmail(appUser.getEmail());
+            hospitalDTO.setContactNo(appUser.getContactNo());
 
-            userdetails = optional.get();
+            userdetails = hospitalDTO;
         }
         else if(appUser.getRoles().get(0).getRoleType().equals("PHARMACY"))
         {
             Optional<Pharmacy> optional = pharmacyRepository.findByAppUser_Id(appUser.getId());
 
-            optional.get().getAppUser().setPassword(null);
+               PharmacyDTO pharmacyDTO = modelMapper.map(optional.get(),PharmacyDTO.class);
 
-            userdetails = optional.get();
+               pharmacyDTO.setId(appUser.getId());
+               pharmacyDTO.setFirstName(appUser.getFirstName());
+               pharmacyDTO.setLastName(appUser.getLastName());
+               pharmacyDTO.setEmail(appUser.getEmail());
+               pharmacyDTO.setContactNo(appUser.getContactNo());
+
+            userdetails = pharmacyDTO;
         }
         else if(appUser.getRoles().get(0).getRoleType().equals("AMBULANCE"))
         {
             Optional<AmbulanceProvider> optional = ambulanceProviderRepository.findByAppUser_Id(appUser.getId());
 
-            optional.get().getAppUser().setPassword(null);
 
-            userdetails = optional.get();
+            AmbulanceProviderDTO ambulanceProviderDTO = modelMapper.map(optional.get(),AmbulanceProviderDTO.class);
+
+            ambulanceProviderDTO.setId(appUser.getId());
+            ambulanceProviderDTO.setFirstName(appUser.getFirstName());
+            ambulanceProviderDTO.setLastName(appUser.getLastName());
+            ambulanceProviderDTO.setEmail(appUser.getEmail());
+            ambulanceProviderDTO.setContactNo(appUser.getContactNo());
+
+
+            userdetails = ambulanceProviderDTO;
         }
 
         if(userdetails==null)
