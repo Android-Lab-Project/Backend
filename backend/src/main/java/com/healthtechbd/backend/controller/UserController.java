@@ -187,6 +187,8 @@ public class UserController {
 
         ambulanceTrip.setUser(user);
 
+        ambulanceTrip.setBidders(new ArrayList<>());
+
         ambulanceTripRepository.save(ambulanceTrip);
 
         return new ResponseEntity<>(ApiResponse.create("create","Trip created"),HttpStatus.OK);
@@ -459,6 +461,54 @@ public class UserController {
 
         return new ResponseEntity<>(medicineOrderViewDTOS,HttpStatus.OK);
     }
+
+    @GetMapping("/ambulance/trip/upcoming")
+    public ResponseEntity<?>getAllUpcomingTrip(HttpServletRequest request)
+    {
+        AppUser user = userService.returnUser(request);
+        if (user == null) {
+            return new ResponseEntity<>(ApiResponse.create("error", "user not found"), HttpStatus.BAD_REQUEST);
+        }
+
+        String roleType = user.getRoles().get(0).getRoleType();
+
+        List<AmbulanceTrip>ambulanceTrips = new ArrayList<>();
+
+        if(roleType.equalsIgnoreCase("USER"))
+        {
+            ambulanceTrips = ambulanceTripRepository.findUpcomingTripsByUser(LocalDate.now(),user.getId());
+        }
+        else if(roleType.equalsIgnoreCase("AMBULANCE"))
+        {
+            ambulanceTrips = ambulanceTripRepository.findUpcomingTripsByProvider(LocalDate.now(),user.getId());
+        }
+
+        if(ambulanceTrips.size()==0)
+        {
+            return new ResponseEntity<>(ApiResponse.create("empty", "No upcoming trip found"), HttpStatus.OK);
+        }
+
+        List<AmbulanceTripViewDTO>ambulanceTripViewDTOS = new ArrayList<>();
+
+        for(var ambulanceTrip:ambulanceTrips)
+        {
+            AmbulanceTripViewDTO ambulanceTripViewDTO =new AmbulanceTripViewDTO();
+            ambulanceTripViewDTO.setId(ambulanceTrip.getId());
+            ambulanceTripViewDTO.setUserId(ambulanceTrip.getUser().getId());
+            ambulanceTripViewDTO.setProviderId(ambulanceTrip.getAmbulanceProvider().getId());
+            ambulanceTripViewDTO.setUserName(ambulanceTrip.getUser().getFirstName()+" "+ambulanceTrip.getUser().getLastName());
+            ambulanceTripViewDTO.setProviderName(ambulanceTrip.getAmbulanceProvider().getFirstName()+" "+ambulanceTrip.getAmbulanceProvider().getLastName());
+            ambulanceTripViewDTO.setSource(ambulanceTrip.getSource());
+            ambulanceTripViewDTO.setDestination(ambulanceTrip.getDestination());
+            ambulanceTripViewDTO.setPrice(ambulanceTrip.getPrice());
+            ambulanceTripViewDTO.setDate(ambulanceTrip.getDate());
+
+            ambulanceTripViewDTOS.add(ambulanceTripViewDTO);
+        }
+
+        return new ResponseEntity<>(ambulanceTripViewDTOS,HttpStatus.OK);
+    }
+
 
 
 

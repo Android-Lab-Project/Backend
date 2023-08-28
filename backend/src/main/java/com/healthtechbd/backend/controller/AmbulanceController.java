@@ -4,6 +4,7 @@ import com.healthtechbd.backend.dto.AmbulanceDTO;
 import com.healthtechbd.backend.dto.StatisticsDTO;
 import com.healthtechbd.backend.entity.Ambulance;
 import com.healthtechbd.backend.entity.AmbulanceProvider;
+import com.healthtechbd.backend.entity.AmbulanceTrip;
 import com.healthtechbd.backend.entity.AppUser;
 import com.healthtechbd.backend.repo.AmbulanceProviderRepository;
 import com.healthtechbd.backend.repo.AmbulanceRepository;
@@ -70,6 +71,50 @@ public class AmbulanceController {
 
         return new ResponseEntity<>(ApiResponse.create("create","Ambulance added"), HttpStatus.OK);
     }
+
+    @PostMapping("/ambulance/trip/bid/{id}")
+    public ResponseEntity<?>addBidderToTrip(HttpServletRequest request,@PathVariable(name="id")Long id)
+    {
+        AppUser bidder = userService.returnUser(request);
+
+        Optional<AmbulanceTrip>optionalAmbulanceTrip = ambulanceTripRepository.findById(id);
+
+        if(!optionalAmbulanceTrip.isPresent())
+        {
+            return new ResponseEntity<>(ApiResponse.create("error", "trip not found"),HttpStatus.BAD_REQUEST);
+        }
+
+        AmbulanceTrip ambulanceTrip =optionalAmbulanceTrip.get();
+
+        ambulanceTrip.getBidders().add(bidder);
+
+        ambulanceTripRepository.save(ambulanceTrip);
+
+        return new ResponseEntity<>(ApiResponse.create("update","trip updated"),HttpStatus.OK);
+    }
+
+    @PostMapping("update/ambulancetrip/{id}")
+    public ResponseEntity<?> updateAmbulanceTrip(HttpServletRequest request, @PathVariable(name ="id")Long id)
+    {
+        AppUser ambulanceProvider = userService.returnUser(request);
+
+        Optional<AmbulanceTrip>optionalAmbulanceTrip = ambulanceTripRepository.findById(id);
+
+        if(!optionalAmbulanceTrip.isPresent())
+        {
+            return new ResponseEntity<>(ApiResponse.create("error", "trip not found"),HttpStatus.BAD_REQUEST);
+        }
+
+        AmbulanceTrip ambulanceTrip =optionalAmbulanceTrip.get();
+
+        ambulanceTrip.setAmbulanceProvider(ambulanceProvider);
+
+        ambulanceTripRepository.save(ambulanceTrip);
+
+        return new ResponseEntity<>(ApiResponse.create("update","trip updated"),HttpStatus.OK);
+
+    }
+
 
 
 
