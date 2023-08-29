@@ -32,37 +32,5 @@ public class PharmacyController {
     @Autowired
     private UserService userService;
 
-    @GetMapping("/pharmacy/statistics")
-    public ResponseEntity<?> getPharmacyStatistics(HttpServletRequest request) {
-        AppUser pharmacy = userService.returnUser(request);
-        if (pharmacy == null) {
-            return new ResponseEntity<>(ApiResponse.create("error", "pharmacy not found"), HttpStatus.OK);
-        }
-
-        StatisticsDTO statisticsDTO = new StatisticsDTO();
-
-        statisticsDTO.set_7DaysCount(medicineOrderRepository.countSerialsByPharmacyAndDate(pharmacy.getId(), LocalDate.now().minusDays(7), LocalDate.now()));
-
-        statisticsDTO.set_30DaysCount(medicineOrderRepository.countSerialsByPharmacyAndDate(pharmacy.getId(), LocalDate.now().minusDays(30), LocalDate.now()));
-
-        statisticsDTO.setTotalCount(medicineOrderRepository.countSerialsByPharmacy(pharmacy.getId()));
-
-        statisticsDTO.set_7DaysIncome(medicineOrderRepository.sumPriceByPharmacyAndDate(pharmacy.getId(), LocalDate.now().minusDays(7), LocalDate.now()));
-        statisticsDTO.set_30DaysIncome(medicineOrderRepository.sumPriceByPharmacyAndDate(pharmacy.getId(), LocalDate.now().minusDays(30), LocalDate.now()));
-        statisticsDTO.setTotalIncome(medicineOrderRepository.sumPriceByPharmacy(pharmacy.getId()));
-
-        List<Object[]> incomeList = medicineOrderRepository.sumPriceByPharmacyAndDateGroupByDate(pharmacy.getId(), LocalDate.now().minusDays(30), LocalDate.now());
-
-        statisticsDTO.setDates(new ArrayList<>());
-
-        statisticsDTO.setIncomes(new ArrayList<>());
-
-        for (var i : incomeList) {
-            statisticsDTO.getDates().add((LocalDate) i[0]);
-            statisticsDTO.getIncomes().add((Long) i[1]);
-        }
-
-        return new ResponseEntity<>(statisticsDTO, HttpStatus.OK);
-    }
 
 }

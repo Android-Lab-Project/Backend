@@ -7,11 +7,14 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class DiagnosisOrderDTO {
+public class UserDiagnosisOrderViewDTO {
+    private Long id;
+
+    private String hospitalName;
+
     private String description;
-    private Long price;
+
     private String place;
-    private String reportURL;
-    private Long hospitalId;
+
     private Double time;
 }

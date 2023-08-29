@@ -5,18 +5,19 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
-
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class DoctorSerialDTO {
-    private String type;
-
+public class AmbulanceTripViewDTO {
+    private Long id;
+    private Long userId;
+    private Long providerId;
+    private String userName;
+    private String providerName;
+    private String source;
+    private String destination;
     private Long price;
-
     private LocalDate date;
 
-    private Double time;
 
-    private Long doctor_id;
 }

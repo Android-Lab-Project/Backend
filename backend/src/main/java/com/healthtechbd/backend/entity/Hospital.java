@@ -16,8 +16,7 @@ public class Hospital {
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "appUser_id", referencedColumnName = "id")
     AppUser appUser;
-    @OneToMany(mappedBy = "hospital", cascade = CascadeType.ALL)
-    List<Diagnosis> diagnosisList;
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

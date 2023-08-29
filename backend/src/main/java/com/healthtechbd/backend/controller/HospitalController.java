@@ -1,9 +1,12 @@
 package com.healthtechbd.backend.controller;
 
+import com.healthtechbd.backend.dto.DiagnosisViewDTO;
 import com.healthtechbd.backend.dto.StatisticsDTO;
 import com.healthtechbd.backend.entity.AppUser;
+import com.healthtechbd.backend.entity.DiagnosisOrder;
 import com.healthtechbd.backend.repo.AppUserRepository;
 import com.healthtechbd.backend.repo.DiagnosisOrderRepository;
+import com.healthtechbd.backend.service.TimeService;
 import com.healthtechbd.backend.service.UserService;
 import com.healthtechbd.backend.utils.ApiResponse;
 import jakarta.servlet.http.HttpServletRequest;
@@ -16,6 +19,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -33,42 +37,73 @@ public class HospitalController {
     @Autowired
     private UserService userService;
 
-    @GetMapping("/hospital/statistics")
-    public ResponseEntity<?> getHospitalStatistics(HttpServletRequest request) {
+    @Autowired
+    private TimeService timeService;
+
+    @GetMapping("/dashboard/hospital/pending")
+    public ResponseEntity<?>getAllPendingReports(HttpServletRequest request)
+    {
         AppUser hospital = userService.returnUser(request);
-        if (hospital == null) {
-            return new ResponseEntity<>(ApiResponse.create("error", "Hospital not found"), HttpStatus.OK);
+
+        List<DiagnosisOrder>diagnosisOrders = diagnosisOrderRepository.findByReportURLIsNullAndHospitalId(hospital.getId());
+
+        if(diagnosisOrders.size()==0)
+        {
+            return new ResponseEntity<>(ApiResponse.create("empty","No pending found"),HttpStatus.OK);
         }
 
-        StatisticsDTO statisticsDTO = new StatisticsDTO();
+        List<DiagnosisViewDTO> diagnosisViewDTOS = new ArrayList<>();
 
-        statisticsDTO.set_7DaysCount(diagnosisOrderRepository.countSerialsByHospitalAndDate(hospital.getId(), LocalDate.now().minusDays(7), LocalDate.now()));
+        for(var i:diagnosisOrders)
+        {
+            DiagnosisViewDTO diagnosisViewDTO = new DiagnosisViewDTO();
+            diagnosisViewDTO.setId(i.getId());
+            diagnosisViewDTO.setDescription(i.getDescription());
+            diagnosisViewDTO.setTime(i.getTime());
+            diagnosisViewDTO.setPlace(i.getPlace());
+            diagnosisViewDTO.setPatientName(i.getUser().getFirstName()+" "+i.getUser().getLastName());
 
-        statisticsDTO.set_30DaysCount(diagnosisOrderRepository.countSerialsByHospitalAndDate(hospital.getId(), LocalDate.now().minusDays(30), LocalDate.now()));
-
-        statisticsDTO.setTotalCount(diagnosisOrderRepository.countSerialsByHospital(hospital.getId()));
-
-        statisticsDTO.set_7DaysIncome(diagnosisOrderRepository.sumPriceByHospitalAndDate(
-                hospital.getId(), LocalDate.now().minusDays(7), LocalDate.now()));
-
-
-        statisticsDTO.set_30DaysIncome(diagnosisOrderRepository.sumPriceByHospitalAndDate(
-                hospital.getId(), LocalDate.now().minusDays(30), LocalDate.now()));
-
-        statisticsDTO.setTotalIncome(diagnosisOrderRepository.sumPriceByHospital(hospital.getId()));
-
-        List<Object[]> incomeList = diagnosisOrderRepository.sumPriceByHospitalAndDateGroupByDate(
-                hospital.getId(), LocalDate.now().minusDays(30), LocalDate.now());
-
-        statisticsDTO.setDates(new ArrayList<>());
-        statisticsDTO.setIncomes(new ArrayList<>());
-
-        for (var i : incomeList) {
-            statisticsDTO.getDates().add((LocalDate) i[0]);
-            statisticsDTO.getIncomes().add((Long) i[1]);
+            diagnosisViewDTOS.add(diagnosisViewDTO);
         }
 
-        return new ResponseEntity<>(statisticsDTO, HttpStatus.OK);
+        return new ResponseEntity<>(diagnosisViewDTOS,HttpStatus.OK);
     }
+
+    @GetMapping("/dashboard/hospital/upcoming")
+    public ResponseEntity<?> getAllUpcoming(HttpServletRequest request)
+    {
+        AppUser hospital = userService.returnUser(request);
+
+        Double time = timeService.convertTimeToDouble(LocalTime.now());
+
+        List<DiagnosisOrder>diagnosisOrders=diagnosisOrderRepository.findByDateAndTimeAndHospitalId(LocalDate.now(),time, hospital.getId());
+
+        if(diagnosisOrders.size()==0)
+        {
+            return new ResponseEntity<>(ApiResponse.create("empty","No upcoming found"),HttpStatus.OK);
+        }
+
+        List<DiagnosisViewDTO> diagnosisViewDTOS = new ArrayList<>();
+
+        for(var i:diagnosisOrders)
+        {
+            DiagnosisViewDTO diagnosisViewDTO = new DiagnosisViewDTO();
+            diagnosisViewDTO.setId(i.getId());
+            diagnosisViewDTO.setDescription(i.getDescription());
+            diagnosisViewDTO.setTime(i.getTime());
+            diagnosisViewDTO.setPlace(i.getPlace());
+            diagnosisViewDTO.setPatientName(i.getUser().getFirstName()+" "+i.getUser().getLastName());
+
+            diagnosisViewDTOS.add(diagnosisViewDTO);
+        }
+
+        return new ResponseEntity<>(diagnosisViewDTOS,HttpStatus.OK);
+
+
+    }
+
+
+
+
 
 }

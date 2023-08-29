@@ -7,11 +7,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class DiagnosisOrderDTO {
-    private String description;
-    private Long price;
+public class PharmacyDTO extends UserDTO{
     private String place;
-    private String reportURL;
-    private Long hospitalId;
-    private Double time;
+    private String bio;
 }

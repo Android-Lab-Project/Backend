@@ -51,4 +51,26 @@ public interface DiagnosisOrderRepository extends JpaRepository<DiagnosisOrder, 
             @Param("hospitalId") Long hospitalId);
 
     List<DiagnosisOrder> findByUser_Id(Long user_id);
+
+    List<DiagnosisOrder>findByUser_IdAndReportURLIsNotNull(Long user_id);
+
+    List<DiagnosisOrder> findByReportURLIsNullAndHospitalId(Long hospitalId);
+
+    @Query("SELECT do FROM DiagnosisOrder do " +
+            "WHERE (do.date = :startDate AND do.time >= :time) " +
+            "OR (do.date > :startDate) " +
+            "AND do.hospital.id = :hospitalId")
+    List<DiagnosisOrder> findByDateAndTimeAndHospitalId(
+            @Param("startDate") LocalDate startDate,
+            @Param("time") Double time,
+            @Param("hospitalId")Long hospitalId);
+
+    @Query("SELECT do FROM DiagnosisOrder do " +
+            "WHERE (do.date = :startDate AND do.time >= :time) " +
+            "OR (do.date > :startDate) " +
+            "AND do.user.id = :userId")
+    List<DiagnosisOrder> findByDateAndTimeAndUserId(
+            @Param("startDate") LocalDate startDate,
+            @Param("time") Double time,
+            @Param("userId")Long userId);
 }

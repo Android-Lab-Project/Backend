@@ -59,19 +59,6 @@ public class MedicineController {
 
     }
 
-    @PostMapping("/medicine/order/create")
-    public ResponseEntity<?> createMedicineOrder(@RequestBody MedicineOrder medicineOrder, HttpServletRequest request) {
-        AppUser user = userService.returnUser(request);
-        if (user == null) {
-            return new ResponseEntity<>(ApiResponse.create("error", "Hospital not found"), HttpStatus.BAD_REQUEST);
-        }
-
-        medicineOrder.setUser(user);
-        medicineOrderRepository.save(medicineOrder);
-
-        return new ResponseEntity<>(ApiResponse.create("create", "medicine order created"), HttpStatus.OK);
-    }
-
     @PostMapping("/medicine/order/update/{id}")
     public ResponseEntity<?> updateMedicineOrder(@PathVariable(name = "id") Long id, HttpServletRequest request) {
         AppUser appUser = userService.returnUser(request);

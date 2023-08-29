@@ -7,9 +7,11 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class AmbulanceDTO {
+public class UserDTO {
     private Long id;
-    private String name;
-    private String type;
+    private String firstName;
+    private String lastName;
+    private String email;
+    private String contactNo;
     private String dp;
 }

@@ -12,15 +12,10 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class DoctorDTO {
+public class DoctorDTO extends UserDTO {
     List<DoctorExpertise> expertise;
     List<DoctorAvailableTime> availableTimes;
     List<DoctorOnlineAvailableTime> availableOnlineTimes;
-    private Long id;
-    private String firstName;
-    private String lastName;
-    private String email;
-    private String contactNo;
     private String bio;
     private String dp;
     private String currentHospital;

@@ -1,13 +1,16 @@
 package com.healthtechbd.backend.controller;
 
 import com.healthtechbd.backend.dto.DoctorDTO;
+import com.healthtechbd.backend.dto.DoctorSerialViewDTO;
 import com.healthtechbd.backend.dto.StatisticsDTO;
 import com.healthtechbd.backend.entity.AppUser;
 import com.healthtechbd.backend.entity.Doctor;
+import com.healthtechbd.backend.entity.DoctorSerial;
 import com.healthtechbd.backend.repo.AppUserRepository;
 import com.healthtechbd.backend.repo.DoctorRepository;
 import com.healthtechbd.backend.repo.DoctorSerialRepository;
 import com.healthtechbd.backend.service.DoctorService;
+import com.healthtechbd.backend.service.TimeService;
 import com.healthtechbd.backend.service.UserService;
 import com.healthtechbd.backend.utils.ApiResponse;
 import jakarta.servlet.http.HttpServletRequest;
@@ -18,6 +21,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -41,6 +45,9 @@ public class DoctorController {
     @Autowired
     private UserService userService;
 
+    @Autowired
+    private TimeService timeService;
+
     @GetMapping("/doctor/{id}")
     public ResponseEntity<?> showDoctorDetails(@PathVariable Long id) {
         Optional<Doctor> optionalDoctor = doctorRepository.findByAppUser_Id(id);
@@ -58,7 +65,6 @@ public class DoctorController {
                 doctor.getAvailableTimes().get(i).setCount(0);
             }
         }
-
 
         for (int i = 0; i < doctor.getAvailableOnlineTimes().size(); i++) {
 
@@ -134,44 +140,58 @@ public class DoctorController {
 
     }
 
-    @GetMapping("/doctor/statistics")
-    public ResponseEntity<?> getHospitalStatistics(HttpServletRequest request) {
-
+    @GetMapping("/dashboard/doctor/pending")
+    public ResponseEntity<?> getAllPendingPrescriptions(HttpServletRequest request) {
         AppUser doctor = userService.returnUser(request);
-        if (doctor == null) {
-            return new ResponseEntity<>(ApiResponse.create("error", "Hospital not found"), HttpStatus.OK);
+
+        List<DoctorSerial> pendingDoctorSerials = doctorSerialRepository.findByPrescriptionIsNullAndDoctorId(doctor.getId());
+
+        if (pendingDoctorSerials.size() == 0) {
+            return new ResponseEntity<>(ApiResponse.create("empty", "No pending found"), HttpStatus.OK);
         }
 
-        StatisticsDTO doctorStatisticsDTO = new StatisticsDTO();
+        List<DoctorSerialViewDTO> doctorSerialViewDTOS = new ArrayList<>();
 
-        doctorStatisticsDTO.set_7DaysCount(doctorSerialRepository.countSerialsByDoctorAndDate(doctor.getId(), LocalDate.now().minusDays(7), LocalDate.now()));
+        for (var doctorSerial : pendingDoctorSerials) {
+            DoctorSerialViewDTO doctorSerialViewDTO = new DoctorSerialViewDTO();
+            doctorSerialViewDTO.setId(doctorSerial.getId());
+            doctorSerialViewDTO.setTime(doctorSerial.getTime());
+            doctorSerialViewDTO.setPatientName(doctorSerial.getUser().getFirstName() + " " + doctorSerial.getUser().getLastName());
 
-        doctorStatisticsDTO.set_30DaysCount(doctorSerialRepository.countSerialsByDoctorAndDate(doctor.getId(), LocalDate.now().minusDays(30), LocalDate.now()));
-
-        doctorStatisticsDTO.setTotalCount(doctorSerialRepository.countSerialsByDoctor(doctor.getId()));
-
-        doctorStatisticsDTO.set_7DaysIncome(doctorSerialRepository.sumPriceByDoctorAndDate(
-                doctor.getId(), LocalDate.now().minusDays(7), LocalDate.now()));
-
-
-        doctorStatisticsDTO.set_30DaysIncome(doctorSerialRepository.sumPriceByDoctorAndDate(
-                doctor.getId(), LocalDate.now().minusDays(30), LocalDate.now()));
-
-        doctorStatisticsDTO.setTotalIncome(doctorSerialRepository.sumPriceByDoctor(doctor.getId()));
-
-        List<Object[]> incomeList = doctorSerialRepository.sumPriceByDoctorAndDateGroupByDate(
-                doctor.getId(), LocalDate.now().minusDays(30), LocalDate.now());
-
-        doctorStatisticsDTO.setDates(new ArrayList<>());
-        doctorStatisticsDTO.setIncomes(new ArrayList<>());
-
-        for (var i : incomeList) {
-            doctorStatisticsDTO.getDates().add((LocalDate) i[0]);
-            doctorStatisticsDTO.getIncomes().add((Long) i[1]);
+            doctorSerialViewDTOS.add(doctorSerialViewDTO);
         }
 
-        return new ResponseEntity<>(doctorStatisticsDTO, HttpStatus.OK);
+        return new ResponseEntity<>(doctorSerialViewDTOS, HttpStatus.OK);
     }
+
+    @GetMapping("/dashboard/doctor/upcoming")
+    public ResponseEntity<?> getAllUpcoming(HttpServletRequest request) {
+        AppUser doctor = userService.returnUser(request);
+
+        Double time = timeService.convertTimeToDouble(LocalTime.now());
+
+        List<DoctorSerial> upcomingDoctorSerials = doctorSerialRepository.findByDateAndTimeAndDoctorId(LocalDate.now(), time, doctor.getId());
+
+        if (upcomingDoctorSerials.size() == 0) {
+            return new ResponseEntity<>(ApiResponse.create("empty", "No upcoming found"), HttpStatus.OK);
+        }
+
+        List<DoctorSerialViewDTO> doctorSerialViewDTOS = new ArrayList<>();
+
+        for (var doctorSerial : upcomingDoctorSerials) {
+            DoctorSerialViewDTO doctorSerialViewDTO = new DoctorSerialViewDTO();
+            doctorSerialViewDTO.setId(doctorSerial.getId());
+            doctorSerialViewDTO.setTime(doctorSerial.getTime());
+            doctorSerialViewDTO.setPatientName(doctorSerial.getUser().getFirstName() + " " + doctorSerial.getUser().getLastName());
+
+            doctorSerialViewDTOS.add(doctorSerialViewDTO);
+        }
+
+        return new ResponseEntity<>(doctorSerialViewDTOS, HttpStatus.OK);
+    }
+
+
+
 
 
 }

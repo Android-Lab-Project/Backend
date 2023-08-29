@@ -171,10 +171,6 @@ public class AuthController {
 
         ambulanceProvider.setAppUser(response.getUser());
 
-        for (int i = 0; i < ambulanceProvider.getAmbulances().size(); i++) {
-            ambulanceProvider.getAmbulances().get(i).setAmbulanceProvider(ambulanceProvider);
-        }
-
 
         ambulanceProviderRepository.save(ambulanceProvider);
 
@@ -212,10 +208,6 @@ public class AuthController {
             return new ResponseEntity<>(ApiResponse.create("error", "Hospital name is empty"), HttpStatus.BAD_REQUEST);
         }
         hospital.setAppUser(response.getUser());
-
-        for (int i = 0; i < hospital.getDiagnosisList().size(); i++) {
-            hospital.getDiagnosisList().get(i).setHospital(hospital);
-        }
 
         hospitalRepository.save(hospital);
 

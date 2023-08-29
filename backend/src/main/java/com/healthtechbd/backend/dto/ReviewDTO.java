@@ -7,14 +7,13 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class DiagnosisReportDTO {
+public class ReviewDTO {
 
-    private String description;
+    private Long reviewerId;
 
-    private String reportURL;
+    private Long starCount;
 
-    private String hospitalName;
+    private String review;
 
-    private Long hospitalId;
-
+    private String reviewerName;
 }

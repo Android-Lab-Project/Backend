@@ -99,35 +99,13 @@ public class DiagnosisController {
             diagnosisDTOS.add(modelMapper.map(diagnoses.get(i), DiagnosisDTO.class));
             diagnosisDTOS.get(i).setAppUser_id(diagnoses.get(i).getHospital().getAppUser().getId());
             diagnosisDTOS.get(i).setHospitalName(diagnoses.get(i).getHospital().getHospitalName());
+            diagnosisDTOS.get(i).setPlace(diagnoses.get(i).getHospital().getPlace());
         }
 
         return new ResponseEntity<>(diagnosisDTOS, HttpStatus.OK);
     }
 
-    @PostMapping("/diagnosis/order")
-    public ResponseEntity<?> createDiagnosisOrder(@RequestBody DiagnosisOrderDTO diagnosisOrderDTO, HttpServletRequest request) {
-        AppUser appUser = userService.returnUser(request);
 
-        Optional<AppUser> opHospital = userRepository.findById(diagnosisOrderDTO.getHospitalId());
-
-        AppUser hospital = new AppUser();
-
-        if (!opHospital.isPresent()) {
-            return new ResponseEntity<>(ApiResponse.create("error", "Hospital does not exist"), HttpStatus.BAD_REQUEST);
-        }
-
-        hospital = opHospital.get();
-
-        DiagnosisOrder diagnosisOrder = modelMapper.map(diagnosisOrderDTO, DiagnosisOrder.class);
-
-        diagnosisOrder.setUser(appUser);
-        diagnosisOrder.setHospital(hospital);
-        diagnosisOrder.setDate(LocalDate.now());
-        diagnosisOrderRepository.save(diagnosisOrder);
-
-        return new ResponseEntity<>(ApiResponse.create("create", "Diagnosis order created"), HttpStatus.OK);
-
-    }
 
 
 }

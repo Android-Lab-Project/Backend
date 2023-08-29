@@ -49,15 +49,20 @@ public class JWTService {
             Jwts.parser().setSigningKey(getSignInKey()).parseClaimsJws(token);
             return true;
         } catch (SignatureException ex) {
-            throw new ApiException(HttpStatus.BAD_REQUEST, "Invalid JWT signature");
+            return false;
+            //throw new ApiException(HttpStatus.BAD_REQUEST, "Invalid JWT signature");
         } catch (MalformedJwtException ex) {
-            throw new ApiException(HttpStatus.BAD_REQUEST, "Invalid JWT token");
+            return false;
+            //throw new ApiException(HttpStatus.BAD_REQUEST, "Invalid JWT token");
         } catch (ExpiredJwtException ex) {
-            throw new ApiException(HttpStatus.BAD_REQUEST, "Expired JWT token");
+            return false;
+            //throw new ApiException(HttpStatus.BAD_REQUEST, "Expired JWT token");
         } catch (UnsupportedJwtException ex) {
-            throw new ApiException(HttpStatus.BAD_REQUEST, "Unsupported JWT token");
+            return false;
+            //throw new ApiException(HttpStatus.BAD_REQUEST, "Unsupported JWT token");
         } catch (IllegalArgumentException ex) {
-            throw new ApiException(HttpStatus.BAD_REQUEST, "JWT claims string is empty.");
+            return false;
+            //throw new ApiException(HttpStatus.BAD_REQUEST, "JWT claims string is empty.");
         }
     }
 

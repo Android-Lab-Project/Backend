@@ -47,5 +47,17 @@ public interface MedicineOrderRepository extends JpaRepository<MedicineOrder, Lo
             "WHERE mo.pharmacy.id = :pharmacyId")
     Long sumPriceByPharmacy(@Param("pharmacyId") Long pharmacyId);
 
+    @Query("SELECT mo " +
+            "FROM MedicineOrder mo " +
+            "WHERE mo.user.id = :userId " +
+            "AND mo.delivered = 0")
+    List<MedicineOrder> findUndeliveredOrdersByUser(@Param("userId") Long userId);
+
+    @Query("SELECT mo " +
+            "FROM MedicineOrder mo " +
+            "WHERE mo.pharmacy.id = :pharmacyId " +
+            "AND mo.delivered = 0")
+    List<MedicineOrder> findUndeliveredOrdersByPharmacy(@Param("pharmacyId") Long pharmacyId);
+
 
 }
