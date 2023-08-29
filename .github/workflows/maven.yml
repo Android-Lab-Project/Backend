@@ -34,6 +34,7 @@ jobs:
       with:
         image: drfahim/springapi
         tags: latest
+        directory: Dockerfile
         registry: docker.io
         dockerfile: .
         username: ${{ secrets.DOCKER_USERNAME }}
