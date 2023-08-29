@@ -2,7 +2,6 @@ package com.healthtechbd.backend.controller;
 
 import com.healthtechbd.backend.dto.DoctorDTO;
 import com.healthtechbd.backend.dto.DoctorSerialViewDTO;
-import com.healthtechbd.backend.dto.StatisticsDTO;
 import com.healthtechbd.backend.entity.AppUser;
 import com.healthtechbd.backend.entity.Doctor;
 import com.healthtechbd.backend.entity.DoctorSerial;

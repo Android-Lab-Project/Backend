@@ -4,7 +4,6 @@ import com.healthtechbd.backend.entity.Role;
 import lombok.Data;
 
 import java.util.List;
-import java.util.Set;
 
 @Data
 public class AppUserDetailsDTO {

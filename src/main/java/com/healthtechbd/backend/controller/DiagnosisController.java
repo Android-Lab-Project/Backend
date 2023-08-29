@@ -2,10 +2,8 @@ package com.healthtechbd.backend.controller;
 
 import com.healthtechbd.backend.dto.AddDiagnosisDTO;
 import com.healthtechbd.backend.dto.DiagnosisDTO;
-import com.healthtechbd.backend.dto.DiagnosisOrderDTO;
 import com.healthtechbd.backend.entity.AppUser;
 import com.healthtechbd.backend.entity.Diagnosis;
-import com.healthtechbd.backend.entity.DiagnosisOrder;
 import com.healthtechbd.backend.entity.Hospital;
 import com.healthtechbd.backend.repo.AppUserRepository;
 import com.healthtechbd.backend.repo.DiagnosisOrderRepository;
@@ -20,7 +18,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;

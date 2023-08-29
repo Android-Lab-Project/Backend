@@ -2,7 +2,6 @@ package com.healthtechbd.backend.controller;
 
 import com.healthtechbd.backend.dto.DiagnosisDTO;
 import com.healthtechbd.backend.dto.DiagnosisViewDTO;
-import com.healthtechbd.backend.dto.StatisticsDTO;
 import com.healthtechbd.backend.entity.AppUser;
 import com.healthtechbd.backend.entity.Diagnosis;
 import com.healthtechbd.backend.entity.DiagnosisOrder;
