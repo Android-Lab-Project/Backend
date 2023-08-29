@@ -21,7 +21,6 @@ jobs:
         cache: maven
     - name: Build with Maven
       run: mvn clean install
-      working-directory: backend
     
     - name: Checkout
       uses: actions/checkout@v3
