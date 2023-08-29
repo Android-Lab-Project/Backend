@@ -20,13 +20,16 @@ public class BkashPaymentService {
 
     private static final String APP_KEY = "4f6o0cjiki2rfm34kfdadl1eqq";
 
-    public static String paymentID;
-
-    public static String createPayment(String callbackURL, String amount) {
+    public  BkashCreateResponse createPayment(String callbackURL, String amount) {
 
         final String CREATE_PAYMENT_ENDPOINT = "/tokenized/checkout/create";
 
         String token = grantToken();
+
+        if(token.equals("Error"))
+        {
+            return  new BkashCreateResponse("error",null,null);
+        }
 
         String AUTHORIZATION_TOKEN = "Bearer " + token;
 
@@ -47,7 +50,7 @@ public class BkashPaymentService {
 
         Map<String, Object> paymentRequest = new HashMap<>();
         paymentRequest.put("mode", "0011");
-        paymentRequest.put("payerReference", "###");
+        paymentRequest.put("payerReference", "reference");
         paymentRequest.put("callbackURL", callbackURL);
         paymentRequest.put("amount", amount);
         paymentRequest.put("currency", "BDT");
@@ -68,19 +71,33 @@ public class BkashPaymentService {
 
             JsonParser jsonParser = new JsonParser();
             JsonObject jsonResponse = jsonParser.parse(responseBody).getAsJsonObject();
-            String bkashURL = jsonResponse.get("bkashURL").getAsString();
-            paymentID = jsonResponse.get("paymentID").getAsString();
 
-            return bkashURL;
+            BkashCreateResponse bkashCreateResponse =new BkashCreateResponse();
+
+            bkashCreateResponse.setStatus("success");
+
+            bkashCreateResponse.setBkashURL(jsonResponse.get("bkashURL").getAsString());
+
+            bkashCreateResponse.setPaymentId(jsonResponse.get("paymentID").getAsString());
+
+
+            return bkashCreateResponse;
+
+
         } else {
-            return "Error";
+            return  new BkashCreateResponse("error",null,null);
         }
     }
 
-    public static String queryPayment() {
+    public  BkashQueryResponse queryPayment(String paymentID) {
         final String QUERY_PAYMENT_ENDPOINT = "/tokenized/checkout/payment/status";
 
         String token = grantToken();
+        if(token.equals("Error"))
+        {
+            return  new BkashQueryResponse("error",null,null);
+        }
+
         String AUTHORIZATION_TOKEN = "Bearer " + token;
 
         RestTemplate restTemplate = new RestTemplate();
@@ -92,7 +109,7 @@ public class BkashPaymentService {
         headers.set("x-app-key", APP_KEY);
 
         Map<String, Object> queryRequest = new HashMap<>();
-        System.out.println(paymentID);
+
         queryRequest.put("paymentID", paymentID);
 
         HttpEntity<Map<String, Object>> requestEntity = new HttpEntity<>(queryRequest, headers);
@@ -105,24 +122,35 @@ public class BkashPaymentService {
         );
 
         if (responseEntity.getStatusCode().is2xxSuccessful()) {
-            String queryResponse = responseEntity.getBody();
 
             String responseBody = responseEntity.getBody();
 
             JsonParser jsonParser = new JsonParser();
             JsonObject jsonResponse = jsonParser.parse(responseBody).getAsJsonObject();
-            String verificationStatus = jsonResponse.get("verificationStatus").getAsString();
-            return verificationStatus;
+            BkashQueryResponse bkashQueryResponse =new BkashQueryResponse();
+            bkashQueryResponse.setStatus("success");
+            bkashQueryResponse.setVerificationStatus(jsonResponse.get("verificationStatus").getAsString());
+            bkashQueryResponse.setTransactionStatus(jsonResponse.get("transactionStatus").getAsString());
+
+            return bkashQueryResponse;
+
+
 
         } else {
-            return "Error";
+            return new BkashQueryResponse("error",null, null);
         }
     }
 
-    public static String executePayment() {
+    public  BkashExecuteResponse executePayment(String paymentId) {
+
         final String QUERY_PAYMENT_ENDPOINT = "/tokenized/checkout/execute";
 
         String token = grantToken();
+
+        if(token.equals("Error"))
+        {
+            return  new BkashExecuteResponse("error",null,null);
+        }
         String AUTHORIZATION_TOKEN = "Bearer " + token;
 
         RestTemplate restTemplate = new RestTemplate();
@@ -133,11 +161,11 @@ public class BkashPaymentService {
         headers.set("Accept", "application/json");
         headers.set("x-app-key", APP_KEY);
 
-        Map<String, Object> queryRequest = new HashMap<>();
-        System.out.println(paymentID);
-        queryRequest.put("paymentID", paymentID);
+        Map<String, Object> executeRequest = new HashMap<>();
 
-        HttpEntity<Map<String, Object>> requestEntity = new HttpEntity<>(queryRequest, headers);
+        executeRequest.put("paymentID", paymentId);
+
+        HttpEntity<Map<String, Object>> requestEntity = new HttpEntity<>(executeRequest, headers);
 
         ResponseEntity<String> responseEntity = restTemplate.exchange(
                 API_BASE_URL + QUERY_PAYMENT_ENDPOINT,
@@ -147,22 +175,82 @@ public class BkashPaymentService {
         );
 
         if (responseEntity.getStatusCode().is2xxSuccessful()) {
-            String executeResponse = responseEntity.getBody();
 
             String responseBody = responseEntity.getBody();
 
-            System.out.println(responseBody);
+            JsonParser jsonParser = new JsonParser();
+            JsonObject jsonResponse = jsonParser.parse(responseBody).getAsJsonObject();
 
-//            JsonParser jsonParser = new JsonParser();
-//            JsonObject jsonResponse = jsonParser.parse(responseBody).getAsJsonObject();
-//            String verificationStatus = jsonResponse.get("verificationStatus").getAsString();
+            BkashExecuteResponse bkashExecuteResponse = new BkashExecuteResponse();
+
+            bkashExecuteResponse.setStatus("success");
+
+            bkashExecuteResponse.setTrxID(jsonResponse.get("trxID").getAsString());
+
+            bkashExecuteResponse.setTransactionStatus(jsonResponse.get("transactionStatus").getAsString());
+
+            return bkashExecuteResponse;
 
         } else {
-            return "Error";
+            return new BkashExecuteResponse("error", null, null);
         }
 
-        return null;
     }
+
+    public BkashRefundResponse refundPayment(String paymentId, String trxID, String amount) {
+
+        final String REFUND_PAYMENT_ENDPOINT = "/tokenized/checkout/payment/refund";
+
+        String token = grantToken();
+
+        if (token.equals("Error")) {
+            return new BkashRefundResponse("error", null, null);
+        }
+
+        String AUTHORIZATION_TOKEN = "Bearer " + token;
+
+        RestTemplate restTemplate = new RestTemplate();
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Authorization", AUTHORIZATION_TOKEN);
+        headers.set("Content-Type", "application/json");
+        headers.set("Accept", "application/json");
+        headers.set("x-app-key", APP_KEY);
+
+        Map<String, Object> refundRequest = new HashMap<>();
+        refundRequest.put("paymentID", paymentId);
+        refundRequest.put("amount", amount);
+        refundRequest.put("trxID", trxID);
+        refundRequest.put("sku","healtechBd");
+        refundRequest.put("reason","Online Consultation cancelled");
+
+        HttpEntity<Map<String, Object>> requestEntity = new HttpEntity<>(refundRequest, headers);
+
+        ResponseEntity<String> responseEntity = restTemplate.exchange(
+                API_BASE_URL + REFUND_PAYMENT_ENDPOINT,
+                HttpMethod.POST,
+                requestEntity,
+                String.class
+        );
+
+        if (responseEntity.getStatusCode().is2xxSuccessful()) {
+            String responseBody = responseEntity.getBody();
+
+            JsonParser jsonParser = new JsonParser();
+            JsonObject jsonResponse = jsonParser.parse(responseBody).getAsJsonObject();
+
+            BkashRefundResponse bkashRefundResponse = new BkashRefundResponse();
+
+            bkashRefundResponse.setStatus("success");
+            bkashRefundResponse.setRefundTrxID(jsonResponse.get("refundTrxID").getAsString());
+            bkashRefundResponse.setTransactionStatus(jsonResponse.get("transactionStatus").getAsString());
+
+            return bkashRefundResponse;
+        } else {
+            return new BkashRefundResponse("error", null, null);
+        }
+    }
+
 
     public static String grantToken() {
 
@@ -187,32 +275,13 @@ public class BkashPaymentService {
                 String idToken = jsonResponse.get("id_token").getAsString();
 
                 return idToken;
-            } else {
-                return "Error";
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            return "Error";
         }
 
-        return null;
-    }
-
-    public static void main(String[] args) {
-
-        //String paymentResponse = BkashPaymentService.createPayment("https://www.google.com","300");
-
-        //System.out.println("Payment Response: " + paymentResponse);
-
-        //System.out.println(BkashPaymentService.paymentID);
-
-        BkashPaymentService.paymentID = "TR0011kIRbq631692897287567";
-
-        System.out.println(BkashPaymentService.queryPayment());
-
-        BkashPaymentService.executePayment();
-
-        System.out.println(BkashPaymentService.queryPayment());
-
+        return "Error";
 
     }
+
 }
