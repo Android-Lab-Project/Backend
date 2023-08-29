@@ -9,6 +9,7 @@ import com.healthtechbd.backend.entity.AppUser;
 import com.healthtechbd.backend.repo.AmbulanceProviderRepository;
 import com.healthtechbd.backend.repo.AmbulanceRepository;
 import com.healthtechbd.backend.repo.AmbulanceTripRepository;
+import com.healthtechbd.backend.repo.AppUserRepository;
 import com.healthtechbd.backend.service.UserService;
 import com.healthtechbd.backend.utils.ApiResponse;
 import jakarta.servlet.http.HttpServletRequest;
@@ -26,6 +27,9 @@ import java.util.Optional;
 @CrossOrigin(origins = "*", allowedHeaders = "*", methods = {RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT, RequestMethod.DELETE})
 @RestController
 public class AmbulanceController {
+
+    @Autowired
+    private AppUserRepository userRepository;
 
     @Autowired
     private AmbulanceRepository ambulanceRepository;
@@ -71,6 +75,31 @@ public class AmbulanceController {
 
         return new ResponseEntity<>(ApiResponse.create("create","Ambulance added"), HttpStatus.OK);
     }
+
+    @GetMapping("/ambulance/{id}")
+    public ResponseEntity<?>getAllAmbulances(@PathVariable(name="id")Long id)
+    {
+        Optional<AppUser>opAppUser = userRepository.findById(id);
+
+        List<Ambulance>ambulances = ambulanceRepository.findByAmbulanceProvider_Id(opAppUser.get().getId());
+
+        if(ambulances.size()==0)
+        {
+            return  new ResponseEntity<>(ApiResponse.create("empty","No Ambulance Found"),HttpStatus.OK);
+        }
+
+        List<AmbulanceDTO>ambulanceDTOS = new ArrayList<>();
+
+        for(var i:ambulances)
+        {
+            AmbulanceDTO ambulanceDTO = modelMapper.map(i,AmbulanceDTO.class);
+            ambulanceDTOS.add(ambulanceDTO);
+        }
+
+        return  new ResponseEntity<>(ambulanceDTOS,HttpStatus.OK);
+
+    }
+
 
     @PostMapping("/ambulance/trip/bid/{id}")
     public ResponseEntity<?>addBidderToTrip(HttpServletRequest request,@PathVariable(name="id")Long id)

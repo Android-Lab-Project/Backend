@@ -90,7 +90,7 @@ public class DiagnosisController {
         List<Diagnosis> diagnoses = diagnosisRepository.findAll();
 
         if (diagnoses.size() == 0) {
-            return new ResponseEntity<>(ApiResponse.create("error", "No Diagnosis Found"), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(ApiResponse.create("empty", "No Diagnosis Found"), HttpStatus.OK);
         }
 
         List<DiagnosisDTO> diagnosisDTOS = new ArrayList<>();

@@ -48,6 +48,9 @@ public class MedicineController {
         if (medicine.getPrice() == null || medicine.getPrice() <= 0) {
             return new ResponseEntity<>(ApiResponse.create("error", "Invalid or empty medicine price"), HttpStatus.BAD_REQUEST);
         }
+        if (medicine.getGeneric_name()== null || medicine.getGeneric_name().trim().length() == 0) {
+            return new ResponseEntity<>(ApiResponse.create("error", "Generic name is empty"), HttpStatus.BAD_REQUEST);
+        }
         if (medicineRepository.existsByName(medicine.getName()) && medicineRepository.existsByCompany(medicine.getCompany())) {
             return new ResponseEntity<>(ApiResponse.create("error", "Medicine already exists"), HttpStatus.BAD_REQUEST);
         }

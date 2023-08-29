@@ -15,19 +15,16 @@ public class Medicine {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(name="medicine_name")
     private String name;
 
+    @Column(name="manufacturer_name")
     private String company;
 
-    private String dp;
+    @Column(name="generic_name")
+    private String generic_name;
 
-    private Long price;
-
-    @PrePersist
-    public void setDefaultDp() {
-        if (dp == null) {
-            dp = "default.png";
-        }
-    }
+    @Column(name="price")
+    private Double price;
 
 }
