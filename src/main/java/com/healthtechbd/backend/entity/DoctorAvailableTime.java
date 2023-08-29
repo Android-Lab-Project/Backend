@@ -14,16 +14,12 @@ import java.time.LocalDate;
 @Table(name = "doctor_availableTime")
 public class DoctorAvailableTime {
 
+    public Integer count;
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
     private String day;
-
     private LocalDate date;
-
-    public Integer count;
-
     private Double availTime;
 
     private Integer startTime;

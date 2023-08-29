@@ -15,16 +15,16 @@ public class Medicine {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name="medicine_name")
+    @Column(name = "medicine_name")
     private String name;
 
-    @Column(name="manufacturer_name")
+    @Column(name = "manufacturer_name")
     private String company;
 
-    @Column(name="generic_name")
+    @Column(name = "generic_name")
     private String generic_name;
 
-    @Column(name="price")
+    @Column(name = "price")
     private Double price;
 
 }

@@ -20,15 +20,46 @@ public class BkashPaymentService {
 
     private static final String APP_KEY = "4f6o0cjiki2rfm34kfdadl1eqq";
 
-    public  BkashCreateResponse createPayment(String callbackURL, String amount) {
+    public static String grantToken() {
+
+        OkHttpClient client = new OkHttpClient();
+
+        MediaType mediaType = MediaType.parse("application/json");
+        RequestBody body = RequestBody.create(mediaType, "{\"app_key\":\"4f6o0cjiki2rfm34kfdadl1eqq\",\"app_secret\":\"2is7hdktrekvrbljjh44ll3d9l1dtjo4pasmjvs5vl5qr3fug4b\"}");
+        Request request = new Request.Builder()
+                .url("https://tokenized.sandbox.bka.sh/v1.2.0-beta/tokenized/checkout/token/grant")
+                .post(body)
+                .addHeader("accept", "application/json")
+                .addHeader("username", "sandboxTokenizedUser02")
+                .addHeader("password", "sandboxTokenizedUser02@12345")
+                .addHeader("content-type", "application/json")
+                .build();
+
+        try (Response response = client.newCall(request).execute()) {
+            if (response.isSuccessful()) {
+                String responseBody = response.body().string();
+                com.google.gson.JsonParser parser = new com.google.gson.JsonParser();
+                com.google.gson.JsonObject jsonResponse = parser.parse(responseBody).getAsJsonObject();
+                String idToken = jsonResponse.get("id_token").getAsString();
+
+                return idToken;
+            }
+        } catch (Exception e) {
+            return "Error";
+        }
+
+        return "Error";
+
+    }
+
+    public BkashCreateResponse createPayment(String callbackURL, String amount) {
 
         final String CREATE_PAYMENT_ENDPOINT = "/tokenized/checkout/create";
 
         String token = grantToken();
 
-        if(token.equals("Error"))
-        {
-            return  new BkashCreateResponse("error",null,null);
+        if (token.equals("Error")) {
+            return new BkashCreateResponse("error", null, null);
         }
 
         String AUTHORIZATION_TOKEN = "Bearer " + token;
@@ -72,7 +103,7 @@ public class BkashPaymentService {
             JsonParser jsonParser = new JsonParser();
             JsonObject jsonResponse = jsonParser.parse(responseBody).getAsJsonObject();
 
-            BkashCreateResponse bkashCreateResponse =new BkashCreateResponse();
+            BkashCreateResponse bkashCreateResponse = new BkashCreateResponse();
 
             bkashCreateResponse.setStatus("success");
 
@@ -85,17 +116,16 @@ public class BkashPaymentService {
 
 
         } else {
-            return  new BkashCreateResponse("error",null,null);
+            return new BkashCreateResponse("error", null, null);
         }
     }
 
-    public  BkashQueryResponse queryPayment(String paymentID) {
+    public BkashQueryResponse queryPayment(String paymentID) {
         final String QUERY_PAYMENT_ENDPOINT = "/tokenized/checkout/payment/status";
 
         String token = grantToken();
-        if(token.equals("Error"))
-        {
-            return  new BkashQueryResponse("error",null,null);
+        if (token.equals("Error")) {
+            return new BkashQueryResponse("error", null, null);
         }
 
         String AUTHORIZATION_TOKEN = "Bearer " + token;
@@ -127,7 +157,7 @@ public class BkashPaymentService {
 
             JsonParser jsonParser = new JsonParser();
             JsonObject jsonResponse = jsonParser.parse(responseBody).getAsJsonObject();
-            BkashQueryResponse bkashQueryResponse =new BkashQueryResponse();
+            BkashQueryResponse bkashQueryResponse = new BkashQueryResponse();
             bkashQueryResponse.setStatus("success");
             bkashQueryResponse.setVerificationStatus(jsonResponse.get("verificationStatus").getAsString());
             bkashQueryResponse.setTransactionStatus(jsonResponse.get("transactionStatus").getAsString());
@@ -135,21 +165,19 @@ public class BkashPaymentService {
             return bkashQueryResponse;
 
 
-
         } else {
-            return new BkashQueryResponse("error",null, null);
+            return new BkashQueryResponse("error", null, null);
         }
     }
 
-    public  BkashExecuteResponse executePayment(String paymentId) {
+    public BkashExecuteResponse executePayment(String paymentId) {
 
         final String QUERY_PAYMENT_ENDPOINT = "/tokenized/checkout/execute";
 
         String token = grantToken();
 
-        if(token.equals("Error"))
-        {
-            return  new BkashExecuteResponse("error",null,null);
+        if (token.equals("Error")) {
+            return new BkashExecuteResponse("error", null, null);
         }
         String AUTHORIZATION_TOKEN = "Bearer " + token;
 
@@ -221,8 +249,8 @@ public class BkashPaymentService {
         refundRequest.put("paymentID", paymentId);
         refundRequest.put("amount", amount);
         refundRequest.put("trxID", trxID);
-        refundRequest.put("sku","healtechBd");
-        refundRequest.put("reason","Online Consultation cancelled");
+        refundRequest.put("sku", "healtechBd");
+        refundRequest.put("reason", "Online Consultation cancelled");
 
         HttpEntity<Map<String, Object>> requestEntity = new HttpEntity<>(refundRequest, headers);
 
@@ -249,39 +277,6 @@ public class BkashPaymentService {
         } else {
             return new BkashRefundResponse("error", null, null);
         }
-    }
-
-
-    public static String grantToken() {
-
-        OkHttpClient client = new OkHttpClient();
-
-        MediaType mediaType = MediaType.parse("application/json");
-        RequestBody body = RequestBody.create(mediaType, "{\"app_key\":\"4f6o0cjiki2rfm34kfdadl1eqq\",\"app_secret\":\"2is7hdktrekvrbljjh44ll3d9l1dtjo4pasmjvs5vl5qr3fug4b\"}");
-        Request request = new Request.Builder()
-                .url("https://tokenized.sandbox.bka.sh/v1.2.0-beta/tokenized/checkout/token/grant")
-                .post(body)
-                .addHeader("accept", "application/json")
-                .addHeader("username", "sandboxTokenizedUser02")
-                .addHeader("password", "sandboxTokenizedUser02@12345")
-                .addHeader("content-type", "application/json")
-                .build();
-
-        try (Response response = client.newCall(request).execute()) {
-            if (response.isSuccessful()) {
-                String responseBody = response.body().string();
-                com.google.gson.JsonParser parser = new com.google.gson.JsonParser();
-                com.google.gson.JsonObject jsonResponse = parser.parse(responseBody).getAsJsonObject();
-                String idToken = jsonResponse.get("id_token").getAsString();
-
-                return idToken;
-            }
-        } catch (Exception e) {
-            return "Error";
-        }
-
-        return "Error";
-
     }
 
 }

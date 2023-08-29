@@ -52,7 +52,7 @@ public interface DiagnosisOrderRepository extends JpaRepository<DiagnosisOrder, 
 
     List<DiagnosisOrder> findByUser_Id(Long user_id);
 
-    List<DiagnosisOrder>findByUser_IdAndReportURLIsNotNull(Long user_id);
+    List<DiagnosisOrder> findByUser_IdAndReportURLIsNotNull(Long user_id);
 
     List<DiagnosisOrder> findByReportURLIsNullAndHospitalId(Long hospitalId);
 
@@ -63,7 +63,7 @@ public interface DiagnosisOrderRepository extends JpaRepository<DiagnosisOrder, 
     List<DiagnosisOrder> findByDateAndTimeAndHospitalId(
             @Param("startDate") LocalDate startDate,
             @Param("time") Double time,
-            @Param("hospitalId")Long hospitalId);
+            @Param("hospitalId") Long hospitalId);
 
     @Query("SELECT do FROM DiagnosisOrder do " +
             "WHERE (do.date = :startDate AND do.time >= :time) " +
@@ -72,5 +72,5 @@ public interface DiagnosisOrderRepository extends JpaRepository<DiagnosisOrder, 
     List<DiagnosisOrder> findByDateAndTimeAndUserId(
             @Param("startDate") LocalDate startDate,
             @Param("time") Double time,
-            @Param("userId")Long userId);
+            @Param("userId") Long userId);
 }

@@ -48,8 +48,9 @@ public interface AmbulanceTripRepository extends JpaRepository<AmbulanceTrip, Lo
             "WHERE at.ambulanceProvider.id = :ambulanceProviderId")
     Long sumPriceByAmbulanceProvider(@Param("ambulanceProviderId") Long ambulanceProviderId);
 
-    @Query("SELECT at FROM AmbulanceTrip at WHERE at.date>=:date AND at.user.id = :userId" )
-    List<AmbulanceTrip> findUpcomingTripsByUser(@Param("date")LocalDate date,@Param("userId")Long userId);
-    @Query("SELECT at FROM AmbulanceTrip at WHERE at.date>=:date AND at.ambulanceProvider.id = :ambulanceProviderId" )
-    List<AmbulanceTrip> findUpcomingTripsByProvider(@Param("date")LocalDate date,@Param("ambulanceProviderId")Long ambulanceProviderId);
+    @Query("SELECT at FROM AmbulanceTrip at WHERE at.date>=:date AND at.user.id = :userId")
+    List<AmbulanceTrip> findUpcomingTripsByUser(@Param("date") LocalDate date, @Param("userId") Long userId);
+
+    @Query("SELECT at FROM AmbulanceTrip at WHERE at.date>=:date AND at.ambulanceProvider.id = :ambulanceProviderId")
+    List<AmbulanceTrip> findUpcomingTripsByProvider(@Param("date") LocalDate date, @Param("ambulanceProviderId") Long ambulanceProviderId);
 }

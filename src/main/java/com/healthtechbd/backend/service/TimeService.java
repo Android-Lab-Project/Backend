@@ -21,7 +21,7 @@ public class TimeService {
         }
     }
 
-    public  Double convertTimeToDouble(LocalTime localTime) {
+    public Double convertTimeToDouble(LocalTime localTime) {
         int hours = localTime.getHour();
         int minutes = localTime.getMinute();
 

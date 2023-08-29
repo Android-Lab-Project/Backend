@@ -30,32 +30,29 @@ public class ReviewController {
     private UserService userService;
 
     @GetMapping("/review/{id}")
-    public ResponseEntity<?>getAllReviews(@PathVariable(name="id")Long id)
-    {
+    public ResponseEntity<?> getAllReviews(@PathVariable(name = "id") Long id) {
         Optional<AppUser> opSubject = userRepository.findById(id);
 
         List<Review> reviewList = reviewRepository.findBySubject_Id(opSubject.get().getId());
 
-        if(reviewList.size()==0)
-        {
-            return new ResponseEntity<>(ApiResponse.create("empty","No review found"),HttpStatus.OK);
+        if (reviewList.size() == 0) {
+            return new ResponseEntity<>(ApiResponse.create("empty", "No review found"), HttpStatus.OK);
         }
 
-        List<ReviewDTO>reviewDTOS = new ArrayList<>();
+        List<ReviewDTO> reviewDTOS = new ArrayList<>();
 
-        for(var i:reviewList)
-        {
+        for (var i : reviewList) {
             ReviewDTO reviewDTO = new ReviewDTO();
 
             reviewDTO.setReviewerId(i.getReviewer().getId());
             reviewDTO.setStarCount(i.getStarCount());
             reviewDTO.setReview(i.getReview());
-            reviewDTO.setReviewerName(i.getReviewer().getFirstName()+" "+i.getReviewer().getLastName());
+            reviewDTO.setReviewerName(i.getReviewer().getFirstName() + " " + i.getReviewer().getLastName());
 
             reviewDTOS.add(reviewDTO);
         }
 
-        return new ResponseEntity<>(reviewDTOS,HttpStatus.OK);
+        return new ResponseEntity<>(reviewDTOS, HttpStatus.OK);
     }
 
 

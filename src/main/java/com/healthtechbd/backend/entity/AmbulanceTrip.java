@@ -14,13 +14,6 @@ import java.util.List;
 @Entity
 @Table(name = "ambulance_trips")
 public class AmbulanceTrip {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-    private String source;
-    private String destination;
-    private Long price;
-    private LocalDate date;
     @ManyToOne
     @JoinColumn(name = "user_id", referencedColumnName = "id")
     AppUser user;
@@ -32,4 +25,11 @@ public class AmbulanceTrip {
     @ManyToOne
     @JoinColumn(name = "ambulanceProvider_id", referencedColumnName = "id")
     AppUser ambulanceProvider;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+    private String source;
+    private String destination;
+    private Long price;
+    private LocalDate date;
 }

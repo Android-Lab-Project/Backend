@@ -140,23 +140,17 @@ public class AppUserController {
 
         Doctor doctor = optionalDoctor.get();
 
-        if(doctorSerialDTO.getType().equalsIgnoreCase("online"))
-        {
-            for(int i=0;i<doctor.getAvailableOnlineTimes().size();i++)
-            {
-                if(doctor.getAvailableOnlineTimes().get(i).getDate().equals(doctorSerialDTO.getDate()))
-                {
+        if (doctorSerialDTO.getType().equalsIgnoreCase("online")) {
+            for (int i = 0; i < doctor.getAvailableOnlineTimes().size(); i++) {
+                if (doctor.getAvailableOnlineTimes().get(i).getDate().equals(doctorSerialDTO.getDate())) {
                     doctor.getAvailableOnlineTimes().get(i).onlineCount++;
                 }
             }
         }
 
-        if(doctorSerialDTO.getType().equalsIgnoreCase("offline"))
-        {
-            for(int i=0;i<doctor.getAvailableTimes().size();i++)
-            {
-                if(doctor.getAvailableTimes().get(i).getDate().equals(doctorSerialDTO.getDate()))
-                {
+        if (doctorSerialDTO.getType().equalsIgnoreCase("offline")) {
+            for (int i = 0; i < doctor.getAvailableTimes().size(); i++) {
+                if (doctor.getAvailableTimes().get(i).getDate().equals(doctorSerialDTO.getDate())) {
                     doctor.getAvailableTimes().get(i).count++;
                 }
             }
@@ -185,8 +179,7 @@ public class AppUserController {
     }
 
     @PostMapping("/add/ambulance/trip")
-    public ResponseEntity<?>createAmbulanceTrip(@RequestBody AmbulanceTrip ambulanceTrip, HttpServletRequest request)
-    {
+    public ResponseEntity<?> createAmbulanceTrip(@RequestBody AmbulanceTrip ambulanceTrip, HttpServletRequest request) {
         AppUser user = userService.returnUser(request);
 
         ambulanceTrip.setUser(user);
@@ -195,19 +188,18 @@ public class AppUserController {
 
         ambulanceTripRepository.save(ambulanceTrip);
 
-        return new ResponseEntity<>(ApiResponse.create("create","Trip created"),HttpStatus.OK);
+        return new ResponseEntity<>(ApiResponse.create("create", "Trip created"), HttpStatus.OK);
     }
 
     @PostMapping("/add/review/{id2}")
-    public ResponseEntity<?> saveReview(@RequestParam(name = "review") String reviewStr,@RequestParam(name = "star") Long starCount, @PathVariable(name = "id2") Long id2, HttpServletRequest request) {
+    public ResponseEntity<?> saveReview(@RequestParam(name = "review") String reviewStr, @RequestParam(name = "star") Long starCount, @PathVariable(name = "id2") Long id2, HttpServletRequest request) {
 
         AppUser reviewer = userService.returnUser(request);
         Optional<AppUser> optionalSubject = userRepository.findById(id2);
 
         AppUser subject = new AppUser();
 
-        if(reviewer==null)
-        {
+        if (reviewer == null) {
             return new ResponseEntity<>(ApiResponse.create("error", "Reviewer not found"), HttpStatus.BAD_REQUEST);
         }
         if (optionalSubject.isPresent()) {
@@ -229,21 +221,17 @@ public class AppUserController {
     }
 
     @GetMapping("/profile")
-    public ResponseEntity<?>getProfileDetails(HttpServletRequest request)
-    {
+    public ResponseEntity<?> getProfileDetails(HttpServletRequest request) {
         AppUser appUser = userService.returnUser(request);
-        Object userdetails =null;
-        if(appUser.getRoles().get(0).getRoleType().equals("USER"))
-        {
-            UserDTO userDTO = modelMapper.map(appUser,UserDTO.class);
+        Object userdetails = null;
+        if (appUser.getRoles().get(0).getRoleType().equals("USER")) {
+            UserDTO userDTO = modelMapper.map(appUser, UserDTO.class);
 
             userdetails = userDTO;
-        }
-        else if(appUser.getRoles().get(0).getRoleType().equals("HOSPITAL"))
-        {
+        } else if (appUser.getRoles().get(0).getRoleType().equals("HOSPITAL")) {
             Optional<Hospital> optional = hospitalRepository.findByAppUser_Id(appUser.getId());
 
-            HospitalDTO hospitalDTO = modelMapper.map(optional.get(),HospitalDTO.class);
+            HospitalDTO hospitalDTO = modelMapper.map(optional.get(), HospitalDTO.class);
             hospitalDTO.setId(appUser.getId());
             hospitalDTO.setFirstName(appUser.getFirstName());
             hospitalDTO.setLastName(appUser.getLastName());
@@ -251,27 +239,23 @@ public class AppUserController {
             hospitalDTO.setContactNo(appUser.getContactNo());
 
             userdetails = hospitalDTO;
-        }
-        else if(appUser.getRoles().get(0).getRoleType().equals("PHARMACY"))
-        {
+        } else if (appUser.getRoles().get(0).getRoleType().equals("PHARMACY")) {
             Optional<Pharmacy> optional = pharmacyRepository.findByAppUser_Id(appUser.getId());
 
-               PharmacyDTO pharmacyDTO = modelMapper.map(optional.get(),PharmacyDTO.class);
+            PharmacyDTO pharmacyDTO = modelMapper.map(optional.get(), PharmacyDTO.class);
 
-               pharmacyDTO.setId(appUser.getId());
-               pharmacyDTO.setFirstName(appUser.getFirstName());
-               pharmacyDTO.setLastName(appUser.getLastName());
-               pharmacyDTO.setEmail(appUser.getEmail());
-               pharmacyDTO.setContactNo(appUser.getContactNo());
+            pharmacyDTO.setId(appUser.getId());
+            pharmacyDTO.setFirstName(appUser.getFirstName());
+            pharmacyDTO.setLastName(appUser.getLastName());
+            pharmacyDTO.setEmail(appUser.getEmail());
+            pharmacyDTO.setContactNo(appUser.getContactNo());
 
             userdetails = pharmacyDTO;
-        }
-        else if(appUser.getRoles().get(0).getRoleType().equals("AMBULANCE"))
-        {
+        } else if (appUser.getRoles().get(0).getRoleType().equals("AMBULANCE")) {
             Optional<AmbulanceProvider> optional = ambulanceProviderRepository.findByAppUser_Id(appUser.getId());
 
 
-            AmbulanceProviderDTO ambulanceProviderDTO = modelMapper.map(optional.get(),AmbulanceProviderDTO.class);
+            AmbulanceProviderDTO ambulanceProviderDTO = modelMapper.map(optional.get(), AmbulanceProviderDTO.class);
 
             ambulanceProviderDTO.setId(appUser.getId());
             ambulanceProviderDTO.setFirstName(appUser.getFirstName());
@@ -283,12 +267,11 @@ public class AppUserController {
             userdetails = ambulanceProviderDTO;
         }
 
-        if(userdetails==null)
-        {
-            return new ResponseEntity<>(ApiResponse.create("error","Profile not found"),HttpStatus.BAD_REQUEST);
+        if (userdetails == null) {
+            return new ResponseEntity<>(ApiResponse.create("error", "Profile not found"), HttpStatus.BAD_REQUEST);
         }
 
-        return new ResponseEntity<>(userdetails,HttpStatus.OK);
+        return new ResponseEntity<>(userdetails, HttpStatus.OK);
     }
 
     @GetMapping("/statistics")
@@ -441,8 +424,7 @@ public class AppUserController {
     }
 
     @GetMapping("/medicineorder/undelivered")
-    public ResponseEntity<?>getAllUndelivered(HttpServletRequest request)
-    {
+    public ResponseEntity<?> getAllUndelivered(HttpServletRequest request) {
         AppUser user = userService.returnUser(request);
         if (user == null) {
             return new ResponseEntity<>(ApiResponse.create("error", "user not found"), HttpStatus.BAD_REQUEST);
@@ -450,44 +432,38 @@ public class AppUserController {
 
         String roleType = user.getRoles().get(0).getRoleType();
 
-        List<MedicineOrder>medicineOrders = new ArrayList<>();
+        List<MedicineOrder> medicineOrders = new ArrayList<>();
 
-        if(roleType.equalsIgnoreCase("USER"))
-        {
+        if (roleType.equalsIgnoreCase("USER")) {
             medicineOrders = medicineOrderRepository.findUndeliveredOrdersByUser(user.getId());
-        }
-        else if(roleType.equalsIgnoreCase("PHARMACY"))
-        {
+        } else if (roleType.equalsIgnoreCase("PHARMACY")) {
             medicineOrders = medicineOrderRepository.findUndeliveredOrdersByPharmacy(user.getId());
         }
 
-        if(medicineOrders.size()==0)
-        {
+        if (medicineOrders.size() == 0) {
             return new ResponseEntity<>(ApiResponse.create("empty", "Undelivered not found"), HttpStatus.OK);
         }
 
-        List<MedicineOrderViewDTO>medicineOrderViewDTOS = new ArrayList<>();
+        List<MedicineOrderViewDTO> medicineOrderViewDTOS = new ArrayList<>();
 
-        for(var medicineOrder:medicineOrders)
-        {
+        for (var medicineOrder : medicineOrders) {
             MedicineOrderViewDTO medicineOrderViewDTO = new MedicineOrderViewDTO();
             medicineOrderViewDTO.setId(medicineOrder.getId());
             medicineOrderViewDTO.setUserId(medicineOrder.getUser().getId());
             medicineOrderViewDTO.setPharmacyId(medicineOrder.getPharmacy().getId());
-            medicineOrderViewDTO.setUserName(medicineOrder.getUser().getFirstName()+" "+medicineOrder.getUser().getLastName());
-            medicineOrderViewDTO.setPharmacyName(medicineOrder.getPharmacy().getFirstName()+" "+medicineOrder.getPharmacy().getLastName());
+            medicineOrderViewDTO.setUserName(medicineOrder.getUser().getFirstName() + " " + medicineOrder.getUser().getLastName());
+            medicineOrderViewDTO.setPharmacyName(medicineOrder.getPharmacy().getFirstName() + " " + medicineOrder.getPharmacy().getLastName());
             medicineOrderViewDTO.setDescription(medicineOrder.getDescription());
             medicineOrderViewDTO.setPrice(medicineOrder.getPrice());
 
             medicineOrderViewDTOS.add(medicineOrderViewDTO);
         }
 
-        return new ResponseEntity<>(medicineOrderViewDTOS,HttpStatus.OK);
+        return new ResponseEntity<>(medicineOrderViewDTOS, HttpStatus.OK);
     }
 
     @GetMapping("/ambulance/trip/upcoming")
-    public ResponseEntity<?>getAllUpcomingTrip(HttpServletRequest request)
-    {
+    public ResponseEntity<?> getAllUpcomingTrip(HttpServletRequest request) {
         AppUser user = userService.returnUser(request);
         if (user == null) {
             return new ResponseEntity<>(ApiResponse.create("error", "user not found"), HttpStatus.BAD_REQUEST);
@@ -495,32 +471,27 @@ public class AppUserController {
 
         String roleType = user.getRoles().get(0).getRoleType();
 
-        List<AmbulanceTrip>ambulanceTrips = new ArrayList<>();
+        List<AmbulanceTrip> ambulanceTrips = new ArrayList<>();
 
-        if(roleType.equalsIgnoreCase("USER"))
-        {
-            ambulanceTrips = ambulanceTripRepository.findUpcomingTripsByUser(LocalDate.now(),user.getId());
-        }
-        else if(roleType.equalsIgnoreCase("AMBULANCE"))
-        {
-            ambulanceTrips = ambulanceTripRepository.findUpcomingTripsByProvider(LocalDate.now(),user.getId());
+        if (roleType.equalsIgnoreCase("USER")) {
+            ambulanceTrips = ambulanceTripRepository.findUpcomingTripsByUser(LocalDate.now(), user.getId());
+        } else if (roleType.equalsIgnoreCase("AMBULANCE")) {
+            ambulanceTrips = ambulanceTripRepository.findUpcomingTripsByProvider(LocalDate.now(), user.getId());
         }
 
-        if(ambulanceTrips.size()==0)
-        {
+        if (ambulanceTrips.size() == 0) {
             return new ResponseEntity<>(ApiResponse.create("empty", "No upcoming trip found"), HttpStatus.OK);
         }
 
-        List<AmbulanceTripViewDTO>ambulanceTripViewDTOS = new ArrayList<>();
+        List<AmbulanceTripViewDTO> ambulanceTripViewDTOS = new ArrayList<>();
 
-        for(var ambulanceTrip:ambulanceTrips)
-        {
-            AmbulanceTripViewDTO ambulanceTripViewDTO =new AmbulanceTripViewDTO();
+        for (var ambulanceTrip : ambulanceTrips) {
+            AmbulanceTripViewDTO ambulanceTripViewDTO = new AmbulanceTripViewDTO();
             ambulanceTripViewDTO.setId(ambulanceTrip.getId());
             ambulanceTripViewDTO.setUserId(ambulanceTrip.getUser().getId());
             ambulanceTripViewDTO.setProviderId(ambulanceTrip.getAmbulanceProvider().getId());
-            ambulanceTripViewDTO.setUserName(ambulanceTrip.getUser().getFirstName()+" "+ambulanceTrip.getUser().getLastName());
-            ambulanceTripViewDTO.setProviderName(ambulanceTrip.getAmbulanceProvider().getFirstName()+" "+ambulanceTrip.getAmbulanceProvider().getLastName());
+            ambulanceTripViewDTO.setUserName(ambulanceTrip.getUser().getFirstName() + " " + ambulanceTrip.getUser().getLastName());
+            ambulanceTripViewDTO.setProviderName(ambulanceTrip.getAmbulanceProvider().getFirstName() + " " + ambulanceTrip.getAmbulanceProvider().getLastName());
             ambulanceTripViewDTO.setSource(ambulanceTrip.getSource());
             ambulanceTripViewDTO.setDestination(ambulanceTrip.getDestination());
             ambulanceTripViewDTO.setPrice(ambulanceTrip.getPrice());
@@ -529,10 +500,8 @@ public class AppUserController {
             ambulanceTripViewDTOS.add(ambulanceTripViewDTO);
         }
 
-        return new ResponseEntity<>(ambulanceTripViewDTOS,HttpStatus.OK);
+        return new ResponseEntity<>(ambulanceTripViewDTOS, HttpStatus.OK);
     }
-
-
 
 
 }
