@@ -21,10 +21,8 @@ public class DoctorAvailableTime {
     private String day;
     private LocalDate date;
     private Double availTime;
-
-    private Integer startTime;
-
-    private Integer endTime;
+    private Double startTime;
+    private Double endTime;
 
 
 }

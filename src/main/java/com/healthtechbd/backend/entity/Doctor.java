@@ -18,11 +18,6 @@ public class Doctor {
     @JoinColumn(name = "appUser_id", referencedColumnName = "id")
     AppUser appUser;
     @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
-    @JoinTable(name = "doctor_expertise",
-            joinColumns = @JoinColumn(name = "doctor_id", referencedColumnName = "id"),
-            inverseJoinColumns = @JoinColumn(name = "expertise_id", referencedColumnName = "id"))
-    List<DoctorExpertise> expertise;
-    @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     @JoinTable(name = "relation_doctor_offlineTime",
             joinColumns = @JoinColumn(name = "doctor_id", referencedColumnName = "id"),
             inverseJoinColumns = @JoinColumn(name = "time_id", referencedColumnName = "id"))
@@ -37,9 +32,11 @@ public class Doctor {
     private Long id;
     @Column(nullable = false)
     private String bio;
+    private String expertise;
     private String currentHospital;
     private String place;
     private String degrees;
+    public Long balance;
 
 
 }

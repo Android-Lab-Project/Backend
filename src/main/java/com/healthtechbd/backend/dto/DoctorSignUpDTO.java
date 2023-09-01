@@ -1,6 +1,8 @@
 package com.healthtechbd.backend.dto;
 
 import com.healthtechbd.backend.entity.AppUser;
+import com.healthtechbd.backend.entity.DoctorAvailableTime;
+import com.healthtechbd.backend.entity.DoctorOnlineAvailableTime;
 import jakarta.persistence.Column;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -25,7 +27,6 @@ public class DoctorSignUpDTO {
 
     private String dp;
 
-    private List<String> days;
-    private List<String> onlineDays;
-    private List<Integer> times;
+    List<DoctorAvailableTime>availableTimes;
+    List<DoctorOnlineAvailableTime>availableOnlineTimes;
 }

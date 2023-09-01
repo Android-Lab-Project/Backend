@@ -12,6 +12,8 @@ import com.healthtechbd.backend.service.DoctorService;
 import com.healthtechbd.backend.service.TimeService;
 import com.healthtechbd.backend.service.UserService;
 import com.healthtechbd.backend.utils.ApiResponse;
+import com.healthtechbd.backend.utils.BkashPaymentService;
+import com.healthtechbd.backend.utils.BkashRefundResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,6 +47,9 @@ public class DoctorController {
     private UserService userService;
 
     @Autowired
+    private BkashPaymentService bkashPaymentService;
+
+    @Autowired
     private TimeService timeService;
 
     @GetMapping("/doctor/{id}")
@@ -69,7 +74,7 @@ public class DoctorController {
 
             if (doctor.getAvailableOnlineTimes().get(i).getDate().isBefore(LocalDate.now())) {
                 doctor.getAvailableOnlineTimes().get(i).setDate(DoctorService.nextDate(doctor.getAvailableTimes().get(i).getDay()));
-                doctor.getAvailableOnlineTimes().get(i).setOnlineCount(0);
+                doctor.getAvailableOnlineTimes().get(i).setCount(0);
             }
         }
 
@@ -114,7 +119,7 @@ public class DoctorController {
 
                 if (doctor.getAvailableOnlineTimes().get(i).getDate().isBefore(LocalDate.now())) {
                     doctor.getAvailableOnlineTimes().get(i).setDate(DoctorService.nextDate(doctor.getAvailableTimes().get(i).getDay()));
-                    doctor.getAvailableOnlineTimes().get(i).setOnlineCount(0);
+                    doctor.getAvailableOnlineTimes().get(i).setCount(0);
                 }
             }
 
@@ -188,6 +193,29 @@ public class DoctorController {
 
         return new ResponseEntity<>(doctorSerialViewDTOS, HttpStatus.OK);
     }
+
+    @GetMapping("/delete/doctor/serial/{id}")
+    public ResponseEntity<?>deleteUpcomingSerial(@PathVariable(name="id") Long id, HttpServletRequest request)
+    {
+        AppUser doctorUser = userService.returnUser(request);
+
+        Optional<Doctor>optionalDoctor = doctorRepository.findByAppUser_Id(doctorUser.getId());
+
+        Optional<DoctorSerial>optionalDoctorSerial = doctorSerialRepository.findById(id);
+
+        DoctorSerial doctorSerial =optionalDoctorSerial.get();
+
+        optionalDoctor.get().balance-=doctorSerial.getPrice();
+
+        doctorRepository.save(optionalDoctor.get());
+
+        BkashRefundResponse bkashRefundResponse = bkashPaymentService.refundPayment(doctorSerial.getPaymentId(),doctorSerial.getTrxId(),doctorSerial.getPrice().toString());
+
+        doctorSerialRepository.delete(doctorSerial);
+
+        return new ResponseEntity<>(bkashRefundResponse,HttpStatus.OK);
+    }
+
 
 
 }

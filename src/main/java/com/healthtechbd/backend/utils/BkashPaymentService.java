@@ -7,6 +7,7 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import java.time.Instant;
@@ -14,6 +15,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
+import static com.healthtechbd.backend.utils.BkashStaticVariable.token;
+@Service
 public class BkashPaymentService {
 
     private static final String API_BASE_URL = "https://tokenized.sandbox.bka.sh/v1.2.0-beta";
@@ -52,14 +55,16 @@ public class BkashPaymentService {
 
     }
 
-    public BkashCreateResponse createPayment(String callbackURL, String amount) {
+    public BkashCreateResponse createPayment( String amount) {
 
         final String CREATE_PAYMENT_ENDPOINT = "/tokenized/checkout/create";
 
         String token = grantToken();
 
+        BkashStaticVariable.token =token;
+
         if (token.equals("Error")) {
-            return new BkashCreateResponse("error", null, null);
+            return new BkashCreateResponse("error", null, null,null,null);
         }
 
         String AUTHORIZATION_TOKEN = "Bearer " + token;
@@ -82,7 +87,7 @@ public class BkashPaymentService {
         Map<String, Object> paymentRequest = new HashMap<>();
         paymentRequest.put("mode", "0011");
         paymentRequest.put("payerReference", "reference");
-        paymentRequest.put("callbackURL", callbackURL);
+        paymentRequest.put("callbackURL", BkashStaticVariable.callBackURL);
         paymentRequest.put("amount", amount);
         paymentRequest.put("currency", "BDT");
         paymentRequest.put("intent", "sale");
@@ -116,17 +121,12 @@ public class BkashPaymentService {
 
 
         } else {
-            return new BkashCreateResponse("error", null, null);
+            return new BkashCreateResponse("failure",null,null,null,null);
         }
     }
 
     public BkashQueryResponse queryPayment(String paymentID) {
         final String QUERY_PAYMENT_ENDPOINT = "/tokenized/checkout/payment/status";
-
-        String token = grantToken();
-        if (token.equals("Error")) {
-            return new BkashQueryResponse("error", null, null);
-        }
 
         String AUTHORIZATION_TOKEN = "Bearer " + token;
 
@@ -174,12 +174,8 @@ public class BkashPaymentService {
 
         final String QUERY_PAYMENT_ENDPOINT = "/tokenized/checkout/execute";
 
-        String token = grantToken();
 
-        if (token.equals("Error")) {
-            return new BkashExecuteResponse("error", null, null);
-        }
-        String AUTHORIZATION_TOKEN = "Bearer " + token;
+        String AUTHORIZATION_TOKEN = "Bearer " + BkashStaticVariable.token;
 
         RestTemplate restTemplate = new RestTemplate();
 
@@ -250,7 +246,7 @@ public class BkashPaymentService {
         refundRequest.put("amount", amount);
         refundRequest.put("trxID", trxID);
         refundRequest.put("sku", "healtechBd");
-        refundRequest.put("reason", "Online Consultation cancelled");
+        refundRequest.put("reason", "Refund issues");
 
         HttpEntity<Map<String, Object>> requestEntity = new HttpEntity<>(refundRequest, headers);
 
@@ -278,5 +274,5 @@ public class BkashPaymentService {
             return new BkashRefundResponse("error", null, null);
         }
     }
-
 }
+

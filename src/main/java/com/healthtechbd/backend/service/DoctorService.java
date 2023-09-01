@@ -43,9 +43,9 @@ public class DoctorService {
     public static void setSerialTime(Doctor doctor) {
         Double serialTime;
         for (int i = 0; i < doctor.getAvailableTimes().size(); i++) {
-            Integer startTime = doctor.getAvailableTimes().get(i).getStartTime();
+            Double startTime = doctor.getAvailableTimes().get(i).getStartTime();
 
-            Integer endTime = doctor.getAvailableTimes().get(i).getEndTime();
+            Double endTime = doctor.getAvailableTimes().get(i).getEndTime();
 
             Integer count = doctor.getAvailableTimes().get(i).getCount();
 
@@ -62,18 +62,18 @@ public class DoctorService {
 
         for (int i = 0; i < doctor.getAvailableOnlineTimes().size(); i++) {
 
-            Integer onlineStartTime = doctor.getAvailableOnlineTimes().get(i).getOnlineStartTime();
+            Double onlineStartTime = doctor.getAvailableOnlineTimes().get(i).getStartTime();
 
-            Integer onlineEndTime = doctor.getAvailableOnlineTimes().get(i).getOnlineEndTime();
+            Double onlineEndTime = doctor.getAvailableOnlineTimes().get(i).getEndTime();
 
-            Integer onlineCount = doctor.getAvailableOnlineTimes().get(i).getOnlineCount();
+            Integer onlineCount = doctor.getAvailableOnlineTimes().get(i).getCount();
 
             serialTime = onlineStartTime * 1.0 + ((onlineCount * AppConstants.perConsultTime) / 60) + (((onlineCount * AppConstants.perConsultTime) % 60) / 100.0);
 
             if (serialTime > onlineEndTime) {
-                doctor.getAvailableOnlineTimes().get(i).setOnlineAvailTime(0.0);
+                doctor.getAvailableOnlineTimes().get(i).setAvailTime(0.0);
             } else {
-                doctor.getAvailableOnlineTimes().get(i).setOnlineAvailTime(serialTime);
+                doctor.getAvailableOnlineTimes().get(i).setAvailTime(serialTime);
             }
         }
     }

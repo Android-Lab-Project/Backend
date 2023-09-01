@@ -26,7 +26,10 @@ public class DiagnosisOrder {
     private String description;
     private String place;
     private Long price;
+    private String paymentId;
+    private String trxId;
     private String reportURL;
     private LocalDate date;
     private Double time;
+
 }

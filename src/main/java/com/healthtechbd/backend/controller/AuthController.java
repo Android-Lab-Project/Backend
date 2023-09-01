@@ -123,39 +123,26 @@ public class AuthController {
 
         Doctor doctor = modelMapper.map(doctorSignUpDTO, Doctor.class);
 
-
-        doctor.setAvailableTimes(new ArrayList<DoctorAvailableTime>());
-
-        for (int i = 0; i < doctorSignUpDTO.getDays().size(); i++) {
-            DoctorAvailableTime doctorAvailableTime = new DoctorAvailableTime();
-            doctorAvailableTime.setDay(doctorSignUpDTO.getDays().get(i));
-            doctorAvailableTime.setDate(DoctorService.currentDate(doctorSignUpDTO.getDays().get(i)));
-            doctorAvailableTime.setStartTime(doctorSignUpDTO.getTimes().get(0));
-            doctorAvailableTime.setEndTime(doctorSignUpDTO.getTimes().get(1));
-            doctorAvailableTime.setAvailTime(0.0);
-            doctorAvailableTime.setCount(0);
-
-            doctor.getAvailableTimes().add(doctorAvailableTime);
+        for (int i = 0; i < doctor.getAvailableTimes().size(); i++)
+        {
+            doctor.getAvailableTimes().get(i).setId(null);
+           doctor.getAvailableTimes().get(i).setCount(0);
+           doctor.getAvailableTimes().get(i).setAvailTime(0.0);
+           doctor.getAvailableTimes().get(i).setDate(DoctorService.currentDate(doctor.getAvailableTimes().get(i).getDay()));
 
         }
+        for (int i = 0; i < doctor.getAvailableOnlineTimes().size(); i++) {
 
-        doctor.setAvailableOnlineTimes(new ArrayList<DoctorOnlineAvailableTime>());
-
-        for (int i = 0; i < doctorSignUpDTO.getOnlineDays().size(); i++) {
-            DoctorOnlineAvailableTime doctorOnlineAvailableTime = new DoctorOnlineAvailableTime();
-            doctorOnlineAvailableTime.setDay(doctorSignUpDTO.getDays().get(i));
-            doctorOnlineAvailableTime.setDate(DoctorService.currentDate(doctorSignUpDTO.getDays().get(i)));
-            doctorOnlineAvailableTime.setOnlineStartTime(doctorSignUpDTO.getTimes().get(2));
-            doctorOnlineAvailableTime.setOnlineEndTime(doctorSignUpDTO.getTimes().get(3));
-            doctorOnlineAvailableTime.setOnlineAvailTime(0.0);
-            doctorOnlineAvailableTime.setOnlineCount(0);
-
-            doctor.getAvailableOnlineTimes().add(doctorOnlineAvailableTime);
-
+            doctor.getAvailableOnlineTimes().get(i).setId(null);
+            doctor.getAvailableOnlineTimes().get(i).setCount(0);
+            doctor.getAvailableOnlineTimes().get(i).setAvailTime(0.0);
+            doctor.getAvailableOnlineTimes().get(i).setDate(DoctorService.currentDate(doctor.getAvailableOnlineTimes().get(i).getDay()));
         }
 
-        Doctor savedDoctor = doctorRepository.save(doctor);
-        return new ResponseEntity<>(ApiResponse.create("create", "Doctor signup successful"), HttpStatus.OK);
+        doctor.setBalance(0L);
+
+        doctorRepository.save(doctor);
+        return new ResponseEntity<>(ApiResponse.create("create","Doctor Sign up successful"), HttpStatus.OK);
     }
 
     @PostMapping("/register/ambulanceProvider")
@@ -170,6 +157,8 @@ public class AuthController {
         }
 
         ambulanceProvider.setAppUser(response.getUser());
+
+        ambulanceProvider.setBalance(0L);
 
 
         ambulanceProviderRepository.save(ambulanceProvider);
@@ -191,6 +180,8 @@ public class AuthController {
         }
         pharmacy.setAppUser(response.getUser());
 
+        pharmacy.setBalance(0L);
+
         pharmacyRepository.save(pharmacy);
 
         return new ResponseEntity<>(ApiResponse.create("create", "Sign up successful"), HttpStatus.OK);
@@ -208,6 +199,8 @@ public class AuthController {
             return new ResponseEntity<>(ApiResponse.create("error", "Hospital name is empty"), HttpStatus.BAD_REQUEST);
         }
         hospital.setAppUser(response.getUser());
+
+        hospital.setBalance(0L);
 
         hospitalRepository.save(hospital);
 

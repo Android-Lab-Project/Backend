@@ -27,6 +27,10 @@ public class DoctorSerial {
 
     private String prescription;
 
+    private String paymentId;
+
+    private String trxId;
+
     @ManyToOne
     @JoinColumn(name = "user_id", referencedColumnName = "id")
     private AppUser user;

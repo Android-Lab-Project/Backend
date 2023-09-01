@@ -24,4 +24,7 @@ public class Hospital {
     private String bio;
     @Column(nullable = false)
     private String place;
+
+    public Long balance;
+
 }

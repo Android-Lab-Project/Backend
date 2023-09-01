@@ -19,4 +19,6 @@ public class AmbulanceProvider {
     private Long id;
     private String bio;
     private String place;
+    public Long balance;
+
 }

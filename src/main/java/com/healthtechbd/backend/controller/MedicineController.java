@@ -3,9 +3,11 @@ package com.healthtechbd.backend.controller;
 import com.healthtechbd.backend.entity.AppUser;
 import com.healthtechbd.backend.entity.Medicine;
 import com.healthtechbd.backend.entity.MedicineOrder;
+import com.healthtechbd.backend.entity.Pharmacy;
 import com.healthtechbd.backend.repo.AppUserRepository;
 import com.healthtechbd.backend.repo.MedicineOrderRepository;
 import com.healthtechbd.backend.repo.MedicineRepository;
+import com.healthtechbd.backend.repo.PharmacyRepository;
 import com.healthtechbd.backend.service.UserService;
 import com.healthtechbd.backend.utils.ApiResponse;
 import jakarta.servlet.http.HttpServletRequest;
@@ -24,6 +26,9 @@ public class MedicineController {
 
     @Autowired
     private MedicineRepository medicineRepository;
+
+    @Autowired
+    private PharmacyRepository pharmacyRepository;
 
     @Autowired
     private MedicineOrderRepository medicineOrderRepository;
@@ -79,6 +84,10 @@ public class MedicineController {
         MedicineOrder medicineOrder = optionalMedicineOrder.get();
 
         medicineOrder.setPharmacy(appUser);
+
+        Optional<Pharmacy>optionalPharmacy = pharmacyRepository.findByAppUser_Id(appUser.getId());
+
+        optionalPharmacy.get().balance+=medicineOrder.getPrice();
 
         medicineOrderRepository.save(medicineOrder);
 

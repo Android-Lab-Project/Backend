@@ -71,6 +71,8 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.GET, "/review/**").permitAll()
                 .requestMatchers(HttpMethod.POST, "/statistics/**").permitAll()
                 .requestMatchers(HttpMethod.POST, "/update/**").permitAll()
+                .requestMatchers(HttpMethod.POST, "/bkash/**").permitAll()
+                .requestMatchers(HttpMethod.GET, "/bkash/**").permitAll()
                 .requestMatchers(HttpMethod.DELETE, "/delete/**").permitAll()
                 .requestMatchers(HttpMethod.POST, "/doctorserial/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/doctorserial/**").permitAll()

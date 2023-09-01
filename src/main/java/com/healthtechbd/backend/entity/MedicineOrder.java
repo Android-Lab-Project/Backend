@@ -27,6 +27,8 @@ public class MedicineOrder {
     private Long id;
     private String description;
     private Integer delivered;
+    private String paymentId;
+    private String trxId;
     private Long price;
 
 

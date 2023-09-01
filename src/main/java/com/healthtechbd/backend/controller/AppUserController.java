@@ -6,6 +6,9 @@ import com.healthtechbd.backend.repo.*;
 import com.healthtechbd.backend.service.TimeService;
 import com.healthtechbd.backend.service.UserService;
 import com.healthtechbd.backend.utils.ApiResponse;
+import com.healthtechbd.backend.utils.BkashCreateResponse;
+import com.healthtechbd.backend.utils.BkashExecuteResponse;
+import com.healthtechbd.backend.utils.BkashPaymentService;
 import jakarta.servlet.http.HttpServletRequest;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -64,6 +67,9 @@ public class AppUserController {
     private TimeService timeService;
 
     @Autowired
+    private BkashPaymentService bkashPaymentService;
+
+    @Autowired
     private ModelMapper modelMapper;
 
     @GetMapping("/dashboard/reports&prescriptions")
@@ -103,6 +109,59 @@ public class AppUserController {
         return new ResponseEntity<>(rps, HttpStatus.OK);
     }
 
+    @GetMapping("bkash/execute/payment")
+    public ResponseEntity<?>executePayment(@RequestParam(name="paymentId")String paymentId,@RequestParam(name="status")String status, @RequestParam(name="type")String type, @RequestParam(name="productId")Long prouductId)
+    {
+        if(status.equalsIgnoreCase("success"))
+        {
+            BkashExecuteResponse bkashExecuteResponse = bkashPaymentService.executePayment(paymentId);
+
+            if(type.equalsIgnoreCase("DiagnosisOrder"))
+            {
+                Optional<DiagnosisOrder>optionalDiagnosisOrder = diagnosisOrderRepository.findById(prouductId);
+                AppUser hospitalUser = optionalDiagnosisOrder.get().getHospital();
+
+                Optional<Hospital>hospital = hospitalRepository.findByAppUser_Id(hospitalUser.getId());
+
+                hospital.get().balance+=optionalDiagnosisOrder.get().getPrice();
+
+                hospitalRepository.save(hospital.get());
+
+            }
+            else if(type.equalsIgnoreCase("DoctorSerial"))
+            {
+                Optional<DoctorSerial>optionalDoctorSerial = doctorSerialRepository.findById(prouductId);
+
+                AppUser doctorUser = optionalDoctorSerial.get().getDoctor();
+
+                Optional<Doctor>doctor=doctorRepository.findByAppUser_Id(doctorUser.getId());
+
+                doctor.get().balance+=optionalDoctorSerial.get().getPrice();
+
+                doctorRepository.save(doctor.get());
+            }
+
+            return new ResponseEntity<>(bkashExecuteResponse,HttpStatus.OK);
+        }
+        else
+        {
+            if(type.equalsIgnoreCase("DiagnosisOrder"))
+            {
+               diagnosisOrderRepository.deleteById(prouductId);
+            }
+            else if(type.equalsIgnoreCase("DoctorSerial"))
+            {
+               doctorSerialRepository.deleteById(prouductId);
+            }
+            else if(type.equalsIgnoreCase("Medicine Order"))
+            {
+                medicineOrderRepository.deleteById(prouductId);
+            }
+
+            return new ResponseEntity<>(ApiResponse.create("error", "Product is canceled or not successful"),HttpStatus.OK);
+        }
+    }
+
     @PostMapping("/order/diagnosis")
     public ResponseEntity<?> createDiagnosisOrder(@RequestBody DiagnosisOrderDTO diagnosisOrderDTO, HttpServletRequest request) {
         AppUser appUser = userService.returnUser(request);
@@ -122,9 +181,15 @@ public class AppUserController {
         diagnosisOrder.setUser(appUser);
         diagnosisOrder.setHospital(hospital);
         diagnosisOrder.setDate(LocalDate.now());
-        diagnosisOrderRepository.save(diagnosisOrder);
+        DiagnosisOrder savedDiagnosisOrder = diagnosisOrderRepository.save(diagnosisOrder);
 
-        return new ResponseEntity<>(ApiResponse.create("create", "Diagnosis order created"), HttpStatus.OK);
+        BkashCreateResponse bkashCreateResponse = bkashPaymentService.createPayment(savedDiagnosisOrder.getPrice().toString());
+
+        bkashCreateResponse.setType("DiagnosisOrder");
+
+        bkashCreateResponse.setProductId(savedDiagnosisOrder.getId());
+
+        return new ResponseEntity<>(bkashCreateResponse, HttpStatus.OK);
 
     }
 
@@ -143,7 +208,7 @@ public class AppUserController {
         if (doctorSerialDTO.getType().equalsIgnoreCase("online")) {
             for (int i = 0; i < doctor.getAvailableOnlineTimes().size(); i++) {
                 if (doctor.getAvailableOnlineTimes().get(i).getDate().equals(doctorSerialDTO.getDate())) {
-                    doctor.getAvailableOnlineTimes().get(i).onlineCount++;
+                    doctor.getAvailableOnlineTimes().get(i).count++;
                 }
             }
         }
@@ -159,9 +224,14 @@ public class AppUserController {
         doctorSerial.setUser(user);
         doctorSerial.setDoctor(opDoctor.get());
 
-        doctorSerialRepository.save(doctorSerial);
+        DoctorSerial savedDoctorSerial =doctorSerialRepository.save(doctorSerial);
 
-        return new ResponseEntity<>(ApiResponse.create("create", "doctor Serial added"), HttpStatus.OK);
+        BkashCreateResponse bkashCreateResponse = bkashPaymentService.createPayment(savedDoctorSerial.getPrice().toString());
+
+        bkashCreateResponse.setType("DoctorSerial");
+        bkashCreateResponse.setProductId(savedDoctorSerial.getId());
+
+        return new ResponseEntity<>(bkashCreateResponse, HttpStatus.OK);
     }
 
     @PostMapping("/add/medicine/order")
@@ -173,9 +243,14 @@ public class AppUserController {
 
         medicineOrder.setUser(user);
         medicineOrder.setDelivered(0);
-        medicineOrderRepository.save(medicineOrder);
+       MedicineOrder savedMedicineOrder = medicineOrderRepository.save(medicineOrder);
 
-        return new ResponseEntity<>(ApiResponse.create("create", "medicine order created"), HttpStatus.OK);
+        BkashCreateResponse bkashCreateResponse = bkashPaymentService.createPayment(savedMedicineOrder.getPrice().toString());
+
+        bkashCreateResponse.setType("MedicineOrder");
+        bkashCreateResponse.setProductId(savedMedicineOrder.getId());
+
+        return new ResponseEntity<>(bkashCreateResponse, HttpStatus.OK);
     }
 
     @PostMapping("/add/ambulance/trip")
