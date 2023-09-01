@@ -8,7 +8,7 @@ import com.healthtechbd.backend.service.UserService;
 import com.healthtechbd.backend.utils.ApiResponse;
 import com.healthtechbd.backend.utils.BkashCreateResponse;
 import com.healthtechbd.backend.utils.BkashExecuteResponse;
-import com.healthtechbd.backend.utils.BkashPaymentService;
+import com.healthtechbd.backend.service.BkashPaymentService;
 import jakarta.servlet.http.HttpServletRequest;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -578,7 +578,68 @@ public class AppUserController {
         return new ResponseEntity<>(ambulanceTripViewDTOS, HttpStatus.OK);
     }
 
+    @DeleteMapping("/delete/user")
+    public ResponseEntity<?> deleteUser(HttpServletRequest request) {
+
+        AppUser appUser = userService.returnUser(request);
+
+        if (appUser == null) {
+            return new ResponseEntity<>(ApiResponse.create("error", "User does not exist"), HttpStatus.BAD_REQUEST);
+        }
+
+        Long id = appUser.getId();
+
+        List<Role> roles = appUser.getRoles();
+
+
+        for (int i = 0; i < roles.size(); i++) {
+            if (roles.get(i).getRoleType().equals("USER")) {
+                userRepository.delete(appUser);
+            }
+            if (roles.get(i).getRoleType().equals("DOCTOR")) {
+
+                Optional<Doctor> doctor = doctorRepository.findByAppUser_Id(id);
+
+                if (!doctor.isPresent()) {
+                    return new ResponseEntity<>(ApiResponse.create("error", "User does not exist"), HttpStatus.BAD_REQUEST);
+                }
+                doctorRepository.delete(doctor.get());
+            }
+            if (roles.get(i).getRoleType().equals("HOSPITAL")) {
+                Optional<Hospital> hospital = hospitalRepository.findByAppUser_Id(id);
+
+                if (!hospital.isPresent()) {
+                    return new ResponseEntity<>(ApiResponse.create("error", "User does not exist"), HttpStatus.BAD_REQUEST);
+                }
+
+                hospitalRepository.delete(hospital.get());
+            }
+            if (roles.get(i).getRoleType().equals("PHARMACY")) {
+                Optional<Pharmacy> pharmacy = pharmacyRepository.findByAppUser_Id(id);
+
+                if (!pharmacy.isPresent()) {
+                    return new ResponseEntity<>(ApiResponse.create("error", "User does not exist"), HttpStatus.BAD_REQUEST);
+                }
+
+                pharmacyRepository.delete(pharmacy.get());
+            }
+            if (roles.get(i).getRoleType().equals("AMBULANCE")) {
+                Optional<AmbulanceProvider> ambulanceProvider = ambulanceProviderRepository.findByAppUser_Id(id);
+
+                if (!ambulanceProvider.isPresent()) {
+                    return new ResponseEntity<>(ApiResponse.create("error", "User does not exist"), HttpStatus.BAD_REQUEST);
+                }
+
+                ambulanceProviderRepository.delete(ambulanceProvider.get());
+            }
+        }
+
+        return new ResponseEntity<>(ApiResponse.create("delete", "User is deleted"), HttpStatus.OK);
+    }
+
+
 
 }
+
 
 

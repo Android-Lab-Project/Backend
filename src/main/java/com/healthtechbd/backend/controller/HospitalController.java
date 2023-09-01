@@ -2,6 +2,7 @@ package com.healthtechbd.backend.controller;
 
 import com.healthtechbd.backend.dto.DiagnosisDTO;
 import com.healthtechbd.backend.dto.DiagnosisViewDTO;
+import com.healthtechbd.backend.dto.SignUpDTO;
 import com.healthtechbd.backend.entity.AppUser;
 import com.healthtechbd.backend.entity.Diagnosis;
 import com.healthtechbd.backend.entity.DiagnosisOrder;
@@ -13,15 +14,14 @@ import com.healthtechbd.backend.repo.HospitalRepository;
 import com.healthtechbd.backend.service.TimeService;
 import com.healthtechbd.backend.service.UserService;
 import com.healthtechbd.backend.utils.ApiResponse;
+import com.healthtechbd.backend.utils.RegistrationResponse;
+import com.healthtechbd.backend.utils.UpdateUserResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -54,6 +54,54 @@ public class HospitalController {
 
     @Autowired
     private ModelMapper modelMapper;
+
+
+    @PostMapping("/register/hospital")
+    public ResponseEntity<?> registerHospital(@RequestBody Hospital hospital) {
+        SignUpDTO signUpDTO = modelMapper.map(hospital.getAppUser(), SignUpDTO.class);
+        RegistrationResponse response = userService.registerUser(signUpDTO, "HOSPITAL");
+
+        if (response.getResponse().haveError()) {
+            return ResponseEntity.badRequest().body(response.getResponse());
+        }
+        if (hospital.getHospitalName() == null || hospital.getHospitalName().trim().length() == 0) {
+            return new ResponseEntity<>(ApiResponse.create("error", "Hospital name is empty"), HttpStatus.BAD_REQUEST);
+        }
+        hospital.setAppUser(response.getUser());
+
+        hospital.setBalance(0L);
+
+        hospitalRepository.save(hospital);
+
+        return new ResponseEntity<>(ApiResponse.create("create", "Sign up successful"), HttpStatus.OK);
+    }
+
+    @PostMapping("/update/hospital")
+    public ResponseEntity<?> updateHospital(HttpServletRequest request, @RequestBody Hospital hospital) {
+        AppUser appUser = userService.returnUser(request);
+        Long appUserId = appUser.getId();
+
+        SignUpDTO signUpDTO = modelMapper.map(hospital.getAppUser(), SignUpDTO.class);
+
+        UpdateUserResponse updateUserResponse = userService.updateUser(signUpDTO);
+
+        if (updateUserResponse.getResponse().haveError()) {
+            return new ResponseEntity<>(updateUserResponse.getResponse(), HttpStatus.BAD_REQUEST);
+        }
+
+        appUser = updateUserResponse.getUser();
+        appUser.setId(appUserId);
+
+        Optional<Hospital> optionalHospital = hospitalRepository.findByAppUser_Id(appUserId);
+
+        hospital.setId(optionalHospital.get().getId());
+        hospital.setAppUser(appUser);
+
+        hospitalRepository.save(hospital);
+
+        return new ResponseEntity<>(updateUserResponse.getResponse(), HttpStatus.OK);
+    }
+
 
     @GetMapping("/dashboard/hospital/diagnoses")
     public ResponseEntity<?> getAlldiagnoses(HttpServletRequest request) {
@@ -132,6 +180,7 @@ public class HospitalController {
 
 
     }
+
 
 
 }

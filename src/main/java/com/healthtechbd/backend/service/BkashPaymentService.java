@@ -1,7 +1,8 @@
-package com.healthtechbd.backend.utils;
+package com.healthtechbd.backend.service;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import com.healthtechbd.backend.utils.*;
 import okhttp3.*;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -55,7 +56,7 @@ public class BkashPaymentService {
 
     }
 
-    public BkashCreateResponse createPayment( String amount) {
+    public BkashCreateResponse createPayment(String amount) {
 
         final String CREATE_PAYMENT_ENDPOINT = "/tokenized/checkout/create";
 

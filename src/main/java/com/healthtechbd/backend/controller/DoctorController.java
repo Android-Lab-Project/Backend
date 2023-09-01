@@ -2,6 +2,8 @@ package com.healthtechbd.backend.controller;
 
 import com.healthtechbd.backend.dto.DoctorDTO;
 import com.healthtechbd.backend.dto.DoctorSerialViewDTO;
+import com.healthtechbd.backend.dto.DoctorSignUpDTO;
+import com.healthtechbd.backend.dto.SignUpDTO;
 import com.healthtechbd.backend.entity.AppUser;
 import com.healthtechbd.backend.entity.Doctor;
 import com.healthtechbd.backend.entity.DoctorSerial;
@@ -12,8 +14,10 @@ import com.healthtechbd.backend.service.DoctorService;
 import com.healthtechbd.backend.service.TimeService;
 import com.healthtechbd.backend.service.UserService;
 import com.healthtechbd.backend.utils.ApiResponse;
-import com.healthtechbd.backend.utils.BkashPaymentService;
+import com.healthtechbd.backend.service.BkashPaymentService;
 import com.healthtechbd.backend.utils.BkashRefundResponse;
+import com.healthtechbd.backend.utils.RegistrationResponse;
+import com.healthtechbd.backend.utils.UpdateUserResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -51,6 +55,82 @@ public class DoctorController {
 
     @Autowired
     private TimeService timeService;
+
+
+    @PostMapping("/register/doctor")
+    public ResponseEntity<?> registerDoctor(@RequestBody DoctorSignUpDTO doctorSignUpDTO) {
+
+        SignUpDTO signUpDTO = modelMapper.map(doctorSignUpDTO.getAppUser(), SignUpDTO.class);
+
+        RegistrationResponse response = userService.registerUser(signUpDTO, "DOCTOR");
+
+        if (response.getResponse().haveError()) {
+            return ResponseEntity.badRequest().body(response.getResponse());
+        }
+
+        doctorSignUpDTO.setAppUser(response.getUser());
+
+        Doctor doctor = modelMapper.map(doctorSignUpDTO, Doctor.class);
+
+        for (int i = 0; i < doctor.getAvailableTimes().size(); i++)
+        {
+            doctor.getAvailableTimes().get(i).setId(null);
+            doctor.getAvailableTimes().get(i).setCount(0);
+            doctor.getAvailableTimes().get(i).setAvailTime(0.0);
+            doctor.getAvailableTimes().get(i).setDate(DoctorService.currentDate(doctor.getAvailableTimes().get(i).getDay()));
+
+        }
+        for (int i = 0; i < doctor.getAvailableOnlineTimes().size(); i++) {
+
+            doctor.getAvailableOnlineTimes().get(i).setId(null);
+            doctor.getAvailableOnlineTimes().get(i).setCount(0);
+            doctor.getAvailableOnlineTimes().get(i).setAvailTime(0.0);
+            doctor.getAvailableOnlineTimes().get(i).setDate(DoctorService.currentDate(doctor.getAvailableOnlineTimes().get(i).getDay()));
+        }
+
+        doctor.setBalance(0L);
+
+        doctorRepository.save(doctor);
+        return new ResponseEntity<>(ApiResponse.create("create","Doctor Sign up successful"), HttpStatus.OK);
+    }
+
+    @PostMapping("update/doctor")
+    public ResponseEntity<?>updateDoctor(HttpServletRequest request, DoctorSignUpDTO doctorSignUpDTO)
+    {
+        AppUser appUser = userService.returnUser(request);
+
+        Long appUserId = appUser.getId();
+
+        SignUpDTO signUpDTO = modelMapper.map(doctorSignUpDTO.getAppUser(), SignUpDTO.class);
+
+        UpdateUserResponse updateUserResponse = userService.updateUser(signUpDTO);
+
+        if(updateUserResponse.getResponse().haveError())
+        {
+            return new ResponseEntity<>(updateUserResponse.getResponse(),HttpStatus.BAD_REQUEST);
+        }
+
+        appUser = updateUserResponse.getUser();
+
+        appUser.setId(appUserId);
+
+        Optional<Doctor> optionalDoctor = doctorRepository.findByAppUser_Id(appUserId);
+
+        Doctor doctor = optionalDoctor.get();
+
+        Long doctorId = doctor.getId();
+
+        doctor = modelMapper.map(doctorSignUpDTO,Doctor.class);
+
+        doctor.setId(doctorId);
+        doctor.setAppUser(appUser);
+
+        doctorRepository.save(doctor);
+
+        return new ResponseEntity<>(updateUserResponse.getResponse(),HttpStatus.OK);
+    }
+
+
 
     @GetMapping("/doctor/{id}")
     public ResponseEntity<?> showDoctorDetails(@PathVariable Long id) {

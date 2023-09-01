@@ -67,7 +67,7 @@ public class MedicineController {
 
     }
 
-    @PostMapping("/medicine/order/update/{id}")
+    @GetMapping("/medicine/order/update/{id}")
     public ResponseEntity<?> updateMedicineOrder(@PathVariable(name = "id") Long id, HttpServletRequest request) {
         AppUser appUser = userService.returnUser(request);
 
@@ -93,6 +93,28 @@ public class MedicineController {
 
         return new ResponseEntity<>(ApiResponse.create("update", "medicine order updated"), HttpStatus.OK);
     }
+
+    @GetMapping("/medicine/order/update/delivered/{id}")
+    public ResponseEntity<?>updateMedicineOrdrerToDelivered(@PathVariable(name = "id") Long id)
+    {
+        Optional<MedicineOrder> optionalMedicineOrder = medicineOrderRepository.findById(id);
+
+        if (!optionalMedicineOrder.isPresent()) {
+            return new ResponseEntity<>(ApiResponse.create("error", "Medicine Order not found"), HttpStatus.BAD_REQUEST);
+        }
+
+        MedicineOrder medicineOrder = optionalMedicineOrder.get();
+
+        medicineOrder.setDelivered(1);
+
+        medicineOrderRepository.save(medicineOrder);
+
+        return new ResponseEntity<>(ApiResponse.create("update", "medicine order delivered"), HttpStatus.OK);
+
+
+
+    }
+
 
 
     @GetMapping("/medicine/all")

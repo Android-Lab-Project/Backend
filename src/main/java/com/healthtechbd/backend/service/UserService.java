@@ -6,6 +6,7 @@ import com.healthtechbd.backend.entity.Role;
 import com.healthtechbd.backend.repo.AppUserRepository;
 import com.healthtechbd.backend.utils.ApiResponse;
 import com.healthtechbd.backend.utils.RegistrationResponse;
+import com.healthtechbd.backend.utils.UpdateUserResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -75,5 +76,34 @@ public class UserService {
 
         return new RegistrationResponse(ApiResponse.create("create", "Sign up successful"), user);
     }
+
+    public UpdateUserResponse updateUser(SignUpDTO signUpDTO)
+    {
+        ApiResponse errorResponse = new ApiResponse();
+
+        if (signUpDTO.getFirstName() == null || signUpDTO.getFirstName().trim().length() == 0)
+            errorResponse = ApiResponse.create("error", "First Name can not be empty");
+
+        if (signUpDTO.getLastName() == null || signUpDTO.getLastName().trim().length() == 0)
+            errorResponse = ApiResponse.create("error", "Last Name can not be empty");
+
+        if (signUpDTO.getEmail() == null || signUpDTO.getEmail().trim().length() == 0)
+            errorResponse = ApiResponse.create("error", "Email can not be empty");
+
+        if (signUpDTO.getPassword() == null || signUpDTO.getPassword().trim().length() == 0)
+            errorResponse = ApiResponse.create("error", "Password can not be empty");
+
+        if (!errorResponse.empty()) {
+            return new UpdateUserResponse(errorResponse, null);
+        }
+
+        String password = bcryptPasswordEncoder.encode(signUpDTO.getPassword());
+        signUpDTO.setPassword(password);
+
+        AppUser user = modelMapper.map(signUpDTO, AppUser.class);
+
+        return new UpdateUserResponse(ApiResponse.create("update", "User updated "), user);
+    }
+
 
 }

@@ -12,6 +12,7 @@ import com.healthtechbd.backend.service.DoctorService;
 import com.healthtechbd.backend.service.UserService;
 import com.healthtechbd.backend.utils.ApiResponse;
 import com.healthtechbd.backend.utils.RegistrationResponse;
+import com.healthtechbd.backend.utils.UpdateUserResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -108,163 +109,38 @@ public class AuthController {
         return ResponseEntity.ok(response.getResponse());
     }
 
-    @PostMapping("/register/doctor")
-    public ResponseEntity<?> registerDoctor(@RequestBody DoctorSignUpDTO doctorSignUpDTO) {
+    @PostMapping("update/user")
+    public ResponseEntity<?>updateUser(HttpServletRequest request,SignUpDTO signUpDTO)
+    {
+        AppUser user = userService.returnUser(request);
 
-        SignUpDTO signUpDTO = modelMapper.map(doctorSignUpDTO.getAppUser(), SignUpDTO.class);
+        Long id = user.getId();
 
-        RegistrationResponse response = userService.registerUser(signUpDTO, "DOCTOR");
+        UpdateUserResponse updateUserResponse = userService.updateUser(signUpDTO);
 
-        if (response.getResponse().haveError()) {
-            return ResponseEntity.badRequest().body(response.getResponse());
-        }
+        user = updateUserResponse.getUser();
 
-        doctorSignUpDTO.setAppUser(response.getUser());
+        user.setId(id);
 
-        Doctor doctor = modelMapper.map(doctorSignUpDTO, Doctor.class);
+        user.setId(id);
 
-        for (int i = 0; i < doctor.getAvailableTimes().size(); i++)
-        {
-            doctor.getAvailableTimes().get(i).setId(null);
-           doctor.getAvailableTimes().get(i).setCount(0);
-           doctor.getAvailableTimes().get(i).setAvailTime(0.0);
-           doctor.getAvailableTimes().get(i).setDate(DoctorService.currentDate(doctor.getAvailableTimes().get(i).getDay()));
+        userRepository.save(user);
 
-        }
-        for (int i = 0; i < doctor.getAvailableOnlineTimes().size(); i++) {
-
-            doctor.getAvailableOnlineTimes().get(i).setId(null);
-            doctor.getAvailableOnlineTimes().get(i).setCount(0);
-            doctor.getAvailableOnlineTimes().get(i).setAvailTime(0.0);
-            doctor.getAvailableOnlineTimes().get(i).setDate(DoctorService.currentDate(doctor.getAvailableOnlineTimes().get(i).getDay()));
-        }
-
-        doctor.setBalance(0L);
-
-        doctorRepository.save(doctor);
-        return new ResponseEntity<>(ApiResponse.create("create","Doctor Sign up successful"), HttpStatus.OK);
-    }
-
-    @PostMapping("/register/ambulanceProvider")
-    public ResponseEntity<?> registerAmbulanceProvider(@RequestBody AmbulanceProvider ambulanceProvider) {
-
-        SignUpDTO signUpDTO = modelMapper.map(ambulanceProvider.getAppUser(), SignUpDTO.class);
-
-        RegistrationResponse response = userService.registerUser(signUpDTO, "AMBULANCE");
-
-        if (response.getResponse().haveError()) {
-            return ResponseEntity.badRequest().body(response.getResponse());
-        }
-
-        ambulanceProvider.setAppUser(response.getUser());
-
-        ambulanceProvider.setBalance(0L);
-
-
-        ambulanceProviderRepository.save(ambulanceProvider);
-
-
-        return new ResponseEntity<>(ApiResponse.create("create", "Sign up Successful"), HttpStatus.OK);
-
+        return  new ResponseEntity<>(updateUserResponse.getResponse(),HttpStatus.OK);
 
     }
 
 
-    @PostMapping("/register/pharmacy")
-    public ResponseEntity<?> registerPharmacy(@RequestBody Pharmacy pharmacy) {
-        SignUpDTO signUpDTO = modelMapper.map(pharmacy.getAppUser(), SignUpDTO.class);
-        RegistrationResponse response = userService.registerUser(signUpDTO, "PHARMACY");
-
-        if (response.getResponse().haveError()) {
-            return ResponseEntity.badRequest().body(response.getResponse());
-        }
-        pharmacy.setAppUser(response.getUser());
-
-        pharmacy.setBalance(0L);
-
-        pharmacyRepository.save(pharmacy);
-
-        return new ResponseEntity<>(ApiResponse.create("create", "Sign up successful"), HttpStatus.OK);
-    }
-
-    @PostMapping("/register/hospital")
-    public ResponseEntity<?> registerHospital(@RequestBody Hospital hospital) {
-        SignUpDTO signUpDTO = modelMapper.map(hospital.getAppUser(), SignUpDTO.class);
-        RegistrationResponse response = userService.registerUser(signUpDTO, "HOSPITAL");
-
-        if (response.getResponse().haveError()) {
-            return ResponseEntity.badRequest().body(response.getResponse());
-        }
-        if (hospital.getHospitalName() == null || hospital.getHospitalName().trim().length() == 0) {
-            return new ResponseEntity<>(ApiResponse.create("error", "Hospital name is empty"), HttpStatus.BAD_REQUEST);
-        }
-        hospital.setAppUser(response.getUser());
-
-        hospital.setBalance(0L);
-
-        hospitalRepository.save(hospital);
-
-        return new ResponseEntity<>(ApiResponse.create("create", "Sign up successful"), HttpStatus.OK);
-    }
-
-    @DeleteMapping("/delete/user")
-    public ResponseEntity<?> deleteUser(HttpServletRequest request) {
-
-        AppUser appUser = userService.returnUser(request);
-
-        if (appUser == null) {
-            return new ResponseEntity<>(ApiResponse.create("error", "User does not exist"), HttpStatus.BAD_REQUEST);
-        }
-
-        Long id = appUser.getId();
-
-        List<Role> roles = appUser.getRoles();
 
 
-        for (int i = 0; i < roles.size(); i++) {
-            if (roles.get(i).getRoleType().equals("USER")) {
-                userRepository.delete(appUser);
-            }
-            if (roles.get(i).getRoleType().equals("DOCTOR")) {
 
-                Optional<Doctor> doctor = doctorRepository.findByAppUser_Id(id);
 
-                if (!doctor.isPresent()) {
-                    return new ResponseEntity<>(ApiResponse.create("error", "User does not exist"), HttpStatus.BAD_REQUEST);
-                }
-                doctorRepository.delete(doctor.get());
-            }
-            if (roles.get(i).getRoleType().equals("HOSPITAL")) {
-                Optional<Hospital> hospital = hospitalRepository.findByAppUser_Id(id);
 
-                if (!hospital.isPresent()) {
-                    return new ResponseEntity<>(ApiResponse.create("error", "User does not exist"), HttpStatus.BAD_REQUEST);
-                }
 
-                hospitalRepository.delete(hospital.get());
-            }
-            if (roles.get(i).getRoleType().equals("PHARMACY")) {
-                Optional<Pharmacy> pharmacy = pharmacyRepository.findByAppUser_Id(id);
 
-                if (!pharmacy.isPresent()) {
-                    return new ResponseEntity<>(ApiResponse.create("error", "User does not exist"), HttpStatus.BAD_REQUEST);
-                }
 
-                pharmacyRepository.delete(pharmacy.get());
-            }
-            if (roles.get(i).getRoleType().equals("AMBULANCE")) {
-                Optional<AmbulanceProvider> ambulanceProvider = ambulanceProviderRepository.findByAppUser_Id(id);
 
-                if (!ambulanceProvider.isPresent()) {
-                    return new ResponseEntity<>(ApiResponse.create("error", "User does not exist"), HttpStatus.BAD_REQUEST);
-                }
 
-                ambulanceProviderRepository.delete(ambulanceProvider.get());
-            }
-        }
-
-        return new ResponseEntity<>(ApiResponse.create("delete", "User is deleted"), HttpStatus.OK);
-    }
 
 
 }
