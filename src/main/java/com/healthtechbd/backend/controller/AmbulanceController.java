@@ -91,6 +91,21 @@ public class AmbulanceController {
 
     }
 
+    @GetMapping("/delete/ambulance/{id}")
+    public ResponseEntity<?>deleteDiagnosis(@PathVariable(name ="id")Long id)
+    {
+        try
+        {
+            ambulanceRepository.deleteById(id);
+        }
+        catch (Exception e)
+        {
+            return new ResponseEntity<>(ApiResponse.create("error", "Ambulance can't be deleted"),HttpStatus.BAD_REQUEST);
+        }
+
+        return  new ResponseEntity<>(ApiResponse.create("delete","Ambulance deleted"),HttpStatus.OK);
+    }
+
 
     @PostMapping("/ambulance/trip/bid/{id}")
     public ResponseEntity<?> addBidderToTrip(HttpServletRequest request, @PathVariable(name = "id") Long id) {

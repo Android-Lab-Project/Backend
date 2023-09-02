@@ -9,6 +9,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class DiagnosisDTO {
 
+    private Long id;
     private String name;
     private String hospitalName;
     private String type;

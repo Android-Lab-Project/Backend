@@ -102,6 +102,21 @@ public class DiagnosisController {
         return new ResponseEntity<>(diagnosisDTOS, HttpStatus.OK);
     }
 
+    @GetMapping("/delete/diagnosis/{id}")
+    public ResponseEntity<?>deleteDiagnosis(@PathVariable(name ="id")Long id)
+    {
+        try
+        {
+            diagnosisRepository.deleteById(id);
+        }
+        catch (Exception e)
+        {
+            return new ResponseEntity<>(ApiResponse.create("error", "Diagnosis can't be deleted"),HttpStatus.BAD_REQUEST);
+        }
+
+        return  new ResponseEntity<>(ApiResponse.create("delete","Diagnosis deleted"),HttpStatus.OK);
+    }
+
 
 
 
