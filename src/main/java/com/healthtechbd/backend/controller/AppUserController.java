@@ -176,12 +176,18 @@ public class AppUserController {
 
         hospital = opHospital.get();
 
+        Optional<Hospital>optionalHospital =hospitalRepository.findByAppUser_Id(opHospital.get().getId());
+
         DiagnosisOrder diagnosisOrder = modelMapper.map(diagnosisOrderDTO, DiagnosisOrder.class);
 
         diagnosisOrder.setUser(appUser);
         diagnosisOrder.setHospital(hospital);
         diagnosisOrder.setDate(LocalDate.now());
         DiagnosisOrder savedDiagnosisOrder = diagnosisOrderRepository.save(diagnosisOrder);
+
+        optionalHospital.get().balance+=diagnosisOrder.getPrice()-10;
+
+        hospitalRepository.save(optionalHospital.get());
 
         BkashCreateResponse bkashCreateResponse = bkashPaymentService.createPayment(savedDiagnosisOrder.getPrice().toString());
 
@@ -221,6 +227,10 @@ public class AppUserController {
             }
         }
 
+        doctor.balance+=doctorSerial.getPrice()-10;
+
+        doctorRepository.save(doctor);
+
         doctorSerial.setUser(user);
         doctorSerial.setDoctor(opDoctor.get());
 
@@ -242,6 +252,7 @@ public class AppUserController {
         }
 
         medicineOrder.setUser(user);
+        medicineOrder.setDate(LocalDate.now());
         medicineOrder.setDelivered(0);
        MedicineOrder savedMedicineOrder = medicineOrderRepository.save(medicineOrder);
 
@@ -260,6 +271,8 @@ public class AppUserController {
         ambulanceTrip.setUser(user);
 
         ambulanceTrip.setBidders(new ArrayList<>());
+
+        ambulanceTrip.setDate(LocalDate.now());
 
         ambulanceTripRepository.save(ambulanceTrip);
 

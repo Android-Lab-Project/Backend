@@ -285,7 +285,9 @@ public class DoctorController {
 
         DoctorSerial doctorSerial =optionalDoctorSerial.get();
 
-        optionalDoctor.get().balance-=doctorSerial.getPrice();
+        optionalDoctor.get().balance-=doctorSerial.getPrice()-10;
+
+        doctorSerial.setPrice(doctorSerial.getPrice()-10);
 
         doctorRepository.save(optionalDoctor.get());
 

@@ -15,7 +15,7 @@ import java.time.LocalDate;
 public class MedicineOrder {
 
 
-    LocalDate date;
+
     @ManyToOne
     @JoinColumn(name = "user_id", referencedColumnName = "id")
     AppUser user;
@@ -28,6 +28,7 @@ public class MedicineOrder {
     private String description;
     private Integer delivered;
     private String paymentId;
+    private LocalDate date;
     private String trxId;
     private Long price;
 

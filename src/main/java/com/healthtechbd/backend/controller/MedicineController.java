@@ -42,8 +42,8 @@ public class MedicineController {
     @Autowired
     private UserService userService;
 
-    @PostMapping("/add/medicine")
-    public ResponseEntity<?> addMedicine(@RequestBody Medicine medicine) {
+    @PostMapping("/add/update/medicine")
+    public ResponseEntity<?> addORupdateMedicine(@RequestBody Medicine medicine) {
         if (medicine.getName() == null || medicine.getName().trim().length() == 0) {
             return new ResponseEntity<>(ApiResponse.create("error", "Medicine name is empty"), HttpStatus.BAD_REQUEST);
         }
@@ -62,10 +62,11 @@ public class MedicineController {
 
         medicineRepository.save(medicine);
 
-        return new ResponseEntity<>(ApiResponse.create("create", "Medicine successfully added"), HttpStatus.OK);
+        return new ResponseEntity<>(ApiResponse.create("create", "Medicine successfully added/updated"), HttpStatus.OK);
 
 
     }
+
 
     @GetMapping("/medicine/order/update/{id}")
     public ResponseEntity<?> updateMedicineOrder(@PathVariable(name = "id") Long id, HttpServletRequest request) {
@@ -87,7 +88,9 @@ public class MedicineController {
 
         Optional<Pharmacy>optionalPharmacy = pharmacyRepository.findByAppUser_Id(appUser.getId());
 
-        optionalPharmacy.get().balance+=medicineOrder.getPrice();
+        optionalPharmacy.get().balance+=medicineOrder.getPrice()-10;
+
+        pharmacyRepository.save(optionalPharmacy.get());
 
         medicineOrderRepository.save(medicineOrder);
 
