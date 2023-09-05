@@ -332,7 +332,7 @@ public class AppUserController {
     public ResponseEntity<?> getProfileDetails(HttpServletRequest request) {
         AppUser appUser = userService.returnUser(request);
         Object userdetails = null;
-        if (appUser.getRoles().get(0).getRoleType().equals("USER")) {
+        if (appUser.getRoles().get(0).getRoleType().equals("USER")||appUser.getRoles().get(0).getRoleType().equals("ADMIN")) {
             UserDTO userDTO = modelMapper.map(appUser, UserDTO.class);
 
             userdetails = userDTO;
@@ -345,6 +345,7 @@ public class AppUserController {
             hospitalDTO.setLastName(appUser.getLastName());
             hospitalDTO.setEmail(appUser.getEmail());
             hospitalDTO.setContactNo(appUser.getContactNo());
+            hospitalDTO.setDp(appUser.getDp());
 
             userdetails = hospitalDTO;
         } else if (appUser.getRoles().get(0).getRoleType().equals("PHARMACY")) {
@@ -357,6 +358,7 @@ public class AppUserController {
             pharmacyDTO.setLastName(appUser.getLastName());
             pharmacyDTO.setEmail(appUser.getEmail());
             pharmacyDTO.setContactNo(appUser.getContactNo());
+            pharmacyDTO.setDp(appUser.getDp());
 
             userdetails = pharmacyDTO;
         } else if (appUser.getRoles().get(0).getRoleType().equals("AMBULANCE")) {
@@ -370,6 +372,7 @@ public class AppUserController {
             ambulanceProviderDTO.setLastName(appUser.getLastName());
             ambulanceProviderDTO.setEmail(appUser.getEmail());
             ambulanceProviderDTO.setContactNo(appUser.getContactNo());
+            ambulanceProviderDTO.setDp(appUser.getDp());
 
 
             userdetails = ambulanceProviderDTO;

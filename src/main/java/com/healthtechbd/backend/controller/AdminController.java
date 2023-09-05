@@ -114,7 +114,7 @@ public class AdminController {
 
           LocalDate date = LocalDate.now().minusDays(i);
 
-          dates.add(date);
+
 
           Object[] objects = new Object[2];
 
@@ -160,8 +160,12 @@ public class AdminController {
               count+=(Long)objects[1];
               at++;
           }
+          if(count!=0)
+          {
+              dates.add(date);
+              incomes.add(count*AppConstants.perUserCharge);
+          }
 
-          incomes.add(count*AppConstants.perUserCharge);
       }
 
       Collections.reverse(dates);

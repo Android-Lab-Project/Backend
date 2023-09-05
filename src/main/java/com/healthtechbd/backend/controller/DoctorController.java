@@ -222,6 +222,7 @@ public class DoctorController {
             allDoctorsDTO.get(i).setLastName(allDoctors.get(i).getAppUser().getLastName());
             allDoctorsDTO.get(i).setEmail(allDoctors.get(i).getAppUser().getEmail());
             allDoctorsDTO.get(i).setContactNo(allDoctors.get(i).getAppUser().getContactNo());
+            allDoctorsDTO.get(i).setDp(allDoctors.get(i).getAppUser().getDp());
         }
         return new ResponseEntity<>(allDoctorsDTO, HttpStatus.OK);
 

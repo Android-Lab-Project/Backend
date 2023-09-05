@@ -72,9 +72,10 @@ public class AmbulanceController {
 
     @GetMapping("/ambulance/{id}")
     public ResponseEntity<?> getAllAmbulances(@PathVariable(name = "id") Long id) {
-        Optional<AppUser> opAppUser = userRepository.findById(id);
 
-        List<Ambulance> ambulances = ambulanceRepository.findByAmbulanceProvider_Id(opAppUser.get().getId());
+        Optional<AmbulanceProvider>optionalAmbulanceProvider = ambulanceProviderRepository.findByAppUser_Id(id);
+
+        List<Ambulance> ambulances = ambulanceRepository.findByAmbulanceProvider_Id(optionalAmbulanceProvider.get().getId());
 
         if (ambulances.size() == 0) {
             return new ResponseEntity<>(ApiResponse.create("empty", "No Ambulance Found"), HttpStatus.OK);
