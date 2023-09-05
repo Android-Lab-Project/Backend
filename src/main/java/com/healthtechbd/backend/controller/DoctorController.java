@@ -173,7 +173,7 @@ public class DoctorController {
         doctorDTO.setLastName(doctor.getAppUser().getLastName());
         doctorDTO.setEmail(doctor.getAppUser().getEmail());
         doctorDTO.setContactNo(doctor.getAppUser().getContactNo());
-
+        doctorDTO.setDp(doctor.getAppUser().getDp());
 
         return new ResponseEntity<>(doctorDTO, HttpStatus.OK);
     }
