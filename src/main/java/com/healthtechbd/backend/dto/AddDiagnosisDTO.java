@@ -10,6 +10,5 @@ import lombok.NoArgsConstructor;
 public class AddDiagnosisDTO {
     private String name;
     private String description;
-    private Long cost;
-    private Double time;
+    private Long price;
 }

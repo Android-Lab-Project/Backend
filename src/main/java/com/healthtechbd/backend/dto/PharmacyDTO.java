@@ -10,4 +10,6 @@ import lombok.NoArgsConstructor;
 public class PharmacyDTO extends UserDTO {
     private String place;
     private String bio;
+    private Long balance;
+
 }

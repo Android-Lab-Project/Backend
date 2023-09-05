@@ -30,6 +30,8 @@ public class AmbulanceTrip {
     private Long id;
     private String source;
     private String destination;
+    private String paymentId;
+    private String trxId;
     private Long price;
     private LocalDate date;
 }

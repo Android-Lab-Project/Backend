@@ -10,6 +10,7 @@ import com.healthtechbd.backend.repo.MedicineRepository;
 import com.healthtechbd.backend.repo.PharmacyRepository;
 import com.healthtechbd.backend.service.UserService;
 import com.healthtechbd.backend.utils.ApiResponse;
+import com.healthtechbd.backend.utils.AppConstants;
 import jakarta.servlet.http.HttpServletRequest;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -88,7 +89,7 @@ public class MedicineController {
 
         Optional<Pharmacy>optionalPharmacy = pharmacyRepository.findByAppUser_Id(appUser.getId());
 
-        optionalPharmacy.get().balance+=medicineOrder.getPrice()-10;
+        optionalPharmacy.get().balance+=medicineOrder.getPrice();
 
         pharmacyRepository.save(optionalPharmacy.get());
 
@@ -113,8 +114,6 @@ public class MedicineController {
         medicineOrderRepository.save(medicineOrder);
 
         return new ResponseEntity<>(ApiResponse.create("update", "medicine order delivered"), HttpStatus.OK);
-
-
 
     }
 

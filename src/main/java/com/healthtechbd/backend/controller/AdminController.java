@@ -114,54 +114,61 @@ public class AdminController {
 
           LocalDate date = LocalDate.now().minusDays(i);
 
-
-
           Object[] objects = new Object[2];
 
           if(ds<doctorserials.size()) {
             objects = doctorserials.get(ds);
           }
 
-          if(date.equals(objects[0]))
+          if(objects!=null && date.equals(objects[0]))
           {
               count+=(Long)objects[1];
               ds++;
           }
+
+          objects =null;
 
           if(dos<diagnosisOrders.size())
           {
               objects = diagnosisOrders.get(dos);
           }
 
-          if(date.equals(objects[0]))
+          if(objects!=null && date.equals(objects[0]))
           {
               count+=(Long)objects[1];
               dos++;
           }
+
+          objects =null;
 
           if(mo<medicineOrders.size())
           {
               objects = medicineOrders.get(mo);
           }
 
-          if(date.equals(objects[0]))
+          if(objects!=null && date.equals(objects[0]))
           {
+
               count+=(Long)objects[1];
               mo++;
           }
+
+          objects =null;
 
           if(at<ambulanceTrips.size())
           {
               objects = ambulanceTrips.get(at);
           }
 
-          if(date.equals(objects[0]))
+          if(objects!=null && date.equals(objects[0]))
           {
+
               count+=(Long)objects[1];
               at++;
           }
           if(count!=0)
           {
+              System.out.println(count);
               dates.add(date);
               incomes.add(count*AppConstants.perUserCharge);
           }

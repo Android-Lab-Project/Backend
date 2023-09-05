@@ -7,9 +7,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class HospitalDTO extends UserDTO {
+public class AdminDTO extends UserDTO{
+
     private Long balance;
-    private String hospitalName;
-    private String place;
-    private String bio;
 }

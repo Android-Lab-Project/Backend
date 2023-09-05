@@ -55,11 +55,12 @@ public class DiagnosisController {
             return new ResponseEntity<>(ApiResponse.create("error", "Description can't be empty"), HttpStatus.BAD_REQUEST);
         }
 
-        if (addDiagnosisDTO.getCost() == null || addDiagnosisDTO.getCost() <= 0) {
+        if (addDiagnosisDTO.getPrice() == null || addDiagnosisDTO.getPrice() <= 0) {
             return new ResponseEntity<>(ApiResponse.create("error", "Invalid Cost"), HttpStatus.BAD_REQUEST);
         }
 
         AppUser appUser = userService.returnUser(request);
+
         if (appUser == null) {
             return new ResponseEntity<>(ApiResponse.create("error", "Hospital not found"), HttpStatus.OK);
         }

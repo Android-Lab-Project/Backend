@@ -23,6 +23,8 @@ public class DoctorSerial {
 
     private LocalDate date;
 
+    private LocalDate appointmentDate;
+
     private Double time;
 
     private String prescription;

@@ -6,6 +6,7 @@ import com.healthtechbd.backend.repo.*;
 import com.healthtechbd.backend.service.TimeService;
 import com.healthtechbd.backend.service.UserService;
 import com.healthtechbd.backend.utils.ApiResponse;
+import com.healthtechbd.backend.utils.AppConstants;
 import com.healthtechbd.backend.utils.BkashCreateResponse;
 import com.healthtechbd.backend.utils.BkashExecuteResponse;
 import com.healthtechbd.backend.service.BkashPaymentService;
@@ -28,6 +29,8 @@ import java.util.Optional;
 @RestController
 public class AppUserController {
 
+    @Autowired
+    private AdminRepository adminRepository;
     @Autowired
     private AppUserRepository userRepository;
 
@@ -123,6 +126,10 @@ public class AppUserController {
             if(type.equalsIgnoreCase("DiagnosisOrder"))
             {
                 Optional<DiagnosisOrder>optionalDiagnosisOrder = diagnosisOrderRepository.findById(prouductId);
+
+                optionalDiagnosisOrder.get().setTrxId(bkashExecuteResponse.getTrxID());
+                diagnosisOrderRepository.save(optionalDiagnosisOrder.get());
+
                 AppUser hospitalUser = optionalDiagnosisOrder.get().getHospital();
 
                 Optional<Hospital>hospital = hospitalRepository.findByAppUser_Id(hospitalUser.getId());
@@ -136,6 +143,10 @@ public class AppUserController {
             {
                 Optional<DoctorSerial>optionalDoctorSerial = doctorSerialRepository.findById(prouductId);
 
+                optionalDoctorSerial.get().setTrxId(bkashExecuteResponse.getTrxID());
+
+                doctorSerialRepository.save(optionalDoctorSerial.get());
+
                 AppUser doctorUser = optionalDoctorSerial.get().getDoctor();
 
                 Optional<Doctor>doctor=doctorRepository.findByAppUser_Id(doctorUser.getId());
@@ -143,6 +154,22 @@ public class AppUserController {
                 doctor.get().balance+=optionalDoctorSerial.get().getPrice();
 
                 doctorRepository.save(doctor.get());
+            }
+            else if(type.equalsIgnoreCase("MedicineOrder"))
+            {
+                Optional<MedicineOrder>optionalMedicineOrder = medicineOrderRepository.findById(prouductId);
+
+                optionalMedicineOrder.get().setTrxId(bkashExecuteResponse.getTrxID());
+
+                medicineOrderRepository.save(optionalMedicineOrder.get());
+            }
+            else if(type.equalsIgnoreCase("AmbulanceTrip"))
+            {
+                Optional<AmbulanceTrip>optionalAmbulanceTrip = ambulanceTripRepository.findById(prouductId);
+
+                optionalAmbulanceTrip.get().setTrxId(bkashExecuteResponse.getTrxID());
+
+                ambulanceTripRepository.save(optionalAmbulanceTrip.get());
             }
 
             return new ResponseEntity<>(bkashExecuteResponse,HttpStatus.OK);
@@ -157,9 +184,13 @@ public class AppUserController {
             {
                doctorSerialRepository.deleteById(prouductId);
             }
-            else if(type.equalsIgnoreCase("Medicine Order"))
+            else if(type.equalsIgnoreCase("MedicineOrder"))
             {
                 medicineOrderRepository.deleteById(prouductId);
+            }
+            else if (type.equalsIgnoreCase("AmbulanceTrip"))
+            {
+                ambulanceTripRepository.deleteById(prouductId);
             }
 
             return new ResponseEntity<>(ApiResponse.create("error", "Product is canceled or not successful"),HttpStatus.OK);
@@ -187,17 +218,22 @@ public class AppUserController {
         diagnosisOrder.setUser(appUser);
         diagnosisOrder.setHospital(hospital);
         diagnosisOrder.setDate(LocalDate.now());
-        DiagnosisOrder savedDiagnosisOrder = diagnosisOrderRepository.save(diagnosisOrder);
 
-        optionalHospital.get().balance+=diagnosisOrder.getPrice()-10;
+        optionalHospital.get().balance+=diagnosisOrder.getPrice()- AppConstants.perUserCharge;
 
         hospitalRepository.save(optionalHospital.get());
 
-        BkashCreateResponse bkashCreateResponse = bkashPaymentService.createPayment(savedDiagnosisOrder.getPrice().toString());
+        BkashCreateResponse bkashCreateResponse = bkashPaymentService.createPayment(diagnosisOrder.getPrice().toString());
 
         bkashCreateResponse.setType("DiagnosisOrder");
 
+        DiagnosisOrder savedDiagnosisOrder = diagnosisOrderRepository.save(diagnosisOrder);
+
         bkashCreateResponse.setProductId(savedDiagnosisOrder.getId());
+
+        savedDiagnosisOrder.setPaymentId(bkashCreateResponse.getPaymentId());
+
+        diagnosisOrderRepository.save(savedDiagnosisOrder);
 
         return new ResponseEntity<>(bkashCreateResponse, HttpStatus.OK);
 
@@ -217,7 +253,7 @@ public class AppUserController {
 
         if (doctorSerialDTO.getType().equalsIgnoreCase("online")) {
             for (int i = 0; i < doctor.getAvailableOnlineTimes().size(); i++) {
-                if (doctor.getAvailableOnlineTimes().get(i).getDate().equals(doctorSerialDTO.getDate())) {
+                if (doctor.getAvailableOnlineTimes().get(i).getDate().equals(doctorSerialDTO.getAppointmentDate())) {
                     doctor.getAvailableOnlineTimes().get(i).count++;
                 }
             }
@@ -225,25 +261,33 @@ public class AppUserController {
 
         if (doctorSerialDTO.getType().equalsIgnoreCase("offline")) {
             for (int i = 0; i < doctor.getAvailableTimes().size(); i++) {
-                if (doctor.getAvailableTimes().get(i).getDate().equals(doctorSerialDTO.getDate())) {
+                if (doctor.getAvailableTimes().get(i).getDate().equals(doctorSerialDTO.getAppointmentDate())) {
                     doctor.getAvailableTimes().get(i).count++;
                 }
             }
         }
 
-        doctor.balance+=doctorSerial.getPrice()-10;
+        doctor.balance+=doctorSerial.getPrice()-AppConstants.perUserCharge;
 
         doctorRepository.save(doctor);
+
+        doctorSerial.setDate(LocalDate.now());
 
         doctorSerial.setUser(user);
         doctorSerial.setDoctor(opDoctor.get());
 
-        DoctorSerial savedDoctorSerial =doctorSerialRepository.save(doctorSerial);
 
-        BkashCreateResponse bkashCreateResponse = bkashPaymentService.createPayment(savedDoctorSerial.getPrice().toString());
+        BkashCreateResponse bkashCreateResponse = bkashPaymentService.createPayment(doctorSerial.getPrice().toString());
 
         bkashCreateResponse.setType("DoctorSerial");
+
+        DoctorSerial savedDoctorSerial = doctorSerialRepository.save(doctorSerial);
+
         bkashCreateResponse.setProductId(savedDoctorSerial.getId());
+
+        savedDoctorSerial.setPaymentId(bkashCreateResponse.getPaymentId());
+
+        doctorSerialRepository.save(savedDoctorSerial);
 
         return new ResponseEntity<>(bkashCreateResponse, HttpStatus.OK);
     }
@@ -258,12 +302,17 @@ public class AppUserController {
         medicineOrder.setUser(user);
         medicineOrder.setDate(LocalDate.now());
         medicineOrder.setDelivered(0);
-       MedicineOrder savedMedicineOrder = medicineOrderRepository.save(medicineOrder);
 
-        BkashCreateResponse bkashCreateResponse = bkashPaymentService.createPayment(savedMedicineOrder.getPrice().toString());
+
+        BkashCreateResponse bkashCreateResponse = bkashPaymentService.createPayment(medicineOrder.getPrice().toString());
+
+        MedicineOrder savedMedicineOrder = medicineOrderRepository.save(medicineOrder);
 
         bkashCreateResponse.setType("MedicineOrder");
         bkashCreateResponse.setProductId(savedMedicineOrder.getId());
+        savedMedicineOrder.setPaymentId(bkashCreateResponse.getPaymentId());
+
+        medicineOrderRepository.save(savedMedicineOrder);
 
         return new ResponseEntity<>(bkashCreateResponse, HttpStatus.OK);
     }
@@ -278,7 +327,14 @@ public class AppUserController {
 
         ambulanceTrip.setDate(LocalDate.now());
 
-        ambulanceTripRepository.save(ambulanceTrip);
+        BkashCreateResponse bkashCreateResponse = bkashPaymentService.createPayment(AppConstants.perUserCharge.toString());
+
+        AmbulanceTrip savedTrip = ambulanceTripRepository.save(ambulanceTrip);
+
+        bkashCreateResponse.setProductId(savedTrip.getId());
+        bkashCreateResponse.setType("AmbulanceTrip");
+        savedTrip.setPaymentId(bkashCreateResponse.getPaymentId());
+        ambulanceTripRepository.save(savedTrip);
 
         return new ResponseEntity<>(ApiResponse.create("create", "Trip created"), HttpStatus.OK);
     }
@@ -332,11 +388,19 @@ public class AppUserController {
     public ResponseEntity<?> getProfileDetails(HttpServletRequest request) {
         AppUser appUser = userService.returnUser(request);
         Object userdetails = null;
-        if (appUser.getRoles().get(0).getRoleType().equals("USER")||appUser.getRoles().get(0).getRoleType().equals("ADMIN")) {
+        if (appUser.getRoles().get(0).getRoleType().equals("USER")) {
             UserDTO userDTO = modelMapper.map(appUser, UserDTO.class);
 
             userdetails = userDTO;
-        } else if (appUser.getRoles().get(0).getRoleType().equals("HOSPITAL")) {
+        } else if(appUser.getRoles().get(0).getRoleType().equals("ADMIN"))
+        {
+            UserDTO userDTO = modelMapper.map(appUser, UserDTO.class);
+            AdminDTO adminDTO = modelMapper.map(userDTO,AdminDTO.class);
+            adminDTO.setBalance(adminRepository.findById(1L).get().getBalance());
+
+            userdetails =adminDTO;
+        }
+        else if (appUser.getRoles().get(0).getRoleType().equals("HOSPITAL")) {
             Optional<Hospital> optional = hospitalRepository.findByAppUser_Id(appUser.getId());
 
             HospitalDTO hospitalDTO = modelMapper.map(optional.get(), HospitalDTO.class);
@@ -672,8 +736,6 @@ public class AppUserController {
 
         return new ResponseEntity<>(ApiResponse.create("delete", "User is deleted"), HttpStatus.OK);
     }
-
-
 
 }
 

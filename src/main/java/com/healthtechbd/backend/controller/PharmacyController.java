@@ -81,6 +81,7 @@ public class PharmacyController {
         Optional<Pharmacy> optionalPharmacy = pharmacyRepository.findByAppUser_Id(appUserId);
 
         pharmacy.setId(optionalPharmacy.get().getId());
+        pharmacy.setBalance(optionalPharmacy.get().getBalance());
         pharmacy.setAppUser(appUser);
 
         pharmacyRepository.save(pharmacy);

@@ -92,7 +92,7 @@ public class AmbulanceController {
 
     }
 
-    @GetMapping("/delete/ambulance/{id}")
+    @DeleteMapping("/delete/ambulance/{id}")
     public ResponseEntity<?>deleteDiagnosis(@PathVariable(name ="id")Long id)
     {
         try
@@ -127,11 +127,11 @@ public class AmbulanceController {
         return new ResponseEntity<>(ApiResponse.create("update", "trip updated"), HttpStatus.OK);
     }
 
-    @PostMapping("update/ambulancetrip/{id}")
-    public ResponseEntity<?> updateAmbulanceTrip(HttpServletRequest request, @PathVariable(name = "id") Long id) {
-        AppUser ambulanceProvider = userService.returnUser(request);
+    @PostMapping("update/ambulancetrip/{id1}/{id2}")
+    public ResponseEntity<?> updateAmbulanceTrip(HttpServletRequest request, @PathVariable(name = "id1") Long id1, @PathVariable(name = "id2") Long id2) {
+        Optional<AmbulanceProvider> optionalProvider =ambulanceProviderRepository.findByAppUser_Id(id2);
 
-        Optional<AmbulanceTrip> optionalAmbulanceTrip = ambulanceTripRepository.findById(id);
+        Optional<AmbulanceTrip> optionalAmbulanceTrip = ambulanceTripRepository.findById(id1);
 
         if (!optionalAmbulanceTrip.isPresent()) {
             return new ResponseEntity<>(ApiResponse.create("error", "trip not found"), HttpStatus.BAD_REQUEST);
@@ -139,7 +139,11 @@ public class AmbulanceController {
 
         AmbulanceTrip ambulanceTrip = optionalAmbulanceTrip.get();
 
-        ambulanceTrip.setAmbulanceProvider(ambulanceProvider);
+        ambulanceTrip.setAmbulanceProvider(optionalProvider.get().getAppUser());
+
+        optionalProvider.get().balance+=ambulanceTrip.getPrice();
+
+        ambulanceProviderRepository.save(optionalProvider.get());
 
         ambulanceTripRepository.save(ambulanceTrip);
 

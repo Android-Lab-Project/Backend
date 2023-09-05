@@ -16,6 +16,7 @@ public class DoctorDTO extends UserDTO {
     List<DoctorOnlineAvailableTime> availableOnlineTimes;
     private String expertise;
     private String bio;
+    private Long balance;
     private Long onlineFee;
     private Long offlineFee;
     private String currentHospital;

@@ -97,6 +97,7 @@ public class HospitalController {
         Optional<Hospital> optionalHospital = hospitalRepository.findByAppUser_Id(appUserId);
 
         hospital.setId(optionalHospital.get().getId());
+        hospital.setBalance(optionalHospital.get().getBalance());
         hospital.setAppUser(appUser);
 
         hospitalRepository.save(hospital);

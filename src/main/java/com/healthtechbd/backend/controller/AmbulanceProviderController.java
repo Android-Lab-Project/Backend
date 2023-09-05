@@ -78,6 +78,7 @@ public class AmbulanceProviderController {
         Optional<AmbulanceProvider> optionalAmbulanceProvider = ambulanceProviderRepository.findByAppUser_Id(appUserId);
 
         ambulanceProvider.setId(optionalAmbulanceProvider.get().getId());
+        ambulanceProvider.setBalance(optionalAmbulanceProvider.get().getBalance());
         ambulanceProvider.setAppUser(appUser);
 
         ambulanceProviderRepository.save(ambulanceProvider);

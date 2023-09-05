@@ -98,7 +98,7 @@ public class DoctorController {
     }
 
     @PostMapping("update/doctor")
-    public ResponseEntity<?>updateDoctor(HttpServletRequest request, DoctorSignUpDTO doctorSignUpDTO)
+    public ResponseEntity<?>updateDoctor(HttpServletRequest request,@RequestBody DoctorSignUpDTO doctorSignUpDTO)
     {
         AppUser appUser = userService.returnUser(request);
 
@@ -123,9 +123,12 @@ public class DoctorController {
 
         Long doctorId = doctor.getId();
 
+        Long balance = doctor.getBalance();
+
         doctor = modelMapper.map(doctorSignUpDTO,Doctor.class);
 
         doctor.setId(doctorId);
+        doctor.setBalance(balance);
         doctor.setAppUser(appUser);
 
         doctorRepository.save(doctor);
@@ -270,6 +273,7 @@ public class DoctorController {
             DoctorSerialViewDTO doctorSerialViewDTO = new DoctorSerialViewDTO();
             doctorSerialViewDTO.setId(doctorSerial.getId());
             doctorSerialViewDTO.setTime(doctorSerial.getTime());
+            doctorSerialViewDTO.setAppointmentDate(doctorSerial.getAppointmentDate());
             doctorSerialViewDTO.setPatientName(doctorSerial.getUser().getFirstName() + " " + doctorSerial.getUser().getLastName());
 
             doctorSerialViewDTOS.add(doctorSerialViewDTO);
@@ -289,7 +293,7 @@ public class DoctorController {
 
         DoctorSerial doctorSerial =optionalDoctorSerial.get();
 
-        optionalDoctor.get().balance-=doctorSerial.getPrice()-10;
+        optionalDoctor.get().balance-=(doctorSerial.getPrice()-10);
 
         doctorSerial.setPrice(doctorSerial.getPrice()-10);
 

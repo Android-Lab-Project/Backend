@@ -28,12 +28,15 @@ public interface DoctorSerialRepository extends JpaRepository<DoctorSerial, Long
             "FROM DoctorSerial ds ")
     Long countDoctorSerials();
 
+    @Query("SELECT MAX(ds.date) FROM DoctorSerial ds")
+    LocalDate findMaxDate();
+
     @Query("SELECT COUNT(ds.id) " +
             "FROM DoctorSerial ds "+"WHERE ds.date BETWEEN :startDate AND :endDate")
     Long countDoctorSerialsByDate(@Param("startDate") LocalDate startDate,
                                    @Param("endDate") LocalDate endDate);
     @Query("SELECT ds.date, COUNT(ds.id) " +
-            "FROM DiagnosisOrder ds " +
+            "FROM DoctorSerial ds " +
             "WHERE ds.date BETWEEN :startDate AND :endDate " +
             "GROUP BY ds.date "+
             "ORDER BY ds.date DESC")
@@ -72,16 +75,14 @@ public interface DoctorSerialRepository extends JpaRepository<DoctorSerial, Long
     List<DoctorSerial> findByUser_IdAndPrescriptionIsNotNull(Long user_id);
 
     @Query("SELECT ds FROM DoctorSerial ds " +
-            "WHERE (ds.date = :startDate AND ds.time >= :time) " +
-            "OR (ds.date > :startDate) " +
+            "WHERE (ds.appointmentDate = :startDate AND ds.time >= :time) " +
             "AND ds.doctor.id = :doctorId")
     List<DoctorSerial> findByDateAndTimeAndDoctorId(@Param("startDate") LocalDate startDate,
                                                     @Param("time") Double time,
                                                     @Param("doctorId") Long doctorId);
 
     @Query("SELECT ds FROM DoctorSerial ds " +
-            "WHERE (ds.date = :startDate AND ds.time >= :time) " +
-            "OR (ds.date > :startDate) " +
+            "WHERE (ds.appointmentDate = :startDate AND ds.time >= :time) " +
             "AND ds.user.id = :userId")
     List<DoctorSerial> findByDateAndTimeAndUserId(@Param("startDate") LocalDate startDate,
                                                   @Param("time") Double time,
