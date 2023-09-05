@@ -24,6 +24,22 @@ public interface DoctorSerialRepository extends JpaRepository<DoctorSerial, Long
     Long countSerialsByDoctor(
             @Param("doctorId") Long doctorId);
 
+    @Query("SELECT COUNT(ds.id) " +
+            "FROM DoctorSerial ds ")
+    Long countDoctorSerials();
+
+    @Query("SELECT COUNT(ds.id) " +
+            "FROM DoctorSerial ds "+"WHERE ds.date BETWEEN :startDate AND :endDate")
+    Long countDoctorSerialsByDate(@Param("startDate") LocalDate startDate,
+                                   @Param("endDate") LocalDate endDate);
+    @Query("SELECT ds.date, COUNT(ds.id) " +
+            "FROM DiagnosisOrder ds " +
+            "WHERE ds.date BETWEEN :startDate AND :endDate " +
+            "GROUP BY ds.date "+
+            "ORDER BY ds.date DESC")
+    List<Object[]> countDoctorSerialsGroupByDate(@Param("startDate") LocalDate startDate,
+                                                  @Param("endDate") LocalDate endDate);
+
     @Query("SELECT ds.date, SUM(ds.price) " +
             "FROM DoctorSerial ds " +
             "WHERE ds.doctor.id = :doctorId " +

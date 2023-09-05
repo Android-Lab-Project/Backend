@@ -16,6 +16,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.Optional;
 @CrossOrigin(origins = "*", allowedHeaders = "*", methods = {RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT, RequestMethod.DELETE})
 @RestController
@@ -47,6 +48,8 @@ public class AmbulanceProviderController {
 
 
         ambulanceProviderRepository.save(ambulanceProvider);
+
+        userService.AddUserCount(LocalDate.now());
 
 
         return new ResponseEntity<>(ApiResponse.create("create", "Sign up Successful"), HttpStatus.OK);

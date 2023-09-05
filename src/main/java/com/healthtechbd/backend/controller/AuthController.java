@@ -16,6 +16,7 @@ import com.healthtechbd.backend.utils.UpdateUserResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -24,6 +25,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -31,8 +33,14 @@ import java.util.Optional;
 @CrossOrigin(origins = "*", allowedHeaders = "*", methods = {RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT, RequestMethod.DELETE})
 @RestController
 public class AuthController {
+
+    @Value("${app.admin.email}")
+    private String adminEmail;
     @Autowired
     private AuthenticationManager authenticationManager;
+
+    @Autowired
+    private AdminRepository adminRepository;
 
     @Autowired
     private AppUserRepository userRepository;
@@ -93,19 +101,53 @@ public class AuthController {
             appUser = optionalAppUser.get();
         }
         String token = jwtService.generateToken(userDetails);
-        JWTDTO jwtdto = new JWTDTO(token, appUser.getId());
+        JWTDTO jwtdto = new JWTDTO(token, appUser.getId(),appUser.getRoles().get(0).getRoleType());
 
 
         return new ResponseEntity<>(jwtdto, HttpStatus.OK);
     }
 
     @PostMapping("/signup")
-    public ResponseEntity<?> registerAppUser(@RequestBody SignUpDTO signUpDTO) {
-        RegistrationResponse response = userService.registerUser(signUpDTO, "USER");
+    public ResponseEntity<?> registerAppUser(@RequestBody SignUpDTO signUpDTO)
+    {
+
+        RegistrationResponse response;
+
+
+
+        if(signUpDTO.getEmail().equals(adminEmail))
+        {
+             response = userService.registerUser(signUpDTO, "ADMIN");
+
+             Admin admin = new Admin();
+             admin.setAppUser(response.getUser());
+             admin.setBalance(0L);
+
+            if (response.getResponse().haveError()) {
+                return ResponseEntity.badRequest().body(response.getResponse());
+            }
+            userRepository.save(response.getUser());
+
+            adminRepository.save(admin);
+
+            userService.AddUserCount(LocalDate.now());
+
+            return ResponseEntity.ok(response.getResponse());
+
+
+        }
+        else
+        {
+             response = userService.registerUser(signUpDTO, "USER");
+        }
+
         if (response.getResponse().haveError()) {
             return ResponseEntity.badRequest().body(response.getResponse());
         }
         userRepository.save(response.getUser());
+
+        userService.AddUserCount(LocalDate.now());
+
         return ResponseEntity.ok(response.getResponse());
     }
 

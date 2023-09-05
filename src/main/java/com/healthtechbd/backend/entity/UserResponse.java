@@ -1,24 +1,28 @@
 package com.healthtechbd.backend.entity;
 
+import jakarta.annotation.Nonnull;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDate;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name="admins")
-public class Admin {
-
+@Table(name = "user_responses")
+public class UserResponse {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "appUser_id", referencedColumnName = "id")
-    AppUser appUser;
+    private Integer checked;
 
-    private Long balance;
+    private String email;
+
+    private String message;
+
+    private LocalDate date;
 }

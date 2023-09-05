@@ -3,7 +3,9 @@ package com.healthtechbd.backend.service;
 import com.healthtechbd.backend.dto.SignUpDTO;
 import com.healthtechbd.backend.entity.AppUser;
 import com.healthtechbd.backend.entity.Role;
+import com.healthtechbd.backend.entity.UserCountStats;
 import com.healthtechbd.backend.repo.AppUserRepository;
+import com.healthtechbd.backend.repo.UserCountStatsRepository;
 import com.healthtechbd.backend.utils.ApiResponse;
 import com.healthtechbd.backend.utils.RegistrationResponse;
 import com.healthtechbd.backend.utils.UpdateUserResponse;
@@ -13,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.Collections;
 import java.util.Optional;
 
@@ -21,6 +24,9 @@ public class UserService {
 
     @Autowired
     private AppUserRepository userRepository;
+
+    @Autowired
+    private UserCountStatsRepository userCountStatsRepository;
 
     @Autowired
     private ModelMapper modelMapper;
@@ -75,6 +81,28 @@ public class UserService {
         user.setRoles(Collections.singletonList(role));
 
         return new RegistrationResponse(ApiResponse.create("create", "Sign up successful"), user);
+    }
+
+    public void AddUserCount(LocalDate date)
+    {
+        Optional<UserCountStats>optionalUserCountStats = userCountStatsRepository.findByDate(date);
+
+        UserCountStats userCountStats;
+
+        if(!optionalUserCountStats.isPresent())
+        {
+            userCountStats = new UserCountStats();
+
+            userCountStats.setCount(1L);
+            userCountStats.setDate(date);
+        }
+        else
+        {
+            userCountStats = optionalUserCountStats.get();
+            userCountStats.setCount(userCountStats.getCount()+1);
+        }
+
+        userCountStatsRepository.save(userCountStats);
     }
 
     public UpdateUserResponse updateUser(SignUpDTO signUpDTO)

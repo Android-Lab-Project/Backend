@@ -73,6 +73,8 @@ public class HospitalController {
 
         hospitalRepository.save(hospital);
 
+        userService.AddUserCount(LocalDate.now());
+
         return new ResponseEntity<>(ApiResponse.create("create", "Sign up successful"), HttpStatus.OK);
     }
 

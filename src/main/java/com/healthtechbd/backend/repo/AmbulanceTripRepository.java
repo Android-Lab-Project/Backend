@@ -24,6 +24,22 @@ public interface AmbulanceTripRepository extends JpaRepository<AmbulanceTrip, Lo
             "WHERE at.ambulanceProvider.id = :ambulanceProviderId")
     Long countTripsByAmbulanceProvider(@Param("ambulanceProviderId") Long ambulanceProviderId);
 
+    @Query("SELECT COUNT(at.id) " +
+            "FROM AmbulanceTrip at ")
+    Long countAmbulanceTrips();
+
+    @Query("SELECT COUNT(at.id) " +
+            "FROM AmbulanceTrip at "+"WHERE at.date BETWEEN :startDate AND :endDate")
+    Long countAmbulanceTripsByDate(@Param("startDate") LocalDate startDate,
+                                   @Param("endDate") LocalDate endDate);
+    @Query("SELECT at.date, COUNT(at.id) " +
+            "FROM DiagnosisOrder at " +
+            "WHERE at.date BETWEEN :startDate AND :endDate " +
+            "GROUP BY at.date "+
+            "ORDER BY at.date DESC")
+    List<Object[]> countAmbulanceTripsGroupByDate(@Param("startDate") LocalDate startDate,
+                                                  @Param("endDate") LocalDate endDate);
+
     @Query("SELECT at.date, SUM(at.price) " +
             "FROM AmbulanceTrip at " +
             "WHERE at.ambulanceProvider.id = :ambulanceProviderId " +

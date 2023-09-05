@@ -12,6 +12,7 @@ import com.healthtechbd.backend.service.BkashPaymentService;
 import jakarta.servlet.http.HttpServletRequest;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cglib.core.Local;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -56,6 +57,9 @@ public class AppUserController {
 
     @Autowired
     private AmbulanceTripRepository ambulanceTripRepository;
+
+    @Autowired
+    private UserResponseRepository userResponseRepository;
 
     @Autowired
     private ReviewRepository reviewRepository;
@@ -308,6 +312,22 @@ public class AppUserController {
 
     }
 
+    @PostMapping("/add/response")
+    public ResponseEntity<?>addUserResponse(HttpServletRequest request, @RequestParam String message)
+    {
+        AppUser user = userService.returnUser(request);
+
+        UserResponse userResponse = new UserResponse();
+        userResponse.setDate(LocalDate.now());
+        userResponse.setEmail(user.getEmail());
+        userResponse.setMessage(message);
+        userResponse.setChecked(0);
+
+        userResponseRepository.save(userResponse);
+
+        return new ResponseEntity<>(ApiResponse.create("create","Response created"),HttpStatus.OK);
+    }
+
     @GetMapping("/profile")
     public ResponseEntity<?> getProfileDetails(HttpServletRequest request) {
         AppUser appUser = userService.returnUser(request);
@@ -397,9 +417,9 @@ public class AppUserController {
             }
         } else if ("PHARMACY".equalsIgnoreCase(roleType)) {
             // Pharmacy statistics logic
-            statisticsDTO.set_7DaysCount(medicineOrderRepository.countSerialsByPharmacyAndDate(user.getId(), sevenDaysAgo, now));
-            statisticsDTO.set_30DaysCount(medicineOrderRepository.countSerialsByPharmacyAndDate(user.getId(), thirtyDaysAgo, now));
-            statisticsDTO.setTotalCount(medicineOrderRepository.countSerialsByPharmacy(user.getId()));
+            statisticsDTO.set_7DaysCount(medicineOrderRepository.countMedicineOrdersByPharmacyAndDate(user.getId(), sevenDaysAgo, now));
+            statisticsDTO.set_30DaysCount(medicineOrderRepository.countMedicineOrdersByPharmacyAndDate(user.getId(), thirtyDaysAgo, now));
+            statisticsDTO.setTotalCount(medicineOrderRepository.countMedicineOrdersByPharmacy(user.getId()));
             statisticsDTO.set_7DaysIncome(medicineOrderRepository.sumPriceByPharmacyAndDate(user.getId(), sevenDaysAgo, now));
             statisticsDTO.set_30DaysIncome(medicineOrderRepository.sumPriceByPharmacyAndDate(user.getId(), thirtyDaysAgo, now));
             statisticsDTO.setTotalIncome(medicineOrderRepository.sumPriceByPharmacy(user.getId()));
@@ -415,9 +435,9 @@ public class AppUserController {
             }
         } else if ("HOSPITAL".equalsIgnoreCase(roleType)) {
             // Hospital statistics logic
-            statisticsDTO.set_7DaysCount(diagnosisOrderRepository.countSerialsByHospitalAndDate(user.getId(), sevenDaysAgo, now));
-            statisticsDTO.set_30DaysCount(diagnosisOrderRepository.countSerialsByHospitalAndDate(user.getId(), thirtyDaysAgo, now));
-            statisticsDTO.setTotalCount(diagnosisOrderRepository.countSerialsByHospital(user.getId()));
+            statisticsDTO.set_7DaysCount(diagnosisOrderRepository.countDiagnosisOrdersByHospitalAndDate(user.getId(), sevenDaysAgo, now));
+            statisticsDTO.set_30DaysCount(diagnosisOrderRepository.countDiagnosisOrdersByHospitalAndDate(user.getId(), thirtyDaysAgo, now));
+            statisticsDTO.setTotalCount(diagnosisOrderRepository.countDiagnosisOrdersByHospital(user.getId()));
             statisticsDTO.set_7DaysIncome(diagnosisOrderRepository.sumPriceByHospitalAndDate(user.getId(), sevenDaysAgo, now));
             statisticsDTO.set_30DaysIncome(diagnosisOrderRepository.sumPriceByHospitalAndDate(user.getId(), thirtyDaysAgo, now));
             statisticsDTO.setTotalIncome(diagnosisOrderRepository.sumPriceByHospital(user.getId()));

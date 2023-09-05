@@ -91,6 +91,9 @@ public class DoctorController {
         doctor.setBalance(0L);
 
         doctorRepository.save(doctor);
+
+        userService.AddUserCount(LocalDate.now());
+
         return new ResponseEntity<>(ApiResponse.create("create","Doctor Sign up successful"), HttpStatus.OK);
     }
 
@@ -274,7 +277,7 @@ public class DoctorController {
         return new ResponseEntity<>(doctorSerialViewDTOS, HttpStatus.OK);
     }
 
-    @GetMapping("/delete/doctor/serial/{id}")
+    @DeleteMapping("/delete/doctor/serial/{id}")
     public ResponseEntity<?>deleteUpcomingSerial(@PathVariable(name="id") Long id, HttpServletRequest request)
     {
         AppUser doctorUser = userService.returnUser(request);

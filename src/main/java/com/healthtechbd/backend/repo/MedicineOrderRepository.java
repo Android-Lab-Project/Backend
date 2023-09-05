@@ -13,7 +13,7 @@ public interface MedicineOrderRepository extends JpaRepository<MedicineOrder, Lo
             "FROM MedicineOrder mo " +
             "WHERE mo.pharmacy.id = :pharmacyId " +
             "AND mo.date BETWEEN :startDate AND :endDate")
-    Long countSerialsByPharmacyAndDate(
+    Long countMedicineOrdersByPharmacyAndDate(
             @Param("pharmacyId") Long pharmacyId,
             @Param("startDate") LocalDate startDate,
             @Param("endDate") LocalDate endDate);
@@ -21,8 +21,24 @@ public interface MedicineOrderRepository extends JpaRepository<MedicineOrder, Lo
     @Query("SELECT COUNT(mo.id) " +
             "FROM MedicineOrder mo " +
             "WHERE mo.pharmacy.id = :pharmacyId")
-    Long countSerialsByPharmacy(
+    Long countMedicineOrdersByPharmacy(
             @Param("pharmacyId") Long pharmacyId);
+
+    @Query("SELECT COUNT(mo.id) " +
+            "FROM MedicineOrder mo ")
+    Long countMedicineOrders();
+
+    @Query("SELECT COUNT(mo.id) " +
+            "FROM MedicineOrder mo "+"WHERE mo.date BETWEEN :startDate AND :endDate")
+    Long countMedicineOrdersByDate(@Param("startDate") LocalDate startDate,
+                            @Param("endDate") LocalDate endDate);
+    @Query("SELECT mo.date, COUNT(mo.id) " +
+            "FROM DiagnosisOrder mo " +
+            "WHERE mo.date BETWEEN :startDate AND :endDate " +
+            "GROUP BY mo.date "+
+            "ORDER BY mo.date DESC")
+    List<Object[]> countMedicineOrdersGroupByDate(@Param("startDate") LocalDate startDate,
+                                           @Param("endDate") LocalDate endDate);
 
     @Query("SELECT mo.date, SUM(mo.price) " +
             "FROM MedicineOrder mo " +
