@@ -17,6 +17,8 @@ public class DoctorDTO extends UserDTO {
     private String expertise;
     private String bio;
     private String dp;
+    private Long onlineFee;
+    private Long offlineFee;
     private String currentHospital;
     private String place;
     private String degrees;

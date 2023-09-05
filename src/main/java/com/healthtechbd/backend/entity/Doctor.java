@@ -35,6 +35,8 @@ public class Doctor {
     private String expertise;
     private String currentHospital;
     private String place;
+    private Long onlineFee;
+    private Long offlineFee;
     private String degrees;
     public Long balance;
 

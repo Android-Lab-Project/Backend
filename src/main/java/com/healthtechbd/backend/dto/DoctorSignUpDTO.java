@@ -25,6 +25,10 @@ public class DoctorSignUpDTO {
 
     private String degrees;
 
+    private Long  onlineFee;
+
+    private Long offlineFee;
+
     private String dp;
 
     List<DoctorAvailableTime>availableTimes;
