@@ -102,6 +102,7 @@ public class DiagnosisController {
         return new ResponseEntity<>(diagnosisDTOS, HttpStatus.OK);
     }
 
+
     @GetMapping("/delete/diagnosis/{id}")
     public ResponseEntity<?>deleteDiagnosis(@PathVariable(name ="id")Long id)
     {

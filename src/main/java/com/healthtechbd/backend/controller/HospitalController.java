@@ -105,9 +105,10 @@ public class HospitalController {
     }
 
 
-    @GetMapping("/dashboard/hospital/diagnoses")
-    public ResponseEntity<?> getAlldiagnoses(HttpServletRequest request) {
-        AppUser user = userService.returnUser(request);
+    @GetMapping("/hospital/{id}/diagnoses")
+    public ResponseEntity<?> getAlldiagnoses(@PathVariable(name="id")Long id) {
+        Optional<AppUser>optional =userRepository.findById(id);
+        AppUser user = optional.get();
         Optional<Hospital> optionalHospital = hospitalRepository.findByAppUser_Id(user.getId());
         List<Diagnosis> diagnoses = diagnosisRepository.findByHospital_Id(optionalHospital.get().getId());
 
