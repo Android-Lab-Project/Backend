@@ -104,7 +104,7 @@ public class DiagnosisController {
     }
 
 
-    @GetMapping("/delete/diagnosis/{id}")
+    @DeleteMapping("/delete/diagnosis/{id}")
     public ResponseEntity<?>deleteDiagnosis(@PathVariable(name ="id")Long id)
     {
         try

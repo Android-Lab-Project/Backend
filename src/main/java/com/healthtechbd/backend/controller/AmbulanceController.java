@@ -108,7 +108,7 @@ public class AmbulanceController {
     }
 
 
-    @PostMapping("/ambulance/trip/bid/{id}")
+    @GetMapping("/ambulance/trip/bid/{id}")
     public ResponseEntity<?> addBidderToTrip(HttpServletRequest request, @PathVariable(name = "id") Long id) {
         AppUser bidder = userService.returnUser(request);
 
@@ -127,7 +127,7 @@ public class AmbulanceController {
         return new ResponseEntity<>(ApiResponse.create("update", "trip updated"), HttpStatus.OK);
     }
 
-    @PostMapping("update/ambulancetrip/{id1}/{id2}")
+    @GetMapping("update/ambulancetrip/{id1}/{id2}")
     public ResponseEntity<?> updateAmbulanceTrip(HttpServletRequest request, @PathVariable(name = "id1") Long id1, @PathVariable(name = "id2") Long id2) {
         Optional<AmbulanceProvider> optionalProvider =ambulanceProviderRepository.findByAppUser_Id(id2);
 

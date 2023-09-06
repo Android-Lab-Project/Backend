@@ -43,8 +43,8 @@ public class MedicineController {
     @Autowired
     private UserService userService;
 
-    @PostMapping("/add/update/medicine")
-    public ResponseEntity<?> addORupdateMedicine(@RequestBody Medicine medicine) {
+    @PostMapping("/add/medicine")
+    public ResponseEntity<?> addMedicine(@RequestBody Medicine medicine) {
         if (medicine.getName() == null || medicine.getName().trim().length() == 0) {
             return new ResponseEntity<>(ApiResponse.create("error", "Medicine name is empty"), HttpStatus.BAD_REQUEST);
         }

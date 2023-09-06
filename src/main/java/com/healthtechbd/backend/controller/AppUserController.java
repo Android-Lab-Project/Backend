@@ -339,11 +339,11 @@ public class AppUserController {
         return new ResponseEntity<>(ApiResponse.create("create", "Trip created"), HttpStatus.OK);
     }
 
-    @PostMapping("/add/review/{id2}")
-    public ResponseEntity<?> saveReview(@RequestParam(name = "review") String reviewStr, @RequestParam(name = "star") Long starCount, @PathVariable(name = "id2") Long id2, HttpServletRequest request) {
+    @PostMapping("/add/review/{id}")
+    public ResponseEntity<?> saveReview(@RequestParam(name = "review") String reviewStr, @RequestParam(name = "star") Long starCount, @PathVariable(name = "id") Long id, HttpServletRequest request) {
 
         AppUser reviewer = userService.returnUser(request);
-        Optional<AppUser> optionalSubject = userRepository.findById(id2);
+        Optional<AppUser> optionalSubject = userRepository.findById(id);
 
         AppUser subject = new AppUser();
 
