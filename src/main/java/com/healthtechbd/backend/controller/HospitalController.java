@@ -83,6 +83,8 @@ public class HospitalController {
         AppUser appUser = userService.returnUser(request);
         Long appUserId = appUser.getId();
 
+        var roles = appUser.getRoles();
+
         SignUpDTO signUpDTO = modelMapper.map(hospital.getAppUser(), SignUpDTO.class);
 
         UpdateUserResponse updateUserResponse = userService.updateUser(signUpDTO);
@@ -93,6 +95,7 @@ public class HospitalController {
 
         appUser = updateUserResponse.getUser();
         appUser.setId(appUserId);
+        appUser.setRoles(roles);
 
         Optional<Hospital> optionalHospital = hospitalRepository.findByAppUser_Id(appUserId);
 

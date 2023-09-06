@@ -104,6 +104,8 @@ public class DoctorController {
 
         Long appUserId = appUser.getId();
 
+        var roles = appUser.getRoles();
+
         SignUpDTO signUpDTO = modelMapper.map(doctorSignUpDTO.getAppUser(), SignUpDTO.class);
 
         UpdateUserResponse updateUserResponse = userService.updateUser(signUpDTO);
@@ -117,6 +119,8 @@ public class DoctorController {
 
         appUser.setId(appUserId);
 
+        appUser.setRoles(roles);
+
         Optional<Doctor> optionalDoctor = doctorRepository.findByAppUser_Id(appUserId);
 
         Doctor doctor = optionalDoctor.get();
@@ -125,7 +129,26 @@ public class DoctorController {
 
         Long balance = doctor.getBalance();
 
+        doctorRepository.delete(optionalDoctor.get());
+
         doctor = modelMapper.map(doctorSignUpDTO,Doctor.class);
+
+        for (int i = 0; i < doctor.getAvailableTimes().size(); i++)
+        {
+            doctor.getAvailableTimes().get(i).setId(null);
+            doctor.getAvailableTimes().get(i).setCount(0);
+            doctor.getAvailableTimes().get(i).setAvailTime(0.0);
+            doctor.getAvailableTimes().get(i).setDate(DoctorService.currentDate(doctor.getAvailableTimes().get(i).getDay()));
+
+        }
+        for (int i = 0; i < doctor.getAvailableOnlineTimes().size(); i++) {
+
+            doctor.getAvailableOnlineTimes().get(i).setId(null);
+            doctor.getAvailableOnlineTimes().get(i).setCount(0);
+            doctor.getAvailableOnlineTimes().get(i).setAvailTime(0.0);
+            doctor.getAvailableOnlineTimes().get(i).setDate(DoctorService.currentDate(doctor.getAvailableOnlineTimes().get(i).getDay()));
+        }
+
 
         doctor.setId(doctorId);
         doctor.setBalance(balance);

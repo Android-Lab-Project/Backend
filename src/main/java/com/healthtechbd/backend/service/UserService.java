@@ -129,6 +129,7 @@ public class UserService {
         signUpDTO.setPassword(password);
 
         AppUser user = modelMapper.map(signUpDTO, AppUser.class);
+        user.setAccountVerified(true);
 
         return new UpdateUserResponse(ApiResponse.create("update", "User updated "), user);
     }

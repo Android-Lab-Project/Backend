@@ -49,7 +49,6 @@ public class AppUserServiceSecurity implements UserDetailsService {
             return new org.springframework.security.core.userdetails.User(user.getEmail(),
                     user.getPassword(), true, true, true, true, mapRolesToAuthorities(user.getRoles()));
         }
-
         return null;
     }
 

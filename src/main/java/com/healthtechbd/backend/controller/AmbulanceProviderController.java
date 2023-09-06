@@ -63,6 +63,8 @@ public class AmbulanceProviderController {
 
         Long appUserId = appUser.getId();
 
+        var roles = appUser.getRoles();
+
         SignUpDTO signUpDTO = modelMapper.map(ambulanceProvider.getAppUser(), SignUpDTO.class);
 
         UpdateUserResponse updateUserResponse = userService.updateUser(signUpDTO);
@@ -74,6 +76,7 @@ public class AmbulanceProviderController {
         appUser = updateUserResponse.getUser();
 
         appUser.setId(appUserId);
+        appUser.setRoles(roles);
 
         Optional<AmbulanceProvider> optionalAmbulanceProvider = ambulanceProviderRepository.findByAppUser_Id(appUserId);
 

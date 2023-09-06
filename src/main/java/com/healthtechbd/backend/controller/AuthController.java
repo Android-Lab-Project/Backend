@@ -91,6 +91,8 @@ public class AuthController {
             );
         } catch (Exception e) {
 
+            System.out.println(e);
+
             ApiResponse errorResponse = ApiResponse.create("error", "Invaild user email or password");
             return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
         }
@@ -152,11 +154,13 @@ public class AuthController {
     }
 
     @PostMapping("update/user")
-    public ResponseEntity<?>updateUser(HttpServletRequest request,SignUpDTO signUpDTO)
+    public ResponseEntity<?>updateUser(HttpServletRequest request,@RequestBody SignUpDTO signUpDTO)
     {
         AppUser user = userService.returnUser(request);
 
         Long id = user.getId();
+
+        var roles = user.getRoles();
 
         UpdateUserResponse updateUserResponse = userService.updateUser(signUpDTO);
 
@@ -165,6 +169,8 @@ public class AuthController {
         user.setId(id);
 
         user.setId(id);
+
+        user.setRoles(roles);
 
         userRepository.save(user);
 

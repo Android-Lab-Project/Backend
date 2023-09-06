@@ -65,6 +65,8 @@ public class PharmacyController {
 
         Long appUserId = appUser.getId();
 
+        var roles =appUser.getRoles();
+
         SignUpDTO signUpDTO = modelMapper.map(pharmacy.getAppUser(), SignUpDTO.class);
 
         UpdateUserResponse updateUserResponse = userService.updateUser(signUpDTO);
@@ -77,6 +79,7 @@ public class PharmacyController {
         appUser = updateUserResponse.getUser();
 
         appUser.setId(appUserId);
+        appUser.setRoles(roles);
 
         Optional<Pharmacy> optionalPharmacy = pharmacyRepository.findByAppUser_Id(appUserId);
 
