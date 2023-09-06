@@ -15,22 +15,14 @@ import java.util.List;
 @NoArgsConstructor
 public class DoctorSignUpDTO {
     AppUser appUser;
-
+    List<DoctorAvailableTime> availableTimes;
+    List<DoctorOnlineAvailableTime> availableOnlineTimes;
     @Column(nullable = false)
     private String bio;
-
     private String currentHospital;
-
     private String expertise;
-
     private String place;
-
     private String degrees;
-
     private Long onlineFee;
-
     private Long offlineFee;
-
-    List<DoctorAvailableTime>availableTimes;
-    List<DoctorOnlineAvailableTime>availableOnlineTimes;
 }

@@ -29,16 +29,17 @@ public interface MedicineOrderRepository extends JpaRepository<MedicineOrder, Lo
     Long countMedicineOrders();
 
     @Query("SELECT COUNT(mo.id) " +
-            "FROM MedicineOrder mo "+"WHERE mo.date BETWEEN :startDate AND :endDate")
+            "FROM MedicineOrder mo " + "WHERE mo.date BETWEEN :startDate AND :endDate")
     Long countMedicineOrdersByDate(@Param("startDate") LocalDate startDate,
-                            @Param("endDate") LocalDate endDate);
+                                   @Param("endDate") LocalDate endDate);
+
     @Query("SELECT mo.date, COUNT(mo.id) " +
             "FROM DiagnosisOrder mo " +
             "WHERE mo.date BETWEEN :startDate AND :endDate " +
-            "GROUP BY mo.date "+
+            "GROUP BY mo.date " +
             "ORDER BY mo.date DESC")
     List<Object[]> countMedicineOrdersGroupByDate(@Param("startDate") LocalDate startDate,
-                                           @Param("endDate") LocalDate endDate);
+                                                  @Param("endDate") LocalDate endDate);
 
     @Query("SELECT mo.date, SUM(mo.price) " +
             "FROM MedicineOrder mo " +

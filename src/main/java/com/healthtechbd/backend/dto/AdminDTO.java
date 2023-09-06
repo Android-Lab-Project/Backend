@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class AdminDTO extends UserDTO{
+public class AdminDTO extends UserDTO {
 
     private Long balance;
 }

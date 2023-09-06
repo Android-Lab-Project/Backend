@@ -1,6 +1,5 @@
 package com.healthtechbd.backend.entity;
 
-import jakarta.annotation.Nonnull;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;

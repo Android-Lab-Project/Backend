@@ -14,6 +14,7 @@ import java.util.List;
 @Table(name = "doctors")
 public class Doctor {
 
+    public Long balance;
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "appUser_id", referencedColumnName = "id")
     AppUser appUser;
@@ -38,7 +39,6 @@ public class Doctor {
     private Long onlineFee;
     private Long offlineFee;
     private String degrees;
-    public Long balance;
 
 
 }

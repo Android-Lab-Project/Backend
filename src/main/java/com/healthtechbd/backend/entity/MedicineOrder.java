@@ -15,7 +15,6 @@ import java.time.LocalDate;
 public class MedicineOrder {
 
 
-
     @ManyToOne
     @JoinColumn(name = "user_id", referencedColumnName = "id")
     AppUser user;

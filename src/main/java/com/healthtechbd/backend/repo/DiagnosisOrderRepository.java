@@ -30,18 +30,17 @@ public interface DiagnosisOrderRepository extends JpaRepository<DiagnosisOrder, 
     Long countDiagnosisOrders();
 
     @Query("SELECT COUNT(do.id) " +
-            "FROM DiagnosisOrder do "+"WHERE do.date BETWEEN :startDate AND :endDate")
+            "FROM DiagnosisOrder do " + "WHERE do.date BETWEEN :startDate AND :endDate")
     Long countDiagnosisOrdersByDate(@Param("startDate") LocalDate startDate,
-                            @Param("endDate") LocalDate endDate);
+                                    @Param("endDate") LocalDate endDate);
+
     @Query("SELECT do.date, COUNT(do.id) " +
             "FROM DiagnosisOrder do " +
             "WHERE do.date BETWEEN :startDate AND :endDate " +
-            "GROUP BY do.date "+
+            "GROUP BY do.date " +
             "ORDER BY do.date DESC")
     List<Object[]> countDiagnosisOrdersGroupByDate(@Param("startDate") LocalDate startDate,
-                                           @Param("endDate") LocalDate endDate);
-
-
+                                                   @Param("endDate") LocalDate endDate);
 
 
     @Query("SELECT do.date, SUM(do.price) " +

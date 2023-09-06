@@ -9,9 +9,9 @@ public class JWTDTO {
     private long id;
     private String role;
 
-    public JWTDTO(String accessToken, long id,String role) {
+    public JWTDTO(String accessToken, long id, String role) {
         this.accessToken = accessToken;
         this.id = id;
-        this.role =role;
+        this.role = role;
     }
 }

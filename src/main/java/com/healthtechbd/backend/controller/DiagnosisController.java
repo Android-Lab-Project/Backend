@@ -5,10 +5,7 @@ import com.healthtechbd.backend.dto.DiagnosisDTO;
 import com.healthtechbd.backend.entity.AppUser;
 import com.healthtechbd.backend.entity.Diagnosis;
 import com.healthtechbd.backend.entity.Hospital;
-import com.healthtechbd.backend.repo.AppUserRepository;
-import com.healthtechbd.backend.repo.DiagnosisOrderRepository;
-import com.healthtechbd.backend.repo.DiagnosisRepository;
-import com.healthtechbd.backend.repo.HospitalRepository;
+import com.healthtechbd.backend.repo.*;
 import com.healthtechbd.backend.service.UserService;
 import com.healthtechbd.backend.utils.ApiResponse;
 import jakarta.servlet.http.HttpServletRequest;
@@ -37,6 +34,9 @@ public class DiagnosisController {
 
     @Autowired
     private DiagnosisOrderRepository diagnosisOrderRepository;
+
+    @Autowired
+    private ReviewRepository reviewRepository;
 
     @Autowired
     private ModelMapper modelMapper;
@@ -95,10 +95,10 @@ public class DiagnosisController {
 
         for (int i = 0; i < diagnoses.size(); i++) {
             diagnosisDTOS.add(modelMapper.map(diagnoses.get(i), DiagnosisDTO.class));
-            diagnosisDTOS.get(i).setAppUser_id(diagnoses.get(i).getHospital().getAppUser().getId());
+            diagnosisDTOS.get(i).setHospitalId(diagnoses.get(i).getHospital().getAppUser().getId());
             diagnosisDTOS.get(i).setHospitalName(diagnoses.get(i).getHospital().getHospitalName());
             diagnosisDTOS.get(i).setPlace(diagnoses.get(i).getHospital().getPlace());
-            diagnosisDTOS.get(i).setRating(diagnoses.get(i).getHospital().getAppUser().getId());
+            diagnosisDTOS.get(i).setRating(reviewRepository.findAvgRating(diagnoses.get(i).getHospital().getAppUser().getId()));
         }
 
         return new ResponseEntity<>(diagnosisDTOS, HttpStatus.OK);
@@ -106,21 +106,15 @@ public class DiagnosisController {
 
 
     @DeleteMapping("/delete/diagnosis/{id}")
-    public ResponseEntity<?>deleteDiagnosis(@PathVariable(name ="id")Long id)
-    {
-        try
-        {
+    public ResponseEntity<?> deleteDiagnosis(@PathVariable(name = "id") Long id) {
+        try {
             diagnosisRepository.deleteById(id);
-        }
-        catch (Exception e)
-        {
-            return new ResponseEntity<>(ApiResponse.create("error", "Diagnosis can't be deleted"),HttpStatus.BAD_REQUEST);
+        } catch (Exception e) {
+            return new ResponseEntity<>(ApiResponse.create("error", "Diagnosis can't be deleted"), HttpStatus.BAD_REQUEST);
         }
 
-        return  new ResponseEntity<>(ApiResponse.create("delete","Diagnosis deleted"),HttpStatus.OK);
+        return new ResponseEntity<>(ApiResponse.create("delete", "Diagnosis deleted"), HttpStatus.OK);
     }
-
-
 
 
 }

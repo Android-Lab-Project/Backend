@@ -22,6 +22,6 @@ public class DoctorDTO extends UserDTO {
     private String currentHospital;
     private String place;
     private String degrees;
-    private Long rating;
+    private Double rating;
     private Long reviewCount;
 }

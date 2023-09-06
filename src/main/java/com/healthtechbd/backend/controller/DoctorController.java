@@ -5,18 +5,17 @@ import com.healthtechbd.backend.dto.DoctorSerialViewDTO;
 import com.healthtechbd.backend.dto.DoctorSignUpDTO;
 import com.healthtechbd.backend.dto.SignUpDTO;
 import com.healthtechbd.backend.entity.AppUser;
-import com.healthtechbd.backend.entity.DiagnosisOrder;
 import com.healthtechbd.backend.entity.Doctor;
 import com.healthtechbd.backend.entity.DoctorSerial;
 import com.healthtechbd.backend.repo.AppUserRepository;
 import com.healthtechbd.backend.repo.DoctorRepository;
 import com.healthtechbd.backend.repo.DoctorSerialRepository;
 import com.healthtechbd.backend.repo.ReviewRepository;
+import com.healthtechbd.backend.service.BkashPaymentService;
 import com.healthtechbd.backend.service.DoctorService;
 import com.healthtechbd.backend.service.TimeService;
 import com.healthtechbd.backend.service.UserService;
 import com.healthtechbd.backend.utils.ApiResponse;
-import com.healthtechbd.backend.service.BkashPaymentService;
 import com.healthtechbd.backend.utils.BkashRefundResponse;
 import com.healthtechbd.backend.utils.RegistrationResponse;
 import com.healthtechbd.backend.utils.UpdateUserResponse;
@@ -77,8 +76,7 @@ public class DoctorController {
 
         Doctor doctor = modelMapper.map(doctorSignUpDTO, Doctor.class);
 
-        for (int i = 0; i < doctor.getAvailableTimes().size(); i++)
-        {
+        for (int i = 0; i < doctor.getAvailableTimes().size(); i++) {
             doctor.getAvailableTimes().get(i).setId(null);
             doctor.getAvailableTimes().get(i).setCount(0);
             doctor.getAvailableTimes().get(i).setAvailTime(0.0);
@@ -99,12 +97,11 @@ public class DoctorController {
 
         userService.AddUserCount(LocalDate.now());
 
-        return new ResponseEntity<>(ApiResponse.create("create","Doctor Sign up successful"), HttpStatus.OK);
+        return new ResponseEntity<>(ApiResponse.create("create", "Doctor Sign up successful"), HttpStatus.OK);
     }
 
     @PostMapping("update/doctor")
-    public ResponseEntity<?>updateDoctor(HttpServletRequest request,@RequestBody DoctorSignUpDTO doctorSignUpDTO)
-    {
+    public ResponseEntity<?> updateDoctor(HttpServletRequest request, @RequestBody DoctorSignUpDTO doctorSignUpDTO) {
         AppUser appUser = userService.returnUser(request);
 
         Long appUserId = appUser.getId();
@@ -115,9 +112,8 @@ public class DoctorController {
 
         UpdateUserResponse updateUserResponse = userService.updateUser(signUpDTO);
 
-        if(updateUserResponse.getResponse().haveError())
-        {
-            return new ResponseEntity<>(updateUserResponse.getResponse(),HttpStatus.BAD_REQUEST);
+        if (updateUserResponse.getResponse().haveError()) {
+            return new ResponseEntity<>(updateUserResponse.getResponse(), HttpStatus.BAD_REQUEST);
         }
 
         appUser = updateUserResponse.getUser();
@@ -136,10 +132,9 @@ public class DoctorController {
 
         doctorRepository.delete(optionalDoctor.get());
 
-        doctor = modelMapper.map(doctorSignUpDTO,Doctor.class);
+        doctor = modelMapper.map(doctorSignUpDTO, Doctor.class);
 
-        for (int i = 0; i < doctor.getAvailableTimes().size(); i++)
-        {
+        for (int i = 0; i < doctor.getAvailableTimes().size(); i++) {
             doctor.getAvailableTimes().get(i).setId(null);
             doctor.getAvailableTimes().get(i).setCount(0);
             doctor.getAvailableTimes().get(i).setAvailTime(0.0);
@@ -161,9 +156,8 @@ public class DoctorController {
 
         doctorRepository.save(doctor);
 
-        return new ResponseEntity<>(updateUserResponse.getResponse(),HttpStatus.OK);
+        return new ResponseEntity<>(updateUserResponse.getResponse(), HttpStatus.OK);
     }
-
 
 
     @GetMapping("/doctor/{id}")
@@ -264,14 +258,13 @@ public class DoctorController {
     }
 
     @GetMapping("/update/doctor/serial/pres/{id}")
-    public ResponseEntity<?>updateDiagnosisReport(@RequestParam String prescription, @PathVariable(name="id")Long id)
-    {
-        Optional<DoctorSerial>optionalDoctorSerial =doctorSerialRepository.findById(id);
-        var diagnosisOrder =optionalDoctorSerial.get();
+    public ResponseEntity<?> updateDiagnosisReport(@RequestParam String prescription, @PathVariable(name = "id") Long id) {
+        Optional<DoctorSerial> optionalDoctorSerial = doctorSerialRepository.findById(id);
+        var diagnosisOrder = optionalDoctorSerial.get();
         diagnosisOrder.setPrescription(prescription);
         doctorSerialRepository.save(diagnosisOrder);
 
-        return new ResponseEntity<>(ApiResponse.create("update","Report added"),HttpStatus.OK);
+        return new ResponseEntity<>(ApiResponse.create("update", "Report added"), HttpStatus.OK);
     }
 
     @GetMapping("/dashboard/doctor/pending")
@@ -326,29 +319,27 @@ public class DoctorController {
     }
 
     @DeleteMapping("/delete/doctor/serial/{id}")
-    public ResponseEntity<?>deleteUpcomingSerial(@PathVariable(name="id") Long id, HttpServletRequest request)
-    {
+    public ResponseEntity<?> deleteUpcomingSerial(@PathVariable(name = "id") Long id, HttpServletRequest request) {
         AppUser doctorUser = userService.returnUser(request);
 
-        Optional<Doctor>optionalDoctor = doctorRepository.findByAppUser_Id(doctorUser.getId());
+        Optional<Doctor> optionalDoctor = doctorRepository.findByAppUser_Id(doctorUser.getId());
 
-        Optional<DoctorSerial>optionalDoctorSerial = doctorSerialRepository.findById(id);
+        Optional<DoctorSerial> optionalDoctorSerial = doctorSerialRepository.findById(id);
 
-        DoctorSerial doctorSerial =optionalDoctorSerial.get();
+        DoctorSerial doctorSerial = optionalDoctorSerial.get();
 
-        optionalDoctor.get().balance-=(doctorSerial.getPrice()-10);
+        optionalDoctor.get().balance -= (doctorSerial.getPrice() - 10);
 
-        doctorSerial.setPrice(doctorSerial.getPrice()-10);
+        doctorSerial.setPrice(doctorSerial.getPrice() - 10);
 
         doctorRepository.save(optionalDoctor.get());
 
-        BkashRefundResponse bkashRefundResponse = bkashPaymentService.refundPayment(doctorSerial.getPaymentId(),doctorSerial.getTrxId(),doctorSerial.getPrice().toString());
+        BkashRefundResponse bkashRefundResponse = bkashPaymentService.refundPayment(doctorSerial.getPaymentId(), doctorSerial.getTrxId(), doctorSerial.getPrice().toString());
 
         doctorSerialRepository.delete(doctorSerial);
 
-        return new ResponseEntity<>(bkashRefundResponse,HttpStatus.OK);
+        return new ResponseEntity<>(bkashRefundResponse, HttpStatus.OK);
     }
-
 
 
 }

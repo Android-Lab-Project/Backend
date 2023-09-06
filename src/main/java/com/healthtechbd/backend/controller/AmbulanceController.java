@@ -73,7 +73,7 @@ public class AmbulanceController {
     @GetMapping("/ambulance/{id}")
     public ResponseEntity<?> getAllAmbulances(@PathVariable(name = "id") Long id) {
 
-        Optional<AmbulanceProvider>optionalAmbulanceProvider = ambulanceProviderRepository.findByAppUser_Id(id);
+        Optional<AmbulanceProvider> optionalAmbulanceProvider = ambulanceProviderRepository.findByAppUser_Id(id);
 
         List<Ambulance> ambulances = ambulanceRepository.findByAmbulanceProvider_Id(optionalAmbulanceProvider.get().getId());
 
@@ -93,18 +93,14 @@ public class AmbulanceController {
     }
 
     @DeleteMapping("/delete/ambulance/{id}")
-    public ResponseEntity<?>deleteDiagnosis(@PathVariable(name ="id")Long id)
-    {
-        try
-        {
+    public ResponseEntity<?> deleteDiagnosis(@PathVariable(name = "id") Long id) {
+        try {
             ambulanceRepository.deleteById(id);
-        }
-        catch (Exception e)
-        {
-            return new ResponseEntity<>(ApiResponse.create("error", "Ambulance can't be deleted"),HttpStatus.BAD_REQUEST);
+        } catch (Exception e) {
+            return new ResponseEntity<>(ApiResponse.create("error", "Ambulance can't be deleted"), HttpStatus.BAD_REQUEST);
         }
 
-        return  new ResponseEntity<>(ApiResponse.create("delete","Ambulance deleted"),HttpStatus.OK);
+        return new ResponseEntity<>(ApiResponse.create("delete", "Ambulance deleted"), HttpStatus.OK);
     }
 
 
@@ -129,7 +125,7 @@ public class AmbulanceController {
 
     @GetMapping("update/ambulancetrip/{id1}/{id2}")
     public ResponseEntity<?> updateAmbulanceTrip(HttpServletRequest request, @PathVariable(name = "id1") Long id1, @PathVariable(name = "id2") Long id2) {
-        Optional<AmbulanceProvider> optionalProvider =ambulanceProviderRepository.findByAppUser_Id(id2);
+        Optional<AmbulanceProvider> optionalProvider = ambulanceProviderRepository.findByAppUser_Id(id2);
 
         Optional<AmbulanceTrip> optionalAmbulanceTrip = ambulanceTripRepository.findById(id1);
 
@@ -141,7 +137,7 @@ public class AmbulanceController {
 
         ambulanceTrip.setAmbulanceProvider(optionalProvider.get().getAppUser());
 
-        optionalProvider.get().balance+=ambulanceTrip.getPrice();
+        optionalProvider.get().balance += ambulanceTrip.getPrice();
 
         ambulanceProviderRepository.save(optionalProvider.get());
 

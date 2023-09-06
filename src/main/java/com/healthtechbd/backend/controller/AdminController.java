@@ -6,7 +6,6 @@ import com.healthtechbd.backend.entity.UserResponse;
 import com.healthtechbd.backend.repo.*;
 import com.healthtechbd.backend.utils.ApiResponse;
 import com.healthtechbd.backend.utils.AppConstants;
-import jakarta.persistence.criteria.CriteriaBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -45,172 +44,158 @@ public class AdminController {
     private AmbulanceTripRepository ambulanceTripRepository;
 
 
+    @GetMapping("/statistics/admin")
+    public ResponseEntity<?> getAdminStats() {
+        AdminStatisticsDTO adminStatisticsDTO = new AdminStatisticsDTO();
 
-  @GetMapping("/statistics/admin")
-  public ResponseEntity<?>getAdminStats()
-  {
-      AdminStatisticsDTO adminStatisticsDTO = new AdminStatisticsDTO();
+        adminStatisticsDTO.set_7daysUserCount(userCountStatsRepository.countUserByDate(LocalDate.now().minusDays(7), LocalDate.now()));
+        adminStatisticsDTO.set_30daysUserCount(userCountStatsRepository.countUserByDate(LocalDate.now().minusDays(30), LocalDate.now()));
+        adminStatisticsDTO.setTotalUserCount(userCountStatsRepository.countUser());
 
-      adminStatisticsDTO.set_7daysUserCount(userCountStatsRepository.countUserByDate(LocalDate.now().minusDays(7),LocalDate.now()));
-      adminStatisticsDTO.set_30daysUserCount(userCountStatsRepository.countUserByDate(LocalDate.now().minusDays(30),LocalDate.now()));
-      adminStatisticsDTO.setTotalUserCount(userCountStatsRepository.countUser());
+        adminStatisticsDTO.setTotalDoctorSerialCount(doctorSerialRepository.countDoctorSerialsByDate(LocalDate.now().minusDays(7), LocalDate.now()));
+        adminStatisticsDTO.setTotalDiagnosisOrderCount(diagnosisOrderRepository.countDiagnosisOrdersByDate(LocalDate.now().minusDays(7), LocalDate.now()));
+        adminStatisticsDTO.setTotalMedicineOrderCount(medicineOrderRepository.countMedicineOrdersByDate(LocalDate.now().minusDays(7), LocalDate.now()));
+        adminStatisticsDTO.setTotalAmbulanceTripCount(ambulanceTripRepository.countAmbulanceTripsByDate(LocalDate.now().minusDays(7), LocalDate.now()));
 
-      adminStatisticsDTO.setTotalDoctorSerialCount(doctorSerialRepository.countDoctorSerialsByDate(LocalDate.now().minusDays(7),LocalDate.now()));
-      adminStatisticsDTO.setTotalDiagnosisOrderCount(diagnosisOrderRepository.countDiagnosisOrdersByDate(LocalDate.now().minusDays(7),LocalDate.now()));
-      adminStatisticsDTO.setTotalMedicineOrderCount(medicineOrderRepository.countMedicineOrdersByDate(LocalDate.now().minusDays(7),LocalDate.now()));
-      adminStatisticsDTO.setTotalAmbulanceTripCount(ambulanceTripRepository.countAmbulanceTripsByDate(LocalDate.now().minusDays(7),LocalDate.now()));
-
-      Long _7daysDSIncome = doctorSerialRepository.countDoctorSerialsByDate(LocalDate.now().minusDays(7),LocalDate.now())* AppConstants.perUserCharge;
-      Long _30daysDSIncome = doctorSerialRepository.countDoctorSerialsByDate(LocalDate.now().minusDays(30),LocalDate.now())* AppConstants.perUserCharge;
-      Long totalDSIncome = doctorSerialRepository.countDoctorSerials()*AppConstants.perUserCharge;
+        Long _7daysDSIncome = doctorSerialRepository.countDoctorSerialsByDate(LocalDate.now().minusDays(7), LocalDate.now()) * AppConstants.perUserCharge;
+        Long _30daysDSIncome = doctorSerialRepository.countDoctorSerialsByDate(LocalDate.now().minusDays(30), LocalDate.now()) * AppConstants.perUserCharge;
+        Long totalDSIncome = doctorSerialRepository.countDoctorSerials() * AppConstants.perUserCharge;
 
 
-      Long _7daysDOIncome = diagnosisOrderRepository.countDiagnosisOrdersByDate(LocalDate.now().minusDays(7), LocalDate.now()) * AppConstants.perUserCharge;
-      Long _30daysDOIncome = diagnosisOrderRepository.countDiagnosisOrdersByDate(LocalDate.now().minusDays(30), LocalDate.now()) * AppConstants.perUserCharge;
-      Long totalDOIncome = diagnosisOrderRepository.countDiagnosisOrders() * AppConstants.perUserCharge;
+        Long _7daysDOIncome = diagnosisOrderRepository.countDiagnosisOrdersByDate(LocalDate.now().minusDays(7), LocalDate.now()) * AppConstants.perUserCharge;
+        Long _30daysDOIncome = diagnosisOrderRepository.countDiagnosisOrdersByDate(LocalDate.now().minusDays(30), LocalDate.now()) * AppConstants.perUserCharge;
+        Long totalDOIncome = diagnosisOrderRepository.countDiagnosisOrders() * AppConstants.perUserCharge;
 
 
-      Long _7daysMOIncome = medicineOrderRepository.countMedicineOrdersByDate(LocalDate.now().minusDays(7), LocalDate.now()) * AppConstants.perUserCharge;
-      Long _30daysMOIncome = medicineOrderRepository.countMedicineOrdersByDate(LocalDate.now().minusDays(30), LocalDate.now()) * AppConstants.perUserCharge;
-      Long totalMOIncome = medicineOrderRepository.countMedicineOrders() * AppConstants.perUserCharge;
+        Long _7daysMOIncome = medicineOrderRepository.countMedicineOrdersByDate(LocalDate.now().minusDays(7), LocalDate.now()) * AppConstants.perUserCharge;
+        Long _30daysMOIncome = medicineOrderRepository.countMedicineOrdersByDate(LocalDate.now().minusDays(30), LocalDate.now()) * AppConstants.perUserCharge;
+        Long totalMOIncome = medicineOrderRepository.countMedicineOrders() * AppConstants.perUserCharge;
 
 
-      Long _7daysATIncome = ambulanceTripRepository.countAmbulanceTripsByDate(LocalDate.now().minusDays(7), LocalDate.now()) * AppConstants.perUserCharge;
-      Long _30daysATIncome = ambulanceTripRepository.countAmbulanceTripsByDate(LocalDate.now().minusDays(30), LocalDate.now()) * AppConstants.perUserCharge;
-      Long totalATIncome = ambulanceTripRepository.countAmbulanceTrips() * AppConstants.perUserCharge;
+        Long _7daysATIncome = ambulanceTripRepository.countAmbulanceTripsByDate(LocalDate.now().minusDays(7), LocalDate.now()) * AppConstants.perUserCharge;
+        Long _30daysATIncome = ambulanceTripRepository.countAmbulanceTripsByDate(LocalDate.now().minusDays(30), LocalDate.now()) * AppConstants.perUserCharge;
+        Long totalATIncome = ambulanceTripRepository.countAmbulanceTrips() * AppConstants.perUserCharge;
 
-      adminStatisticsDTO.set_7daysIncome(_7daysDSIncome+_7daysDOIncome+_7daysMOIncome+_7daysATIncome);
-      adminStatisticsDTO.set_30daysIncome(_30daysDSIncome+_30daysDOIncome+_30daysMOIncome+_30daysATIncome);
-      adminStatisticsDTO.setTotalIncome(totalDSIncome+totalDOIncome+totalMOIncome+totalATIncome);
+        adminStatisticsDTO.set_7daysIncome(_7daysDSIncome + _7daysDOIncome + _7daysMOIncome + _7daysATIncome);
+        adminStatisticsDTO.set_30daysIncome(_30daysDSIncome + _30daysDOIncome + _30daysMOIncome + _30daysATIncome);
+        adminStatisticsDTO.setTotalIncome(totalDSIncome + totalDOIncome + totalMOIncome + totalATIncome);
 
-      Optional<Admin> optionalAdmin = adminRepository.findById(1L);
+        Optional<Admin> optionalAdmin = adminRepository.findById(1L);
 
-      Admin admin = optionalAdmin.get();
+        Admin admin = optionalAdmin.get();
 
-      admin.setBalance(totalDSIncome+totalDOIncome+totalMOIncome+totalATIncome);
+        admin.setBalance(totalDSIncome + totalDOIncome + totalMOIncome + totalATIncome);
 
-      adminRepository.save(admin);
+        adminRepository.save(admin);
 
-      List<Object[]>doctorserials = doctorSerialRepository.countDoctorSerialsGroupByDate(LocalDate.now().minusDays(30),LocalDate.now());
+        List<Object[]> doctorserials = doctorSerialRepository.countDoctorSerialsGroupByDate(LocalDate.now().minusDays(30), LocalDate.now());
 
-      List<Object[]>diagnosisOrders = diagnosisOrderRepository.countDiagnosisOrdersGroupByDate(LocalDate.now().minusDays(30),LocalDate.now());
+        List<Object[]> diagnosisOrders = diagnosisOrderRepository.countDiagnosisOrdersGroupByDate(LocalDate.now().minusDays(30), LocalDate.now());
 
-      List<Object[]>medicineOrders = medicineOrderRepository.countMedicineOrdersGroupByDate(LocalDate.now().minusDays(30),LocalDate.now());
+        List<Object[]> medicineOrders = medicineOrderRepository.countMedicineOrdersGroupByDate(LocalDate.now().minusDays(30), LocalDate.now());
 
-      List<Object[]>ambulanceTrips = ambulanceTripRepository.countAmbulanceTripsGroupByDate(LocalDate.now().minusDays(30),LocalDate.now());
+        List<Object[]> ambulanceTrips = ambulanceTripRepository.countAmbulanceTripsGroupByDate(LocalDate.now().minusDays(30), LocalDate.now());
 
-      List<LocalDate>dates = new ArrayList<>();
+        List<LocalDate> dates = new ArrayList<>();
 
-      List<Long>incomes = new ArrayList<>();
+        List<Long> incomes = new ArrayList<>();
 
-      Integer ds=0;
-      Integer dos=0;
-      Integer mo=0;
-      Integer at=0;
+        Integer ds = 0;
+        Integer dos = 0;
+        Integer mo = 0;
+        Integer at = 0;
 
-      for(int i=0;i<30;i++)
-      {
-          Long count =0L;
+        for (int i = 0; i < 30; i++) {
+            Long count = 0L;
 
-          LocalDate date = LocalDate.now().minusDays(i);
+            LocalDate date = LocalDate.now().minusDays(i);
 
-          Object[] objects = new Object[2];
+            Object[] objects = new Object[2];
 
-          if(ds<doctorserials.size()) {
-            objects = doctorserials.get(ds);
-          }
+            if (ds < doctorserials.size()) {
+                objects = doctorserials.get(ds);
+            }
 
-          if(objects!=null && date.equals(objects[0]))
-          {
-              count+=(Long)objects[1];
-              ds++;
-          }
+            if (objects != null && date.equals(objects[0])) {
+                count += (Long) objects[1];
+                ds++;
+            }
 
-          objects =null;
+            objects = null;
 
-          if(dos<diagnosisOrders.size())
-          {
-              objects = diagnosisOrders.get(dos);
-          }
+            if (dos < diagnosisOrders.size()) {
+                objects = diagnosisOrders.get(dos);
+            }
 
-          if(objects!=null && date.equals(objects[0]))
-          {
-              count+=(Long)objects[1];
-              dos++;
-          }
+            if (objects != null && date.equals(objects[0])) {
+                count += (Long) objects[1];
+                dos++;
+            }
 
-          objects =null;
+            objects = null;
 
-          if(mo<medicineOrders.size())
-          {
-              objects = medicineOrders.get(mo);
-          }
+            if (mo < medicineOrders.size()) {
+                objects = medicineOrders.get(mo);
+            }
 
-          if(objects!=null && date.equals(objects[0]))
-          {
+            if (objects != null && date.equals(objects[0])) {
 
-              count+=(Long)objects[1];
-              mo++;
-          }
+                count += (Long) objects[1];
+                mo++;
+            }
 
-          objects =null;
+            objects = null;
 
-          if(at<ambulanceTrips.size())
-          {
-              objects = ambulanceTrips.get(at);
-          }
+            if (at < ambulanceTrips.size()) {
+                objects = ambulanceTrips.get(at);
+            }
 
-          if(objects!=null && date.equals(objects[0]))
-          {
+            if (objects != null && date.equals(objects[0])) {
 
-              count+=(Long)objects[1];
-              at++;
-          }
-          if(count!=0)
-          {
-              System.out.println(count);
-              dates.add(date);
-              incomes.add(count*AppConstants.perUserCharge);
-          }
+                count += (Long) objects[1];
+                at++;
+            }
+            if (count != 0) {
+                System.out.println(count);
+                dates.add(date);
+                incomes.add(count * AppConstants.perUserCharge);
+            }
 
-      }
+        }
 
-      Collections.reverse(dates);
+        Collections.reverse(dates);
 
-      Collections.reverse(incomes);
+        Collections.reverse(incomes);
 
-      adminStatisticsDTO.setDates(dates);
+        adminStatisticsDTO.setDates(dates);
 
-      adminStatisticsDTO.setIncomes(incomes);
+        adminStatisticsDTO.setIncomes(incomes);
 
-      return  new ResponseEntity<>(adminStatisticsDTO, HttpStatus.OK);
-  }
+        return new ResponseEntity<>(adminStatisticsDTO, HttpStatus.OK);
+    }
 
-  @GetMapping("/update/user/response/{id}")
-  public ResponseEntity<?>updateUserResponse(@PathVariable(name="id")Long id)
-  {
-      Optional<UserResponse>optionalUserResponse = userResponseRepository.findById(id);
+    @GetMapping("/update/user/response/{id}")
+    public ResponseEntity<?> updateUserResponse(@PathVariable(name = "id") Long id) {
+        Optional<UserResponse> optionalUserResponse = userResponseRepository.findById(id);
 
-      UserResponse userResponse = optionalUserResponse.get();
+        UserResponse userResponse = optionalUserResponse.get();
 
-      userResponse.setChecked(1);
+        userResponse.setChecked(1);
 
-      userResponseRepository.save(userResponse);
+        userResponseRepository.save(userResponse);
 
-      return new ResponseEntity<>(ApiResponse.create("update","Response is checked"), HttpStatus.OK);
-  }
+        return new ResponseEntity<>(ApiResponse.create("update", "Response is checked"), HttpStatus.OK);
+    }
 
-  @GetMapping("user/response/pending")
-  public ResponseEntity<?>getAllPendingResponses()
-  {
-      List<UserResponse>userResponses = userResponseRepository.findByChecked();
+    @GetMapping("user/response/pending")
+    public ResponseEntity<?> getAllPendingResponses() {
+        List<UserResponse> userResponses = userResponseRepository.findByChecked();
 
-      if(userResponses.size()==0)
-      {
-          return new ResponseEntity<>(ApiResponse.create("empty", "No pending found"),HttpStatus.OK);
-      }
+        if (userResponses.size() == 0) {
+            return new ResponseEntity<>(ApiResponse.create("empty", "No pending found"), HttpStatus.OK);
+        }
 
-      return new ResponseEntity<>(userResponses,HttpStatus.OK);
-  }
+        return new ResponseEntity<>(userResponses, HttpStatus.OK);
+    }
 
 }

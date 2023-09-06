@@ -7,10 +7,7 @@ import com.healthtechbd.backend.entity.AppUser;
 import com.healthtechbd.backend.entity.Diagnosis;
 import com.healthtechbd.backend.entity.DiagnosisOrder;
 import com.healthtechbd.backend.entity.Hospital;
-import com.healthtechbd.backend.repo.AppUserRepository;
-import com.healthtechbd.backend.repo.DiagnosisOrderRepository;
-import com.healthtechbd.backend.repo.DiagnosisRepository;
-import com.healthtechbd.backend.repo.HospitalRepository;
+import com.healthtechbd.backend.repo.*;
 import com.healthtechbd.backend.service.TimeService;
 import com.healthtechbd.backend.service.UserService;
 import com.healthtechbd.backend.utils.ApiResponse;
@@ -45,6 +42,9 @@ public class HospitalController {
 
     @Autowired
     private DiagnosisOrderRepository diagnosisOrderRepository;
+
+    @Autowired
+    private ReviewRepository reviewRepository;
 
     @Autowired
     private UserService userService;
@@ -110,8 +110,8 @@ public class HospitalController {
 
 
     @GetMapping("/hospital/{id}/diagnoses")
-    public ResponseEntity<?> getAlldiagnoses(@PathVariable(name="id")Long id) {
-        Optional<AppUser>optional =userRepository.findById(id);
+    public ResponseEntity<?> getAlldiagnoses(@PathVariable(name = "id") Long id) {
+        Optional<AppUser> optional = userRepository.findById(id);
         AppUser user = optional.get();
         Optional<Hospital> optionalHospital = hospitalRepository.findByAppUser_Id(user.getId());
         List<Diagnosis> diagnoses = diagnosisRepository.findByHospital_Id(optionalHospital.get().getId());
@@ -124,24 +124,23 @@ public class HospitalController {
 
         for (int i = 0; i < diagnoses.size(); i++) {
             diagnosisDTOS.add(modelMapper.map(diagnoses.get(i), DiagnosisDTO.class));
-            diagnosisDTOS.get(i).setAppUser_id(diagnoses.get(i).getHospital().getAppUser().getId());
+            diagnosisDTOS.get(i).setHospitalId(diagnoses.get(i).getHospital().getAppUser().getId());
             diagnosisDTOS.get(i).setHospitalName(diagnoses.get(i).getHospital().getHospitalName());
             diagnosisDTOS.get(i).setPlace(diagnoses.get(i).getHospital().getPlace());
-            diagnosisDTOS.get(i).setRating(diagnoses.get(i).getHospital().getAppUser().getId());
+            diagnosisDTOS.get(i).setRating(reviewRepository.findAvgRating(diagnoses.get(i).getHospital().getAppUser().getId()));
         }
 
         return new ResponseEntity<>(diagnosisDTOS, HttpStatus.OK);
     }
 
     @GetMapping("/update/diagnosis/order/report/{id}")
-    public ResponseEntity<?>updateDiagnosisReport(@RequestParam(name="report")String report, @PathVariable(name="id")Long id)
-    {
-        Optional<DiagnosisOrder>optionalDiagnosisOrder =diagnosisOrderRepository.findById(id);
-        DiagnosisOrder diagnosisOrder =optionalDiagnosisOrder.get();
+    public ResponseEntity<?> updateDiagnosisReport(@RequestParam(name = "report") String report, @PathVariable(name = "id") Long id) {
+        Optional<DiagnosisOrder> optionalDiagnosisOrder = diagnosisOrderRepository.findById(id);
+        DiagnosisOrder diagnosisOrder = optionalDiagnosisOrder.get();
         diagnosisOrder.setReportURL(report);
         diagnosisOrderRepository.save(diagnosisOrder);
 
-        return new ResponseEntity<>(ApiResponse.create("update","Report added"),HttpStatus.OK);
+        return new ResponseEntity<>(ApiResponse.create("update", "Report added"), HttpStatus.OK);
     }
 
 
@@ -200,7 +199,6 @@ public class HospitalController {
 
 
     }
-
 
 
 }

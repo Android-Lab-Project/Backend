@@ -32,16 +32,17 @@ public interface DoctorSerialRepository extends JpaRepository<DoctorSerial, Long
     LocalDate findMaxDate();
 
     @Query("SELECT COUNT(ds.id) " +
-            "FROM DoctorSerial ds "+"WHERE ds.date BETWEEN :startDate AND :endDate")
+            "FROM DoctorSerial ds " + "WHERE ds.date BETWEEN :startDate AND :endDate")
     Long countDoctorSerialsByDate(@Param("startDate") LocalDate startDate,
-                                   @Param("endDate") LocalDate endDate);
+                                  @Param("endDate") LocalDate endDate);
+
     @Query("SELECT ds.date, COUNT(ds.id) " +
             "FROM DoctorSerial ds " +
             "WHERE ds.date BETWEEN :startDate AND :endDate " +
-            "GROUP BY ds.date "+
+            "GROUP BY ds.date " +
             "ORDER BY ds.date DESC")
     List<Object[]> countDoctorSerialsGroupByDate(@Param("startDate") LocalDate startDate,
-                                                  @Param("endDate") LocalDate endDate);
+                                                 @Param("endDate") LocalDate endDate);
 
     @Query("SELECT ds.date, SUM(ds.price) " +
             "FROM DoctorSerial ds " +

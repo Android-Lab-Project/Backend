@@ -57,8 +57,7 @@ public class JWTAuthenticationFilter extends OncePerRequestFilter {
 
             SecurityContextHolder.getContext().setAuthentication(authenticationToken);
             request.setAttribute("username", username);
-        }
-        else {
+        } else {
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             return;
         }

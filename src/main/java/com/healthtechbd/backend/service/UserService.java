@@ -83,30 +83,25 @@ public class UserService {
         return new RegistrationResponse(ApiResponse.create("create", "Sign up successful"), user);
     }
 
-    public void AddUserCount(LocalDate date)
-    {
-        Optional<UserCountStats>optionalUserCountStats = userCountStatsRepository.findByDate(date);
+    public void AddUserCount(LocalDate date) {
+        Optional<UserCountStats> optionalUserCountStats = userCountStatsRepository.findByDate(date);
 
         UserCountStats userCountStats;
 
-        if(!optionalUserCountStats.isPresent())
-        {
+        if (!optionalUserCountStats.isPresent()) {
             userCountStats = new UserCountStats();
 
             userCountStats.setCount(1L);
             userCountStats.setDate(date);
-        }
-        else
-        {
+        } else {
             userCountStats = optionalUserCountStats.get();
-            userCountStats.setCount(userCountStats.getCount()+1);
+            userCountStats.setCount(userCountStats.getCount() + 1);
         }
 
         userCountStatsRepository.save(userCountStats);
     }
 
-    public UpdateUserResponse updateUser(SignUpDTO signUpDTO)
-    {
+    public UpdateUserResponse updateUser(SignUpDTO signUpDTO) {
         ApiResponse errorResponse = new ApiResponse();
 
         if (signUpDTO.getFirstName() == null || signUpDTO.getFirstName().trim().length() == 0)

@@ -11,10 +11,9 @@ public class RegistrationResponse {
         this.user = user;
     }
 
-    public RegistrationResponse()
-    {
-        this.response=null;
-        this.user =null;
+    public RegistrationResponse() {
+        this.response = null;
+        this.user = null;
     }
 
     public ApiResponse getResponse() {

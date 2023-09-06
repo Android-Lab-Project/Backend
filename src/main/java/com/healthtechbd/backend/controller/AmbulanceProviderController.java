@@ -4,7 +4,6 @@ import com.healthtechbd.backend.dto.SignUpDTO;
 import com.healthtechbd.backend.entity.AmbulanceProvider;
 import com.healthtechbd.backend.entity.AppUser;
 import com.healthtechbd.backend.repo.AmbulanceProviderRepository;
-import com.healthtechbd.backend.repo.AppUserRepository;
 import com.healthtechbd.backend.service.UserService;
 import com.healthtechbd.backend.utils.ApiResponse;
 import com.healthtechbd.backend.utils.RegistrationResponse;
@@ -18,6 +17,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 import java.util.Optional;
+
 @CrossOrigin(origins = "*", allowedHeaders = "*", methods = {RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT, RequestMethod.DELETE})
 @RestController
 public class AmbulanceProviderController {

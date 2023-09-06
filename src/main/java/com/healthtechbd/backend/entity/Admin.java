@@ -9,16 +9,14 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name="admins")
+@Table(name = "admins")
 public class Admin {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
 
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "appUser_id", referencedColumnName = "id")
     AppUser appUser;
-
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
     private Long balance;
 }

@@ -10,10 +10,11 @@ import java.util.List;
 public interface ReviewRepository extends JpaRepository<Review, Long> {
     List<Review> findBySubject_Id(Long id);
 
-    @Query("SELECT AVG(r.startCount) FROM Review r WHERE r.subject.id = :user_id")
-    Long findAvgRating(@Param("user_id")Long user_id);
+    @Query("SELECT AVG(r.starCount) FROM Review r WHERE r.subject.id = :user_id")
+    Double findAvgRating(@Param("user_id") Long user_id);
+
     @Query("SELECT Count(r) FROM Review r WHERE r.subject.id = :user_id")
-    Long findCount(@Param("user_id")Long user_id);
+    Long findCount(@Param("user_id") Long user_id);
 
 
 }

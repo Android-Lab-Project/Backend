@@ -11,10 +11,10 @@ import lombok.NoArgsConstructor;
 @Entity
 @Table(name = "hospital")
 public class Hospital {
+    public Long balance;
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "appUser_id", referencedColumnName = "id")
     AppUser appUser;
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -24,7 +24,5 @@ public class Hospital {
     private String bio;
     @Column(nullable = false)
     private String place;
-
-    public Long balance;
 
 }

@@ -11,6 +11,7 @@ import lombok.NoArgsConstructor;
 @Entity
 @Table(name = "pharmacy")
 public class Pharmacy {
+    public Long balance;
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "appUser_id", referencedColumnName = "id")
     AppUser appUser;
@@ -19,12 +20,8 @@ public class Pharmacy {
     private Long id;
     @Column(nullable = false)
     private String bio;
-
     @Column(nullable = false)
     private String place;
-
-    public Long balance;
-
 
 
 }

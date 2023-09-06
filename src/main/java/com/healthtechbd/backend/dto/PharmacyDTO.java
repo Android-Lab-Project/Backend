@@ -11,7 +11,7 @@ public class PharmacyDTO extends UserDTO {
     private String place;
     private String bio;
     private Long balance;
-    private Long rating;
+    private Double rating;
     private Long reviewCount;
 
 }

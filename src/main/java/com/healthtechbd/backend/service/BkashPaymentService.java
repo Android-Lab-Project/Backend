@@ -17,6 +17,7 @@ import java.util.Map;
 import java.util.UUID;
 
 import static com.healthtechbd.backend.utils.BkashStaticVariable.token;
+
 @Service
 public class BkashPaymentService {
 
@@ -62,10 +63,10 @@ public class BkashPaymentService {
 
         String token = grantToken();
 
-        BkashStaticVariable.token =token;
+        BkashStaticVariable.token = token;
 
         if (token.equals("Error")) {
-            return new BkashCreateResponse("error", null, null,null,null);
+            return new BkashCreateResponse("error", null, null, null, null);
         }
 
         String AUTHORIZATION_TOKEN = "Bearer " + token;
@@ -122,7 +123,7 @@ public class BkashPaymentService {
 
 
         } else {
-            return new BkashCreateResponse("failure",null,null,null,null);
+            return new BkashCreateResponse("failure", null, null, null, null);
         }
     }
 

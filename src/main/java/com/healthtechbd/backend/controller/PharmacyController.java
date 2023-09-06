@@ -59,21 +59,19 @@ public class PharmacyController {
     }
 
     @PostMapping("/update/pharmacy")
-    public ResponseEntity<?>upatePharmacy(HttpServletRequest request, @RequestBody Pharmacy pharmacy)
-    {
+    public ResponseEntity<?> upatePharmacy(HttpServletRequest request, @RequestBody Pharmacy pharmacy) {
         AppUser appUser = userService.returnUser(request);
 
         Long appUserId = appUser.getId();
 
-        var roles =appUser.getRoles();
+        var roles = appUser.getRoles();
 
         SignUpDTO signUpDTO = modelMapper.map(pharmacy.getAppUser(), SignUpDTO.class);
 
         UpdateUserResponse updateUserResponse = userService.updateUser(signUpDTO);
 
-        if(updateUserResponse.getResponse().haveError())
-        {
-            return new ResponseEntity<>(updateUserResponse.getResponse(),HttpStatus.BAD_REQUEST);
+        if (updateUserResponse.getResponse().haveError()) {
+            return new ResponseEntity<>(updateUserResponse.getResponse(), HttpStatus.BAD_REQUEST);
         }
 
         appUser = updateUserResponse.getUser();
@@ -89,12 +87,10 @@ public class PharmacyController {
 
         pharmacyRepository.save(pharmacy);
 
-        return  new ResponseEntity<>(updateUserResponse.getResponse(),HttpStatus.OK);
+        return new ResponseEntity<>(updateUserResponse.getResponse(), HttpStatus.OK);
 
 
     }
-
-
 
 
 }

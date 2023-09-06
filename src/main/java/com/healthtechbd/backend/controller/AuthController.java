@@ -1,14 +1,13 @@
 package com.healthtechbd.backend.controller;
 
-import com.healthtechbd.backend.dto.DoctorSignUpDTO;
 import com.healthtechbd.backend.dto.JWTDTO;
 import com.healthtechbd.backend.dto.SignInDTO;
 import com.healthtechbd.backend.dto.SignUpDTO;
-import com.healthtechbd.backend.entity.*;
+import com.healthtechbd.backend.entity.Admin;
+import com.healthtechbd.backend.entity.AppUser;
 import com.healthtechbd.backend.repo.*;
 import com.healthtechbd.backend.security.AppUserServiceSecurity;
 import com.healthtechbd.backend.security.JWTService;
-import com.healthtechbd.backend.service.DoctorService;
 import com.healthtechbd.backend.service.UserService;
 import com.healthtechbd.backend.utils.ApiResponse;
 import com.healthtechbd.backend.utils.RegistrationResponse;
@@ -26,8 +25,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
 
 @CrossOrigin(origins = "*", allowedHeaders = "*", methods = {RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT, RequestMethod.DELETE})
@@ -103,27 +100,24 @@ public class AuthController {
             appUser = optionalAppUser.get();
         }
         String token = jwtService.generateToken(userDetails);
-        JWTDTO jwtdto = new JWTDTO(token, appUser.getId(),appUser.getRoles().get(0).getRoleType());
+        JWTDTO jwtdto = new JWTDTO(token, appUser.getId(), appUser.getRoles().get(0).getRoleType());
 
 
         return new ResponseEntity<>(jwtdto, HttpStatus.OK);
     }
 
     @PostMapping("/signup")
-    public ResponseEntity<?> registerAppUser(@RequestBody SignUpDTO signUpDTO)
-    {
+    public ResponseEntity<?> registerAppUser(@RequestBody SignUpDTO signUpDTO) {
 
         RegistrationResponse response;
 
 
+        if (signUpDTO.getEmail().equals(adminEmail)) {
+            response = userService.registerUser(signUpDTO, "ADMIN");
 
-        if(signUpDTO.getEmail().equals(adminEmail))
-        {
-             response = userService.registerUser(signUpDTO, "ADMIN");
-
-             Admin admin = new Admin();
-             admin.setAppUser(response.getUser());
-             admin.setBalance(0L);
+            Admin admin = new Admin();
+            admin.setAppUser(response.getUser());
+            admin.setBalance(0L);
 
             if (response.getResponse().haveError()) {
                 return ResponseEntity.badRequest().body(response.getResponse());
@@ -137,10 +131,8 @@ public class AuthController {
             return ResponseEntity.ok(response.getResponse());
 
 
-        }
-        else
-        {
-             response = userService.registerUser(signUpDTO, "USER");
+        } else {
+            response = userService.registerUser(signUpDTO, "USER");
         }
 
         if (response.getResponse().haveError()) {
@@ -154,8 +146,7 @@ public class AuthController {
     }
 
     @PostMapping("update/user")
-    public ResponseEntity<?>updateUser(HttpServletRequest request,@RequestBody SignUpDTO signUpDTO)
-    {
+    public ResponseEntity<?> updateUser(HttpServletRequest request, @RequestBody SignUpDTO signUpDTO) {
         AppUser user = userService.returnUser(request);
 
         Long id = user.getId();
@@ -174,21 +165,9 @@ public class AuthController {
 
         userRepository.save(user);
 
-        return  new ResponseEntity<>(updateUserResponse.getResponse(),HttpStatus.OK);
+        return new ResponseEntity<>(updateUserResponse.getResponse(), HttpStatus.OK);
 
     }
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 }

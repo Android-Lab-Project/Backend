@@ -16,6 +16,6 @@ public class DiagnosisDTO {
     private String description;
     private String place;
     private Long price;
-    private Long appUser_id;
-    private Long rating;
+    private Long hospitalId;
+    private Double rating;
 }

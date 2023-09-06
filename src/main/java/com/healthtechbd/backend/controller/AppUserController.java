@@ -3,17 +3,16 @@ package com.healthtechbd.backend.controller;
 import com.healthtechbd.backend.dto.*;
 import com.healthtechbd.backend.entity.*;
 import com.healthtechbd.backend.repo.*;
+import com.healthtechbd.backend.service.BkashPaymentService;
 import com.healthtechbd.backend.service.TimeService;
 import com.healthtechbd.backend.service.UserService;
 import com.healthtechbd.backend.utils.ApiResponse;
 import com.healthtechbd.backend.utils.AppConstants;
 import com.healthtechbd.backend.utils.BkashCreateResponse;
 import com.healthtechbd.backend.utils.BkashExecuteResponse;
-import com.healthtechbd.backend.service.BkashPaymentService;
 import jakarta.servlet.http.HttpServletRequest;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cglib.core.Local;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -117,31 +116,26 @@ public class AppUserController {
     }
 
     @GetMapping("bkash/execute/payment")
-    public ResponseEntity<?>executePayment(@RequestParam(name="paymentId")String paymentId,@RequestParam(name="status")String status, @RequestParam(name="type")String type, @RequestParam(name="productId")Long prouductId)
-    {
-        if(status.equalsIgnoreCase("success"))
-        {
+    public ResponseEntity<?> executePayment(@RequestParam(name = "paymentId") String paymentId, @RequestParam(name = "status") String status, @RequestParam(name = "type") String type, @RequestParam(name = "productId") Long prouductId) {
+        if (status.equalsIgnoreCase("success")) {
             BkashExecuteResponse bkashExecuteResponse = bkashPaymentService.executePayment(paymentId);
 
-            if(type.equalsIgnoreCase("DiagnosisOrder"))
-            {
-                Optional<DiagnosisOrder>optionalDiagnosisOrder = diagnosisOrderRepository.findById(prouductId);
+            if (type.equalsIgnoreCase("DiagnosisOrder")) {
+                Optional<DiagnosisOrder> optionalDiagnosisOrder = diagnosisOrderRepository.findById(prouductId);
 
                 optionalDiagnosisOrder.get().setTrxId(bkashExecuteResponse.getTrxID());
                 diagnosisOrderRepository.save(optionalDiagnosisOrder.get());
 
                 AppUser hospitalUser = optionalDiagnosisOrder.get().getHospital();
 
-                Optional<Hospital>hospital = hospitalRepository.findByAppUser_Id(hospitalUser.getId());
+                Optional<Hospital> hospital = hospitalRepository.findByAppUser_Id(hospitalUser.getId());
 
-                hospital.get().balance+=optionalDiagnosisOrder.get().getPrice();
+                hospital.get().balance += optionalDiagnosisOrder.get().getPrice();
 
                 hospitalRepository.save(hospital.get());
 
-            }
-            else if(type.equalsIgnoreCase("DoctorSerial"))
-            {
-                Optional<DoctorSerial>optionalDoctorSerial = doctorSerialRepository.findById(prouductId);
+            } else if (type.equalsIgnoreCase("DoctorSerial")) {
+                Optional<DoctorSerial> optionalDoctorSerial = doctorSerialRepository.findById(prouductId);
 
                 optionalDoctorSerial.get().setTrxId(bkashExecuteResponse.getTrxID());
 
@@ -149,51 +143,38 @@ public class AppUserController {
 
                 AppUser doctorUser = optionalDoctorSerial.get().getDoctor();
 
-                Optional<Doctor>doctor=doctorRepository.findByAppUser_Id(doctorUser.getId());
+                Optional<Doctor> doctor = doctorRepository.findByAppUser_Id(doctorUser.getId());
 
-                doctor.get().balance+=optionalDoctorSerial.get().getPrice();
+                doctor.get().balance += optionalDoctorSerial.get().getPrice();
 
                 doctorRepository.save(doctor.get());
-            }
-            else if(type.equalsIgnoreCase("MedicineOrder"))
-            {
-                Optional<MedicineOrder>optionalMedicineOrder = medicineOrderRepository.findById(prouductId);
+            } else if (type.equalsIgnoreCase("MedicineOrder")) {
+                Optional<MedicineOrder> optionalMedicineOrder = medicineOrderRepository.findById(prouductId);
 
                 optionalMedicineOrder.get().setTrxId(bkashExecuteResponse.getTrxID());
 
                 medicineOrderRepository.save(optionalMedicineOrder.get());
-            }
-            else if(type.equalsIgnoreCase("AmbulanceTrip"))
-            {
-                Optional<AmbulanceTrip>optionalAmbulanceTrip = ambulanceTripRepository.findById(prouductId);
+            } else if (type.equalsIgnoreCase("AmbulanceTrip")) {
+                Optional<AmbulanceTrip> optionalAmbulanceTrip = ambulanceTripRepository.findById(prouductId);
 
                 optionalAmbulanceTrip.get().setTrxId(bkashExecuteResponse.getTrxID());
 
                 ambulanceTripRepository.save(optionalAmbulanceTrip.get());
             }
 
-            return new ResponseEntity<>(bkashExecuteResponse,HttpStatus.OK);
-        }
-        else
-        {
-            if(type.equalsIgnoreCase("DiagnosisOrder"))
-            {
-               diagnosisOrderRepository.deleteById(prouductId);
-            }
-            else if(type.equalsIgnoreCase("DoctorSerial"))
-            {
-               doctorSerialRepository.deleteById(prouductId);
-            }
-            else if(type.equalsIgnoreCase("MedicineOrder"))
-            {
+            return new ResponseEntity<>(bkashExecuteResponse, HttpStatus.OK);
+        } else {
+            if (type.equalsIgnoreCase("DiagnosisOrder")) {
+                diagnosisOrderRepository.deleteById(prouductId);
+            } else if (type.equalsIgnoreCase("DoctorSerial")) {
+                doctorSerialRepository.deleteById(prouductId);
+            } else if (type.equalsIgnoreCase("MedicineOrder")) {
                 medicineOrderRepository.deleteById(prouductId);
-            }
-            else if (type.equalsIgnoreCase("AmbulanceTrip"))
-            {
+            } else if (type.equalsIgnoreCase("AmbulanceTrip")) {
                 ambulanceTripRepository.deleteById(prouductId);
             }
 
-            return new ResponseEntity<>(ApiResponse.create("error", "Product is canceled or not successful"),HttpStatus.OK);
+            return new ResponseEntity<>(ApiResponse.create("error", "Product is canceled or not successful"), HttpStatus.OK);
         }
     }
 
@@ -211,7 +192,7 @@ public class AppUserController {
 
         hospital = opHospital.get();
 
-        Optional<Hospital>optionalHospital =hospitalRepository.findByAppUser_Id(opHospital.get().getId());
+        Optional<Hospital> optionalHospital = hospitalRepository.findByAppUser_Id(opHospital.get().getId());
 
         DiagnosisOrder diagnosisOrder = modelMapper.map(diagnosisOrderDTO, DiagnosisOrder.class);
 
@@ -219,7 +200,7 @@ public class AppUserController {
         diagnosisOrder.setHospital(hospital);
         diagnosisOrder.setDate(LocalDate.now());
 
-        optionalHospital.get().balance+=diagnosisOrder.getPrice()- AppConstants.perUserCharge;
+        optionalHospital.get().balance += diagnosisOrder.getPrice() - AppConstants.perUserCharge;
 
         hospitalRepository.save(optionalHospital.get());
 
@@ -267,7 +248,7 @@ public class AppUserController {
             }
         }
 
-        doctor.balance+=doctorSerial.getPrice()-AppConstants.perUserCharge;
+        doctor.balance += doctorSerial.getPrice() - AppConstants.perUserCharge;
 
         doctorRepository.save(doctor);
 
@@ -369,8 +350,7 @@ public class AppUserController {
     }
 
     @PostMapping("/add/response")
-    public ResponseEntity<?>addUserResponse(HttpServletRequest request, @RequestParam String message)
-    {
+    public ResponseEntity<?> addUserResponse(HttpServletRequest request, @RequestParam String message) {
         AppUser user = userService.returnUser(request);
 
         UserResponse userResponse = new UserResponse();
@@ -381,7 +361,7 @@ public class AppUserController {
 
         userResponseRepository.save(userResponse);
 
-        return new ResponseEntity<>(ApiResponse.create("create","Response created"),HttpStatus.OK);
+        return new ResponseEntity<>(ApiResponse.create("create", "Response created"), HttpStatus.OK);
     }
 
     @GetMapping("/profile")
@@ -392,15 +372,13 @@ public class AppUserController {
             UserDTO userDTO = modelMapper.map(appUser, UserDTO.class);
 
             userdetails = userDTO;
-        } else if(appUser.getRoles().get(0).getRoleType().equals("ADMIN"))
-        {
+        } else if (appUser.getRoles().get(0).getRoleType().equals("ADMIN")) {
             UserDTO userDTO = modelMapper.map(appUser, UserDTO.class);
-            AdminDTO adminDTO = modelMapper.map(userDTO,AdminDTO.class);
+            AdminDTO adminDTO = modelMapper.map(userDTO, AdminDTO.class);
             adminDTO.setBalance(adminRepository.findById(1L).get().getBalance());
 
-            userdetails =adminDTO;
-        }
-        else if (appUser.getRoles().get(0).getRoleType().equals("HOSPITAL")) {
+            userdetails = adminDTO;
+        } else if (appUser.getRoles().get(0).getRoleType().equals("HOSPITAL")) {
             Optional<Hospital> optional = hospitalRepository.findByAppUser_Id(appUser.getId());
 
             HospitalDTO hospitalDTO = modelMapper.map(optional.get(), HospitalDTO.class);
