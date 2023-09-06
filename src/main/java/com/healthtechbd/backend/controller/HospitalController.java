@@ -127,6 +127,7 @@ public class HospitalController {
             diagnosisDTOS.get(i).setAppUser_id(diagnoses.get(i).getHospital().getAppUser().getId());
             diagnosisDTOS.get(i).setHospitalName(diagnoses.get(i).getHospital().getHospitalName());
             diagnosisDTOS.get(i).setPlace(diagnoses.get(i).getHospital().getPlace());
+            diagnosisDTOS.get(i).setRating(diagnoses.get(i).getHospital().getAppUser().getId());
         }
 
         return new ResponseEntity<>(diagnosisDTOS, HttpStatus.OK);

@@ -11,6 +11,7 @@ import com.healthtechbd.backend.entity.DoctorSerial;
 import com.healthtechbd.backend.repo.AppUserRepository;
 import com.healthtechbd.backend.repo.DoctorRepository;
 import com.healthtechbd.backend.repo.DoctorSerialRepository;
+import com.healthtechbd.backend.repo.ReviewRepository;
 import com.healthtechbd.backend.service.DoctorService;
 import com.healthtechbd.backend.service.TimeService;
 import com.healthtechbd.backend.service.UserService;
@@ -44,6 +45,9 @@ public class DoctorController {
 
     @Autowired
     private DoctorSerialRepository doctorSerialRepository;
+
+    @Autowired
+    private ReviewRepository reviewRepository;
 
     @Autowired
     private ModelMapper modelMapper;
@@ -201,6 +205,8 @@ public class DoctorController {
         doctorDTO.setEmail(doctor.getAppUser().getEmail());
         doctorDTO.setContactNo(doctor.getAppUser().getContactNo());
         doctorDTO.setDp(doctor.getAppUser().getDp());
+        doctorDTO.setRating(reviewRepository.findAvgRating(id));
+        doctorDTO.setReviewCount(reviewRepository.findCount(id));
 
         return new ResponseEntity<>(doctorDTO, HttpStatus.OK);
     }
@@ -250,6 +256,8 @@ public class DoctorController {
             allDoctorsDTO.get(i).setEmail(allDoctors.get(i).getAppUser().getEmail());
             allDoctorsDTO.get(i).setContactNo(allDoctors.get(i).getAppUser().getContactNo());
             allDoctorsDTO.get(i).setDp(allDoctors.get(i).getAppUser().getDp());
+            allDoctorsDTO.get(i).setRating(reviewRepository.findAvgRating(allDoctors.get(i).getAppUser().getId()));
+            allDoctorsDTO.get(i).setReviewCount(reviewRepository.findCount(allDoctors.get(i).getAppUser().getId()));
         }
         return new ResponseEntity<>(allDoctorsDTO, HttpStatus.OK);
 

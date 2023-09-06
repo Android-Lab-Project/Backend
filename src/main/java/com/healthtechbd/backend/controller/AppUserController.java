@@ -410,6 +410,8 @@ public class AppUserController {
             hospitalDTO.setEmail(appUser.getEmail());
             hospitalDTO.setContactNo(appUser.getContactNo());
             hospitalDTO.setDp(appUser.getDp());
+            hospitalDTO.setRating(reviewRepository.findAvgRating(appUser.getId()));
+            hospitalDTO.setReviewCount(reviewRepository.findCount(appUser.getId()));
 
             userdetails = hospitalDTO;
         } else if (appUser.getRoles().get(0).getRoleType().equals("PHARMACY")) {
@@ -423,6 +425,8 @@ public class AppUserController {
             pharmacyDTO.setEmail(appUser.getEmail());
             pharmacyDTO.setContactNo(appUser.getContactNo());
             pharmacyDTO.setDp(appUser.getDp());
+            pharmacyDTO.setRating(reviewRepository.findAvgRating(appUser.getId()));
+            pharmacyDTO.setReviewCount(reviewRepository.findCount(appUser.getId()));
 
             userdetails = pharmacyDTO;
         } else if (appUser.getRoles().get(0).getRoleType().equals("AMBULANCE")) {
@@ -437,6 +441,8 @@ public class AppUserController {
             ambulanceProviderDTO.setEmail(appUser.getEmail());
             ambulanceProviderDTO.setContactNo(appUser.getContactNo());
             ambulanceProviderDTO.setDp(appUser.getDp());
+            ambulanceProviderDTO.setRating(reviewRepository.findAvgRating(appUser.getId()));
+            ambulanceProviderDTO.setReviewCount(reviewRepository.findCount(appUser.getId()));
 
 
             userdetails = ambulanceProviderDTO;

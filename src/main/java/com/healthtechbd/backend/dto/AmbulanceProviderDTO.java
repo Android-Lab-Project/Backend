@@ -11,5 +11,7 @@ public class AmbulanceProviderDTO extends UserDTO {
     private String bio;
     private String place;
     private Long balance;
+    private Long rating;
+    private Long reviewCount;
 
 }
