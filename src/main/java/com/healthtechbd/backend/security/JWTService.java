@@ -48,19 +48,19 @@ public class JWTService {
             return true;
         } catch (SignatureException ex) {
             return false;
-            //throw new ApiException(HttpStatus.BAD_REQUEST, "Invalid JWT signature");
+
         } catch (MalformedJwtException ex) {
             return false;
-            //throw new ApiException(HttpStatus.BAD_REQUEST, "Invalid JWT token");
+
         } catch (ExpiredJwtException ex) {
             return false;
-            //throw new ApiException(HttpStatus.BAD_REQUEST, "Expired JWT token");
+
         } catch (UnsupportedJwtException ex) {
             return false;
-            //throw new ApiException(HttpStatus.BAD_REQUEST, "Unsupported JWT token");
+
         } catch (IllegalArgumentException ex) {
             return false;
-            //throw new ApiException(HttpStatus.BAD_REQUEST, "JWT claims string is empty.");
+
         }
     }
 
