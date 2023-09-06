@@ -16,6 +16,8 @@ public class DoctorSerialDTO {
 
     private LocalDate appointmentDate;
 
+    private String prescription;
+
     private Double time;
 
     private Long doctor_id;
