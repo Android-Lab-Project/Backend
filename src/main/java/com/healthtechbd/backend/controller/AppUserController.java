@@ -196,6 +196,8 @@ public class AppUserController {
 
         DiagnosisOrder diagnosisOrder = modelMapper.map(diagnosisOrderDTO, DiagnosisOrder.class);
 
+        diagnosisOrder.setId(null);
+
         diagnosisOrder.setUser(appUser);
         diagnosisOrder.setHospital(hospital);
         diagnosisOrder.setDate(LocalDate.now());
