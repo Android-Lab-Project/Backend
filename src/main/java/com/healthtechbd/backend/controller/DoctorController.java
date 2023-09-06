@@ -5,6 +5,7 @@ import com.healthtechbd.backend.dto.DoctorSerialViewDTO;
 import com.healthtechbd.backend.dto.DoctorSignUpDTO;
 import com.healthtechbd.backend.dto.SignUpDTO;
 import com.healthtechbd.backend.entity.AppUser;
+import com.healthtechbd.backend.entity.DiagnosisOrder;
 import com.healthtechbd.backend.entity.Doctor;
 import com.healthtechbd.backend.entity.DoctorSerial;
 import com.healthtechbd.backend.repo.AppUserRepository;
@@ -252,6 +253,17 @@ public class DoctorController {
         }
         return new ResponseEntity<>(allDoctorsDTO, HttpStatus.OK);
 
+    }
+
+    @GetMapping("/update/doctor/serial/pres/{id}")
+    public ResponseEntity<?>updateDiagnosisReport(@RequestParam String prescription, @PathVariable(name="id")Long id)
+    {
+        Optional<DoctorSerial>optionalDoctorSerial =doctorSerialRepository.findById(id);
+        var diagnosisOrder =optionalDoctorSerial.get();
+        diagnosisOrder.setPrescription(prescription);
+        doctorSerialRepository.save(diagnosisOrder);
+
+        return new ResponseEntity<>(ApiResponse.create("update","Report added"),HttpStatus.OK);
     }
 
     @GetMapping("/dashboard/doctor/pending")

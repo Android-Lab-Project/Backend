@@ -132,6 +132,18 @@ public class HospitalController {
         return new ResponseEntity<>(diagnosisDTOS, HttpStatus.OK);
     }
 
+    @GetMapping("/update/diagnosis/order/report/{id}")
+    public ResponseEntity<?>updateDiagnosisReport(@RequestParam(name="report")String report, @PathVariable(name="id")Long id)
+    {
+        Optional<DiagnosisOrder>optionalDiagnosisOrder =diagnosisOrderRepository.findById(id);
+        DiagnosisOrder diagnosisOrder =optionalDiagnosisOrder.get();
+        diagnosisOrder.setReportURL(report);
+        diagnosisOrderRepository.save(diagnosisOrder);
+
+        return new ResponseEntity<>(ApiResponse.create("update","Report added"),HttpStatus.OK);
+    }
+
+
     @GetMapping("/dashboard/hospital/pending")
     public ResponseEntity<?> getAllPendingReports(HttpServletRequest request) {
         AppUser hospital = userService.returnUser(request);
