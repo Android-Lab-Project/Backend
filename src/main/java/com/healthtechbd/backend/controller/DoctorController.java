@@ -258,13 +258,13 @@ public class DoctorController {
     }
 
     @GetMapping("/update/doctor/serial/pres/{id}")
-    public ResponseEntity<?> updateDiagnosisReport(@RequestParam String prescription, @PathVariable(name = "id") Long id) {
+    public ResponseEntity<?> updateDiagnosisReport(@RequestParam(name = "prescription") String prescription, @PathVariable(name = "id") Long id) {
         Optional<DoctorSerial> optionalDoctorSerial = doctorSerialRepository.findById(id);
         var diagnosisOrder = optionalDoctorSerial.get();
         diagnosisOrder.setPrescription(prescription);
         doctorSerialRepository.save(diagnosisOrder);
 
-        return new ResponseEntity<>(ApiResponse.create("update", "Report added"), HttpStatus.OK);
+        return new ResponseEntity<>(ApiResponse.create("update", "Prescription added"), HttpStatus.OK);
     }
 
     @GetMapping("/dashboard/doctor/pending")
