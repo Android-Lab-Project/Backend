@@ -178,50 +178,6 @@ public class AppUserController {
         }
     }
 
-    @PostMapping("/order/diagnosis")
-    public ResponseEntity<?> createDiagnosisOrder(@RequestBody DiagnosisOrderDTO diagnosisOrderDTO, HttpServletRequest request) {
-        AppUser appUser = userService.returnUser(request);
-
-        Optional<AppUser> opHospital = userRepository.findById(diagnosisOrderDTO.getHospitalId());
-
-        AppUser hospital = new AppUser();
-
-        if (!opHospital.isPresent()) {
-            return new ResponseEntity<>(ApiResponse.create("error", "Hospital does not exist"), HttpStatus.BAD_REQUEST);
-        }
-
-        hospital = opHospital.get();
-
-        Optional<Hospital> optionalHospital = hospitalRepository.findByAppUser_Id(opHospital.get().getId());
-
-        DiagnosisOrder diagnosisOrder = modelMapper.map(diagnosisOrderDTO, DiagnosisOrder.class);
-
-        diagnosisOrder.setId(null);
-
-        diagnosisOrder.setUser(appUser);
-        diagnosisOrder.setHospital(hospital);
-        diagnosisOrder.setDate(LocalDate.now());
-
-        optionalHospital.get().balance += diagnosisOrder.getPrice() - AppConstants.perUserCharge;
-
-        hospitalRepository.save(optionalHospital.get());
-
-        BkashCreateResponse bkashCreateResponse = bkashPaymentService.createPayment(diagnosisOrder.getPrice().toString());
-
-        bkashCreateResponse.setType("DiagnosisOrder");
-
-        DiagnosisOrder savedDiagnosisOrder = diagnosisOrderRepository.save(diagnosisOrder);
-
-        bkashCreateResponse.setProductId(savedDiagnosisOrder.getId());
-
-        savedDiagnosisOrder.setPaymentId(bkashCreateResponse.getPaymentId());
-
-        diagnosisOrderRepository.save(savedDiagnosisOrder);
-
-        return new ResponseEntity<>(bkashCreateResponse, HttpStatus.OK);
-
-    }
-
     @PostMapping("/add/doctorSerial")
     public ResponseEntity<?> createDoctorSerial(@RequestBody DoctorSerialDTO doctorSerialDTO, HttpServletRequest request) {
         AppUser user = userService.returnUser(request);
@@ -274,6 +230,53 @@ public class AppUserController {
 
         return new ResponseEntity<>(bkashCreateResponse, HttpStatus.OK);
     }
+
+    @PostMapping("/order/diagnosis")
+    public ResponseEntity<?> createDiagnosisOrder(@RequestBody DiagnosisOrderDTO diagnosisOrderDTO, HttpServletRequest request) {
+        AppUser appUser = userService.returnUser(request);
+
+        Optional<AppUser> opHospital = userRepository.findById(diagnosisOrderDTO.getHospitalId());
+
+        AppUser hospital = new AppUser();
+
+        if (!opHospital.isPresent()) {
+            return new ResponseEntity<>(ApiResponse.create("error", "Hospital does not exist"), HttpStatus.BAD_REQUEST);
+        }
+
+        hospital = opHospital.get();
+
+        Optional<Hospital> optionalHospital = hospitalRepository.findByAppUser_Id(opHospital.get().getId());
+
+        DiagnosisOrder diagnosisOrder = new DiagnosisOrder();
+
+        diagnosisOrder.setDescription(diagnosisOrderDTO.getDescription());
+        diagnosisOrder.setPrice(diagnosisOrderDTO.getPrice());
+        diagnosisOrder.setTime(diagnosisOrder.getTime());
+        diagnosisOrder.setUser(appUser);
+        diagnosisOrder.setHospital(hospital);
+        diagnosisOrder.setOrderDate(diagnosisOrderDTO.getOrderDate());
+        diagnosisOrder.setDate(LocalDate.now());
+
+        optionalHospital.get().balance += diagnosisOrder.getPrice() - AppConstants.perUserCharge;
+
+        hospitalRepository.save(optionalHospital.get());
+
+        BkashCreateResponse bkashCreateResponse = bkashPaymentService.createPayment(diagnosisOrder.getPrice().toString());
+
+        bkashCreateResponse.setType("DiagnosisOrder");
+
+        DiagnosisOrder savedDiagnosisOrder = diagnosisOrderRepository.save(diagnosisOrder);
+
+        bkashCreateResponse.setProductId(savedDiagnosisOrder.getId());
+
+        savedDiagnosisOrder.setPaymentId(bkashCreateResponse.getPaymentId());
+
+        diagnosisOrderRepository.save(savedDiagnosisOrder);
+
+        return new ResponseEntity<>(bkashCreateResponse, HttpStatus.OK);
+
+    }
+
 
     @PostMapping("/add/medicine/order")
     public ResponseEntity<?> createMedicineOrder(@RequestBody MedicineOrder medicineOrder, HttpServletRequest request) {
@@ -364,6 +367,140 @@ public class AppUserController {
         userResponseRepository.save(userResponse);
 
         return new ResponseEntity<>(ApiResponse.create("create", "Response created"), HttpStatus.OK);
+    }
+
+    @GetMapping("/dashboard/user/upcoming/doctorserial")
+    public ResponseEntity<?> getAllUpcomingForUser(HttpServletRequest request) {
+        AppUser user = userService.returnUser(request);
+
+        Double time = timeService.convertTimeToDouble(LocalTime.now());
+
+        List<DoctorSerial> upcomingDoctorSerials = doctorSerialRepository.findByDateAndTimeAndUserId(LocalDate.now(), time, user.getId());
+
+        if (upcomingDoctorSerials.size() == 0) {
+            return new ResponseEntity<>(ApiResponse.create("empty", "No upcoming found"), HttpStatus.OK);
+        }
+
+        List<UserDoctorSerialViewDTO> userDoctorSerialDTOs = new ArrayList<>();
+
+        for (var doctorSerial : upcomingDoctorSerials) {
+            UserDoctorSerialViewDTO userDoctorSerialDTO = new UserDoctorSerialViewDTO();
+            userDoctorSerialDTO.setId(doctorSerial.getId());
+            userDoctorSerialDTO.setTime(doctorSerial.getTime());
+            userDoctorSerialDTO.setDoctorName(doctorSerial.getDoctor().getFirstName() + " " + doctorSerial.getDoctor().getLastName());
+
+            userDoctorSerialDTOs.add(userDoctorSerialDTO);
+        }
+
+        return new ResponseEntity<>(userDoctorSerialDTOs, HttpStatus.OK);
+    }
+
+    @GetMapping("/dashboard/user/upcoming/diagnosis")
+    public ResponseEntity<?> getAllUpcoming(HttpServletRequest request) {
+        AppUser user = userService.returnUser(request);
+
+        Double time = timeService.convertTimeToDouble(LocalTime.now());
+
+        List<DiagnosisOrder> upcomingDiagnosisOrders = diagnosisOrderRepository.findByDateAndTimeAndUserId(LocalDate.now(), time, user.getId());
+
+        if (upcomingDiagnosisOrders.size() == 0) {
+            return new ResponseEntity<>(ApiResponse.create("empty", "No upcoming found"), HttpStatus.OK);
+        }
+
+        List<UserDiagnosisOrderViewDTO> userDiagnosisOrderViewDTOS = new ArrayList<>();
+
+        for (var diagnosisOrder : upcomingDiagnosisOrders) {
+            UserDiagnosisOrderViewDTO userDiagnosisOrderViewDTO = new UserDiagnosisOrderViewDTO();
+            userDiagnosisOrderViewDTO.setId(diagnosisOrder.getId());
+            userDiagnosisOrderViewDTO.setDescription(diagnosisOrder.getDescription());
+            userDiagnosisOrderViewDTO.setTime(diagnosisOrder.getTime());
+            userDiagnosisOrderViewDTO.setPlace(diagnosisOrder.getPlace());
+            userDiagnosisOrderViewDTO.setHospitalName(hospitalRepository.findByAppUser_Id(diagnosisOrder.getHospital().getId()).get().getHospitalName());
+
+            userDiagnosisOrderViewDTOS.add(userDiagnosisOrderViewDTO);
+        }
+
+        return new ResponseEntity<>(userDiagnosisOrderViewDTOS, HttpStatus.OK);
+    }
+
+    @GetMapping("/ambulance/trip/upcoming")
+    public ResponseEntity<?> getAllUpcomingTrip(HttpServletRequest request) {
+        AppUser user = userService.returnUser(request);
+        if (user == null) {
+            return new ResponseEntity<>(ApiResponse.create("error", "user not found"), HttpStatus.BAD_REQUEST);
+        }
+
+        String roleType = user.getRoles().get(0).getRoleType();
+
+        List<AmbulanceTrip> ambulanceTrips = new ArrayList<>();
+
+        if (roleType.equalsIgnoreCase("USER")) {
+            ambulanceTrips = ambulanceTripRepository.findUpcomingTripsByUser(LocalDate.now(), user.getId());
+        } else if (roleType.equalsIgnoreCase("AMBULANCE")) {
+            ambulanceTrips = ambulanceTripRepository.findUpcomingTripsByProvider(LocalDate.now(), user.getId());
+        }
+
+        if (ambulanceTrips.size() == 0) {
+            return new ResponseEntity<>(ApiResponse.create("empty", "No upcoming trip found"), HttpStatus.OK);
+        }
+
+        List<AmbulanceTripViewDTO> ambulanceTripViewDTOS = new ArrayList<>();
+
+        for (var ambulanceTrip : ambulanceTrips) {
+            AmbulanceTripViewDTO ambulanceTripViewDTO = new AmbulanceTripViewDTO();
+            ambulanceTripViewDTO.setId(ambulanceTrip.getId());
+            ambulanceTripViewDTO.setUserId(ambulanceTrip.getUser().getId());
+            ambulanceTripViewDTO.setProviderId(ambulanceTrip.getAmbulanceProvider().getId());
+            ambulanceTripViewDTO.setUserName(ambulanceTrip.getUser().getFirstName() + " " + ambulanceTrip.getUser().getLastName());
+            ambulanceTripViewDTO.setProviderName(ambulanceTrip.getAmbulanceProvider().getFirstName() + " " + ambulanceTrip.getAmbulanceProvider().getLastName());
+            ambulanceTripViewDTO.setSource(ambulanceTrip.getSource());
+            ambulanceTripViewDTO.setDestination(ambulanceTrip.getDestination());
+            ambulanceTripViewDTO.setPrice(ambulanceTrip.getPrice());
+            ambulanceTripViewDTO.setOrderDate(ambulanceTrip.getOrderDate());
+
+            ambulanceTripViewDTOS.add(ambulanceTripViewDTO);
+        }
+
+        return new ResponseEntity<>(ambulanceTripViewDTOS, HttpStatus.OK);
+    }
+
+    @GetMapping("/medicineorder/undelivered")
+    public ResponseEntity<?> getAllUndelivered(HttpServletRequest request) {
+        AppUser user = userService.returnUser(request);
+        if (user == null) {
+            return new ResponseEntity<>(ApiResponse.create("error", "user not found"), HttpStatus.BAD_REQUEST);
+        }
+
+        String roleType = user.getRoles().get(0).getRoleType();
+
+        List<MedicineOrder> medicineOrders = new ArrayList<>();
+
+        if (roleType.equalsIgnoreCase("USER")) {
+            medicineOrders = medicineOrderRepository.findUndeliveredOrdersByUser(user.getId());
+        } else if (roleType.equalsIgnoreCase("PHARMACY")) {
+            medicineOrders = medicineOrderRepository.findUndeliveredOrdersByPharmacy(user.getId());
+        }
+
+        if (medicineOrders.size() == 0) {
+            return new ResponseEntity<>(ApiResponse.create("empty", "Undelivered not found"), HttpStatus.OK);
+        }
+
+        List<MedicineOrderViewDTO> medicineOrderViewDTOS = new ArrayList<>();
+
+        for (var medicineOrder : medicineOrders) {
+            MedicineOrderViewDTO medicineOrderViewDTO = new MedicineOrderViewDTO();
+            medicineOrderViewDTO.setId(medicineOrder.getId());
+            medicineOrderViewDTO.setUserId(medicineOrder.getUser().getId());
+            medicineOrderViewDTO.setPharmacyId(medicineOrder.getPharmacy().getId());
+            medicineOrderViewDTO.setUserName(medicineOrder.getUser().getFirstName() + " " + medicineOrder.getUser().getLastName());
+            medicineOrderViewDTO.setPharmacyName(medicineOrder.getPharmacy().getFirstName() + " " + medicineOrder.getPharmacy().getLastName());
+            medicineOrderViewDTO.setDescription(medicineOrder.getDescription());
+            medicineOrderViewDTO.setPrice(medicineOrder.getPrice());
+
+            medicineOrderViewDTOS.add(medicineOrderViewDTO);
+        }
+
+        return new ResponseEntity<>(medicineOrderViewDTOS, HttpStatus.OK);
     }
 
     @GetMapping("/profile")
@@ -529,140 +666,6 @@ public class AppUserController {
         return new ResponseEntity<>(statisticsDTO, HttpStatus.OK);
     }
 
-
-    @GetMapping("/dashboard/user/upcoming/doctorserial")
-    public ResponseEntity<?> getAllUpcomingForUser(HttpServletRequest request) {
-        AppUser user = userService.returnUser(request);
-
-        Double time = timeService.convertTimeToDouble(LocalTime.now());
-
-        List<DoctorSerial> upcomingDoctorSerials = doctorSerialRepository.findByDateAndTimeAndUserId(LocalDate.now(), time, user.getId());
-
-        if (upcomingDoctorSerials.size() == 0) {
-            return new ResponseEntity<>(ApiResponse.create("empty", "No upcoming found"), HttpStatus.OK);
-        }
-
-        List<UserDoctorSerialViewDTO> userDoctorSerialDTOs = new ArrayList<>();
-
-        for (var doctorSerial : upcomingDoctorSerials) {
-            UserDoctorSerialViewDTO userDoctorSerialDTO = new UserDoctorSerialViewDTO();
-            userDoctorSerialDTO.setId(doctorSerial.getId());
-            userDoctorSerialDTO.setTime(doctorSerial.getTime());
-            userDoctorSerialDTO.setDoctorName(doctorSerial.getDoctor().getFirstName() + " " + doctorSerial.getDoctor().getLastName());
-
-            userDoctorSerialDTOs.add(userDoctorSerialDTO);
-        }
-
-        return new ResponseEntity<>(userDoctorSerialDTOs, HttpStatus.OK);
-    }
-
-    @GetMapping("/dashboard/user/upcoming/diagnosis")
-    public ResponseEntity<?> getAllUpcoming(HttpServletRequest request) {
-        AppUser user = userService.returnUser(request);
-
-        Double time = timeService.convertTimeToDouble(LocalTime.now());
-
-        List<DiagnosisOrder> upcomingDiagnosisOrders = diagnosisOrderRepository.findByDateAndTimeAndUserId(LocalDate.now(), time, user.getId());
-
-        if (upcomingDiagnosisOrders.size() == 0) {
-            return new ResponseEntity<>(ApiResponse.create("empty", "No upcoming found"), HttpStatus.OK);
-        }
-
-        List<UserDiagnosisOrderViewDTO> userDiagnosisOrderViewDTOS = new ArrayList<>();
-
-        for (var diagnosisOrder : upcomingDiagnosisOrders) {
-            UserDiagnosisOrderViewDTO userDiagnosisOrderViewDTO = new UserDiagnosisOrderViewDTO();
-            userDiagnosisOrderViewDTO.setId(diagnosisOrder.getId());
-            userDiagnosisOrderViewDTO.setDescription(diagnosisOrder.getDescription());
-            userDiagnosisOrderViewDTO.setTime(diagnosisOrder.getTime());
-            userDiagnosisOrderViewDTO.setPlace(diagnosisOrder.getPlace());
-            userDiagnosisOrderViewDTO.setHospitalName(hospitalRepository.findByAppUser_Id(diagnosisOrder.getHospital().getId()).get().getHospitalName());
-
-            userDiagnosisOrderViewDTOS.add(userDiagnosisOrderViewDTO);
-        }
-
-        return new ResponseEntity<>(userDiagnosisOrderViewDTOS, HttpStatus.OK);
-    }
-
-    @GetMapping("/medicineorder/undelivered")
-    public ResponseEntity<?> getAllUndelivered(HttpServletRequest request) {
-        AppUser user = userService.returnUser(request);
-        if (user == null) {
-            return new ResponseEntity<>(ApiResponse.create("error", "user not found"), HttpStatus.BAD_REQUEST);
-        }
-
-        String roleType = user.getRoles().get(0).getRoleType();
-
-        List<MedicineOrder> medicineOrders = new ArrayList<>();
-
-        if (roleType.equalsIgnoreCase("USER")) {
-            medicineOrders = medicineOrderRepository.findUndeliveredOrdersByUser(user.getId());
-        } else if (roleType.equalsIgnoreCase("PHARMACY")) {
-            medicineOrders = medicineOrderRepository.findUndeliveredOrdersByPharmacy(user.getId());
-        }
-
-        if (medicineOrders.size() == 0) {
-            return new ResponseEntity<>(ApiResponse.create("empty", "Undelivered not found"), HttpStatus.OK);
-        }
-
-        List<MedicineOrderViewDTO> medicineOrderViewDTOS = new ArrayList<>();
-
-        for (var medicineOrder : medicineOrders) {
-            MedicineOrderViewDTO medicineOrderViewDTO = new MedicineOrderViewDTO();
-            medicineOrderViewDTO.setId(medicineOrder.getId());
-            medicineOrderViewDTO.setUserId(medicineOrder.getUser().getId());
-            medicineOrderViewDTO.setPharmacyId(medicineOrder.getPharmacy().getId());
-            medicineOrderViewDTO.setUserName(medicineOrder.getUser().getFirstName() + " " + medicineOrder.getUser().getLastName());
-            medicineOrderViewDTO.setPharmacyName(medicineOrder.getPharmacy().getFirstName() + " " + medicineOrder.getPharmacy().getLastName());
-            medicineOrderViewDTO.setDescription(medicineOrder.getDescription());
-            medicineOrderViewDTO.setPrice(medicineOrder.getPrice());
-
-            medicineOrderViewDTOS.add(medicineOrderViewDTO);
-        }
-
-        return new ResponseEntity<>(medicineOrderViewDTOS, HttpStatus.OK);
-    }
-
-    @GetMapping("/ambulance/trip/upcoming")
-    public ResponseEntity<?> getAllUpcomingTrip(HttpServletRequest request) {
-        AppUser user = userService.returnUser(request);
-        if (user == null) {
-            return new ResponseEntity<>(ApiResponse.create("error", "user not found"), HttpStatus.BAD_REQUEST);
-        }
-
-        String roleType = user.getRoles().get(0).getRoleType();
-
-        List<AmbulanceTrip> ambulanceTrips = new ArrayList<>();
-
-        if (roleType.equalsIgnoreCase("USER")) {
-            ambulanceTrips = ambulanceTripRepository.findUpcomingTripsByUser(LocalDate.now(), user.getId());
-        } else if (roleType.equalsIgnoreCase("AMBULANCE")) {
-            ambulanceTrips = ambulanceTripRepository.findUpcomingTripsByProvider(LocalDate.now(), user.getId());
-        }
-
-        if (ambulanceTrips.size() == 0) {
-            return new ResponseEntity<>(ApiResponse.create("empty", "No upcoming trip found"), HttpStatus.OK);
-        }
-
-        List<AmbulanceTripViewDTO> ambulanceTripViewDTOS = new ArrayList<>();
-
-        for (var ambulanceTrip : ambulanceTrips) {
-            AmbulanceTripViewDTO ambulanceTripViewDTO = new AmbulanceTripViewDTO();
-            ambulanceTripViewDTO.setId(ambulanceTrip.getId());
-            ambulanceTripViewDTO.setUserId(ambulanceTrip.getUser().getId());
-            ambulanceTripViewDTO.setProviderId(ambulanceTrip.getAmbulanceProvider().getId());
-            ambulanceTripViewDTO.setUserName(ambulanceTrip.getUser().getFirstName() + " " + ambulanceTrip.getUser().getLastName());
-            ambulanceTripViewDTO.setProviderName(ambulanceTrip.getAmbulanceProvider().getFirstName() + " " + ambulanceTrip.getAmbulanceProvider().getLastName());
-            ambulanceTripViewDTO.setSource(ambulanceTrip.getSource());
-            ambulanceTripViewDTO.setDestination(ambulanceTrip.getDestination());
-            ambulanceTripViewDTO.setPrice(ambulanceTrip.getPrice());
-            ambulanceTripViewDTO.setDate(ambulanceTrip.getDate());
-
-            ambulanceTripViewDTOS.add(ambulanceTripViewDTO);
-        }
-
-        return new ResponseEntity<>(ambulanceTripViewDTOS, HttpStatus.OK);
-    }
 
     @DeleteMapping("/delete/user")
     public ResponseEntity<?> deleteUser(HttpServletRequest request) {

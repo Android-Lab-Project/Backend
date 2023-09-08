@@ -30,6 +30,7 @@ public class DiagnosisOrder {
     private String trxId;
     private String reportURL;
     private LocalDate date;
+    private LocalDate orderDate;
     private Double time;
 
 }

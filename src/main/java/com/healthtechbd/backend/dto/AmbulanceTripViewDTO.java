@@ -18,7 +18,5 @@ public class AmbulanceTripViewDTO {
     private String source;
     private String destination;
     private Long price;
-    private LocalDate date;
-
-
+    private LocalDate orderDate;
 }

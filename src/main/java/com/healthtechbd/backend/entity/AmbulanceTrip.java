@@ -33,5 +33,6 @@ public class AmbulanceTrip {
     private String paymentId;
     private String trxId;
     private Long price;
+    private LocalDate orderDate;
     private LocalDate date;
 }
