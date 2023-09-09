@@ -9,6 +9,9 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class UserDoctorSerialViewDTO {
     private Long id;
+    private String type;
+    private Long doctorId;
     private String doctorName;
+    private String contactNo;
     private Double time;
 }

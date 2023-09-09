@@ -1,7 +1,7 @@
 package com.healthtechbd.backend.controller;
 
 import com.healthtechbd.backend.dto.DiagnosisDTO;
-import com.healthtechbd.backend.dto.DiagnosisViewDTO;
+import com.healthtechbd.backend.dto.DiagnosisOrderViewDTO;
 import com.healthtechbd.backend.dto.SignUpDTO;
 import com.healthtechbd.backend.entity.AppUser;
 import com.healthtechbd.backend.entity.Diagnosis;
@@ -154,20 +154,22 @@ public class HospitalController {
             return new ResponseEntity<>(ApiResponse.create("empty", "No pending found"), HttpStatus.OK);
         }
 
-        List<DiagnosisViewDTO> diagnosisViewDTOS = new ArrayList<>();
+        List<DiagnosisOrderViewDTO> diagnosisOrderViewDTOS = new ArrayList<>();
 
         for (var i : diagnosisOrders) {
-            DiagnosisViewDTO diagnosisViewDTO = new DiagnosisViewDTO();
-            diagnosisViewDTO.setId(i.getId());
-            diagnosisViewDTO.setDescription(i.getDescription());
-            diagnosisViewDTO.setTime(i.getTime());
-            diagnosisViewDTO.setPlace(i.getPlace());
-            diagnosisViewDTO.setPatientName(i.getUser().getFirstName() + " " + i.getUser().getLastName());
+            DiagnosisOrderViewDTO diagnosisOrderViewDTO = new DiagnosisOrderViewDTO();
+            diagnosisOrderViewDTO.setId(i.getId());
+            diagnosisOrderViewDTO.setDescription(i.getDescription());
+            diagnosisOrderViewDTO.setTime(i.getTime());
+            diagnosisOrderViewDTO.setPlace(i.getPlace());
+            diagnosisOrderViewDTO.setPatientName(i.getUser().getFirstName() + " " + i.getUser().getLastName());
+            diagnosisOrderViewDTO.setPatientId(i.getUser().getId());
+            diagnosisOrderViewDTO.setContanctNo(i.getUser().getContactNo());
 
-            diagnosisViewDTOS.add(diagnosisViewDTO);
+            diagnosisOrderViewDTOS.add(diagnosisOrderViewDTO);
         }
 
-        return new ResponseEntity<>(diagnosisViewDTOS, HttpStatus.OK);
+        return new ResponseEntity<>(diagnosisOrderViewDTOS, HttpStatus.OK);
     }
 
     @GetMapping("/dashboard/hospital/upcoming")
@@ -182,20 +184,22 @@ public class HospitalController {
             return new ResponseEntity<>(ApiResponse.create("empty", "No upcoming found"), HttpStatus.OK);
         }
 
-        List<DiagnosisViewDTO> diagnosisViewDTOS = new ArrayList<>();
+        List<DiagnosisOrderViewDTO> diagnosisOrderViewDTOS = new ArrayList<>();
 
         for (var i : diagnosisOrders) {
-            DiagnosisViewDTO diagnosisViewDTO = new DiagnosisViewDTO();
-            diagnosisViewDTO.setId(i.getId());
-            diagnosisViewDTO.setDescription(i.getDescription());
-            diagnosisViewDTO.setTime(i.getTime());
-            diagnosisViewDTO.setPlace(i.getPlace());
-            diagnosisViewDTO.setPatientName(i.getUser().getFirstName() + " " + i.getUser().getLastName());
+            DiagnosisOrderViewDTO diagnosisOrderViewDTO = new DiagnosisOrderViewDTO();
+            diagnosisOrderViewDTO.setId(i.getId());
+            diagnosisOrderViewDTO.setDescription(i.getDescription());
+            diagnosisOrderViewDTO.setTime(i.getTime());
+            diagnosisOrderViewDTO.setPlace(i.getPlace());
+            diagnosisOrderViewDTO.setPatientName(i.getUser().getFirstName() + " " + i.getUser().getLastName());
+            diagnosisOrderViewDTO.setPatientId(i.getUser().getId());
+            diagnosisOrderViewDTO.setContanctNo(i.getUser().getContactNo());
 
-            diagnosisViewDTOS.add(diagnosisViewDTO);
+            diagnosisOrderViewDTOS.add(diagnosisOrderViewDTO);
         }
 
-        return new ResponseEntity<>(diagnosisViewDTOS, HttpStatus.OK);
+        return new ResponseEntity<>(diagnosisOrderViewDTOS, HttpStatus.OK);
 
 
     }

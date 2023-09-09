@@ -10,6 +10,10 @@ import lombok.NoArgsConstructor;
 public class UserDiagnosisOrderViewDTO {
     private Long id;
 
+    private Long hospitalId;
+
+    private String contactNo;
+
     private String hospitalName;
 
     private String description;

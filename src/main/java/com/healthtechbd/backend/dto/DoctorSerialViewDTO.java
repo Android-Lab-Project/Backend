@@ -12,7 +12,13 @@ import java.time.LocalDate;
 public class DoctorSerialViewDTO {
     private Long id;
 
+    private Long patientId;
+
+    private String contanctNo;
+
     private String patientName;
+
+    private String type;
 
     private Double time;
 

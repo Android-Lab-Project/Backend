@@ -9,9 +9,13 @@ import java.time.LocalDate;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class DiagnosisViewDTO {
+public class DiagnosisOrderViewDTO {
 
     private Long id;
+
+    private Long patientId;
+
+    private String contanctNo;
 
     private String patientName;
 

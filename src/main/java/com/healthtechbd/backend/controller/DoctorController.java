@@ -284,6 +284,9 @@ public class DoctorController {
             doctorSerialViewDTO.setId(doctorSerial.getId());
             doctorSerialViewDTO.setTime(doctorSerial.getTime());
             doctorSerialViewDTO.setPatientName(doctorSerial.getUser().getFirstName() + " " + doctorSerial.getUser().getLastName());
+            doctorSerialViewDTO.setType(doctorSerial.getType());
+            doctorSerialViewDTO.setPatientId(doctorSerial.getUser().getId());
+            doctorSerialViewDTO.setContanctNo(doctorSerial.getUser().getContactNo());
 
             doctorSerialViewDTOS.add(doctorSerialViewDTO);
         }
@@ -311,6 +314,9 @@ public class DoctorController {
             doctorSerialViewDTO.setTime(doctorSerial.getTime());
             doctorSerialViewDTO.setAppointmentDate(doctorSerial.getAppointmentDate());
             doctorSerialViewDTO.setPatientName(doctorSerial.getUser().getFirstName() + " " + doctorSerial.getUser().getLastName());
+            doctorSerialViewDTO.setType(doctorSerial.getType());
+            doctorSerialViewDTO.setPatientId(doctorSerial.getUser().getId());
+            doctorSerialViewDTO.setContanctNo(doctorSerial.getUser().getContactNo());
 
             doctorSerialViewDTOS.add(doctorSerialViewDTO);
         }
