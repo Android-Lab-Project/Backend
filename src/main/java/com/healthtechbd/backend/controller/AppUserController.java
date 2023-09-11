@@ -4,6 +4,7 @@ import com.healthtechbd.backend.dto.*;
 import com.healthtechbd.backend.entity.*;
 import com.healthtechbd.backend.repo.*;
 import com.healthtechbd.backend.service.BkashPaymentService;
+import com.healthtechbd.backend.service.ReviewService;
 import com.healthtechbd.backend.service.TimeService;
 import com.healthtechbd.backend.service.UserService;
 import com.healthtechbd.backend.utils.ApiResponse;
@@ -71,6 +72,9 @@ public class AppUserController {
 
     @Autowired
     private TimeService timeService;
+
+    @Autowired
+    private ReviewService reviewService;
 
     @Autowired
     private BkashPaymentService bkashPaymentService;
@@ -215,6 +219,16 @@ public class AppUserController {
         doctorSerial.setUser(user);
         doctorSerial.setDoctor(opDoctor.get());
 
+        Long reviewCount = reviewRepository.countByUser(user.getId(),opDoctor.get().getId());
+
+        if(reviewCount>=1)
+        {
+            doctorSerial.setReviewChecked(1);
+        }
+        else
+        {
+            doctorSerial.setReviewChecked(0);
+        }
 
         BkashCreateResponse bkashCreateResponse = bkashPaymentService.createPayment(doctorSerial.getPrice().toString());
 
@@ -257,6 +271,17 @@ public class AppUserController {
         diagnosisOrder.setOrderDate(diagnosisOrderDTO.getOrderDate());
         diagnosisOrder.setDate(LocalDate.now());
 
+        Long reviewCount = reviewRepository.countByUser(appUser.getId(), hospital.getId());
+
+        if(reviewCount>=1)
+        {
+            diagnosisOrder.setReviewChecked(1);
+        }
+        else
+        {
+            diagnosisOrder.setReviewChecked(0);
+        }
+
         optionalHospital.get().balance += diagnosisOrder.getPrice() - AppConstants.perUserCharge;
 
         hospitalRepository.save(optionalHospital.get());
@@ -276,7 +301,6 @@ public class AppUserController {
         return new ResponseEntity<>(bkashCreateResponse, HttpStatus.OK);
 
     }
-
 
     @PostMapping("/add/medicine/order")
     public ResponseEntity<?> createMedicineOrder(@RequestBody MedicineOrder medicineOrder, HttpServletRequest request) {
@@ -325,11 +349,11 @@ public class AppUserController {
         return new ResponseEntity<>(ApiResponse.create("create", "Trip created"), HttpStatus.OK);
     }
 
-    @PostMapping("/add/review/{id}")
-    public ResponseEntity<?> saveReview(@RequestParam(name = "review") String reviewStr, @RequestParam(name = "star") Long starCount, @PathVariable(name = "id") Long id, HttpServletRequest request) {
+    @PostMapping("/add/review")
+    public ResponseEntity<?> saveReview(@RequestParam(name = "review") String reviewStr, @RequestParam(name = "star") Long starCount,@RequestBody ReviewPendingDTO reviewPendingDTO, HttpServletRequest request) {
 
         AppUser reviewer = userService.returnUser(request);
-        Optional<AppUser> optionalSubject = userRepository.findById(id);
+        Optional<AppUser> optionalSubject = userRepository.findById(reviewPendingDTO.getSubjectId());
 
         AppUser subject = new AppUser();
 
@@ -349,10 +373,76 @@ public class AppUserController {
         review.setSubject(subject);
 
         reviewRepository.save(review);
+
+        if(reviewPendingDTO.getRole().equalsIgnoreCase("Doctor"))
+        {
+            reviewService.updateReviewCheckedForDoctorSerial(reviewPendingDTO.getOrderId(),reviewer.getId(), subject.getId());
+        }
+        else if(reviewPendingDTO.getRole().equalsIgnoreCase("Hospital"))
+        {
+            reviewService.updateReviewCheckedForDiagnosisOrder(reviewPendingDTO.getOrderId(),reviewer.getId(), subject.getId());
+        }
+        else if(reviewPendingDTO.getRole().equalsIgnoreCase("Ambulance"))
+        {
+            reviewService.updateReviewCheckedForAmbulanceTrip(reviewPendingDTO.getOrderId(),reviewer.getId(), subject.getId());
+        }
+
         ApiResponse createResponse = ApiResponse.create("create", "Review Saved");
         return new ResponseEntity<>(createResponse, HttpStatus.OK);
 
     }
+
+    @GetMapping("/review/pending")
+    public ResponseEntity<?> getPendingReview(HttpServletRequest request)
+    {
+        AppUser user =userService.returnUser(request);
+
+        List<DiagnosisOrder>diagnosisOrders = diagnosisOrderRepository.findDiagnosisOrderByReviewChecked(user.getId());
+
+        List<DoctorSerial>doctorSerials = doctorSerialRepository.findDoctorSerialByReviewChecked(user.getId());
+
+        List<AmbulanceTrip>ambulanceTrips = ambulanceTripRepository.findTripByReviewChecked(user.getId());
+
+        List<ReviewPendingDTO>reviewPendingDTOS = new ArrayList<>();
+
+        for(var diagnosisOrder: diagnosisOrders)
+        {
+            ReviewPendingDTO reviewPendingDTO = new ReviewPendingDTO();
+            reviewPendingDTO.setOrderId(diagnosisOrder.getId());
+            reviewPendingDTO.setRole("Hospital");
+            reviewPendingDTO.setSubjectName(hospitalRepository.findByAppUser_Id(diagnosisOrder.getHospital().getId()).get().getHospitalName());
+            reviewPendingDTO.setSubjectId(diagnosisOrder.getHospital().getId());
+            reviewPendingDTOS.add(reviewPendingDTO);
+        }
+
+        for(var doctorSerial: doctorSerials)
+        {
+            ReviewPendingDTO reviewPendingDTO = new ReviewPendingDTO();
+            reviewPendingDTO.setOrderId(doctorSerial.getId());
+            reviewPendingDTO.setRole("Doctor");
+            reviewPendingDTO.setSubjectName(doctorSerial.getDoctor().getFirstName()+" "+doctorSerial.getDoctor().getLastName());
+            reviewPendingDTO.setSubjectId(doctorSerial.getDoctor().getId());
+            reviewPendingDTOS.add(reviewPendingDTO);
+        }
+
+        for(var ambulanceTrip: ambulanceTrips)
+        {
+            ReviewPendingDTO reviewPendingDTO = new ReviewPendingDTO();
+            reviewPendingDTO.setOrderId(ambulanceTrip.getId());
+            reviewPendingDTO.setRole("Ambulance");
+            reviewPendingDTO.setSubjectName(ambulanceTrip.getAmbulanceProvider().getFirstName()+" "+ambulanceTrip.getAmbulanceProvider().getLastName());
+            reviewPendingDTO.setSubjectId(ambulanceTrip.getAmbulanceProvider().getId());
+            reviewPendingDTOS.add(reviewPendingDTO);
+        }
+
+        if(reviewPendingDTOS.isEmpty())
+        {
+            return new ResponseEntity<>(ApiResponse.create("empty","No pending response found"),HttpStatus.OK);
+        }
+
+        return new ResponseEntity<>(reviewPendingDTOS,HttpStatus.OK);
+    }
+
 
     @PostMapping("/add/response")
     public ResponseEntity<?> addUserResponse(HttpServletRequest request, @RequestParam String message) {

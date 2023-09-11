@@ -20,5 +20,8 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
     @Query("SELECT Count(r) FROM Review r WHERE r.subject.id = :user_id")
     Long findCount(@Param("user_id") Long user_id);
 
+    @Query("Select Count(r) from Review r where r.reviewer.id = :reviewerId AND r.subject.id = :subjectId")
+    Long countByUser(@Param("reviewerId")Long reviewerId, @Param("subjectId")Long subjectId);
+
 
 }

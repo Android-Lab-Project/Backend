@@ -32,5 +32,6 @@ public class DiagnosisOrder {
     private LocalDate date;
     private LocalDate orderDate;
     private Double time;
+    private Integer reviewChecked;
 
 }

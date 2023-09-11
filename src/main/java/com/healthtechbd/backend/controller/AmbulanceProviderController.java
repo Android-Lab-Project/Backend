@@ -32,8 +32,7 @@ public class AmbulanceProviderController {
     private ModelMapper modelMapper;
 
     @PostMapping("/register/ambulanceProvider")
-    public ResponseEntity<?> registerAmbulanceProvider(@RequestBody AmbulanceProvider ambulanceProvider) {
-
+    public ResponseEntity<ApiResponse> registerAmbulanceProvider(@RequestBody AmbulanceProvider ambulanceProvider) {
         SignUpDTO signUpDTO = modelMapper.map(ambulanceProvider.getAppUser(), SignUpDTO.class);
 
         RegistrationResponse response = userService.registerUser(signUpDTO, "AMBULANCE");
@@ -43,30 +42,21 @@ public class AmbulanceProviderController {
         }
 
         ambulanceProvider.setAppUser(response.getUser());
-
         ambulanceProvider.setBalance(0L);
 
-
         ambulanceProviderRepository.save(ambulanceProvider);
-
         userService.AddUserCount(LocalDate.now());
 
-
         return new ResponseEntity<>(ApiResponse.create("create", "Sign up Successful"), HttpStatus.OK);
-
-
     }
 
     @PostMapping("/update/ambulanceProvider")
-    public ResponseEntity<?> upateProvider(HttpServletRequest request, @RequestBody AmbulanceProvider ambulanceProvider) {
+    public ResponseEntity<ApiResponse> updateProvider(HttpServletRequest request, @RequestBody AmbulanceProvider ambulanceProvider) {
         AppUser appUser = userService.returnUser(request);
-
         Long appUserId = appUser.getId();
-
         var roles = appUser.getRoles();
 
         SignUpDTO signUpDTO = modelMapper.map(ambulanceProvider.getAppUser(), SignUpDTO.class);
-
         UpdateUserResponse updateUserResponse = userService.updateUser(signUpDTO);
 
         if (updateUserResponse.getResponse().haveError()) {
@@ -74,7 +64,6 @@ public class AmbulanceProviderController {
         }
 
         appUser = updateUserResponse.getUser();
-
         appUser.setId(appUserId);
         appUser.setRoles(roles);
 
@@ -88,5 +77,4 @@ public class AmbulanceProviderController {
 
         return new ResponseEntity<>(updateUserResponse.getResponse(), HttpStatus.OK);
     }
-
 }

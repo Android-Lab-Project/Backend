@@ -27,6 +27,8 @@ public class DoctorSerial {
 
     private Double time;
 
+    private Integer reviewChecked;
+
     private String prescription;
 
     private String paymentId;

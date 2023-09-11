@@ -2,6 +2,7 @@ package com.healthtechbd.backend.repo;
 
 import com.healthtechbd.backend.entity.AmbulanceTrip;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -70,4 +71,12 @@ public interface AmbulanceTripRepository extends JpaRepository<AmbulanceTrip, Lo
 
     @Query("SELECT at FROM AmbulanceTrip at WHERE at.orderDate>=:date AND at.ambulanceProvider.id = :ambulanceProviderId")
     List<AmbulanceTrip> findUpcomingTripsByProvider(@Param("date") LocalDate date, @Param("ambulanceProviderId") Long ambulanceProviderId);
+
+
+    @Query("SELECT at FROM AmbulanceTrip at WHERE at.user.id = :userId AND at.reviewChecked = 0")
+    List<AmbulanceTrip> findTripByReviewChecked(@Param("userId") Long userId);
+
+    @Modifying
+    @Query("UPDATE AmbulanceTrip SET reviewChecked = 1 WHERE id = :o_id AND user.id = :user_id AND ambulanceProvider.id = :subject_id")
+    void updateReviewChecked(@Param("o_id")Long o_id,@Param("user_id") Long user_id, @Param("subject_id")Long subject_id);
 }

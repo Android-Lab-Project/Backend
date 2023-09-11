@@ -1,7 +1,9 @@
 package com.healthtechbd.backend.repo;
 
+import com.healthtechbd.backend.entity.AmbulanceTrip;
 import com.healthtechbd.backend.entity.DiagnosisOrder;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -89,4 +91,12 @@ public interface DiagnosisOrderRepository extends JpaRepository<DiagnosisOrder, 
             @Param("startDate") LocalDate startDate,
             @Param("time") Double time,
             @Param("userId") Long userId);
+
+    @Query("SELECT do FROM DiagnosisOrder do WHERE do.user.id = :userId AND do.reviewChecked = 0")
+    List<DiagnosisOrder> findDiagnosisOrderByReviewChecked(@Param("userId") Long userId);
+
+    @Modifying
+    @Query("UPDATE DiagnosisOrder SET reviewChecked = 1 WHERE id = :o_id AND user.id = :user_id AND hospital.id = :subject_id")
+    void updateReviewChecked(@Param("o_id")Long o_id,@Param("user_id") Long user_id, @Param("subject_id")Long subject_id);
+
 }

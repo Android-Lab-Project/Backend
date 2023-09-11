@@ -35,4 +35,5 @@ public class AmbulanceTrip {
     private Long price;
     private LocalDate orderDate;
     private LocalDate date;
+    private Integer reviewChecked;
 }

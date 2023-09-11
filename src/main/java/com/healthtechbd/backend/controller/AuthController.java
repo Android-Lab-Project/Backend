@@ -88,14 +88,13 @@ public class AuthController {
             );
         } catch (Exception e) {
 
-            System.out.println(e);
-
             ApiResponse errorResponse = ApiResponse.create("error", "Invaild user email or password");
             return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
         }
         UserDetails userDetails = userServiceSecurity.loadUserByUsername(signInDTO.getEmail());
         Optional<AppUser> optionalAppUser = userRepository.findByEmail(signInDTO.getEmail());
         AppUser appUser = new AppUser();
+
         if (optionalAppUser.isPresent()) {
             appUser = optionalAppUser.get();
         }
@@ -168,7 +167,5 @@ public class AuthController {
         return new ResponseEntity<>(updateUserResponse.getResponse(), HttpStatus.OK);
 
     }
-
-
 }
 
