@@ -24,8 +24,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-@SuppressWarnings({"OptionalGetWithoutIsPresent","Unused"})
-@CrossOrigin(origins = "*", allowedHeaders = "*", methods = {RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT, RequestMethod.DELETE})
+@SuppressWarnings({ "OptionalGetWithoutIsPresent", "Unused" })
+@CrossOrigin(origins = "*", allowedHeaders = "*", methods = { RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT,
+        RequestMethod.DELETE })
 @RestController
 public class AppUserController {
 
@@ -86,9 +87,11 @@ public class AppUserController {
     public ResponseEntity<?> getAllReportsPrescriptions(HttpServletRequest request) {
         AppUser appUser = userService.returnUser(request);
 
-        List<DoctorSerial> doctorSerials = doctorSerialRepository.findByUser_IdAndPrescriptionIsNotNull(appUser.getId());
+        List<DoctorSerial> doctorSerials = doctorSerialRepository
+                .findByUser_IdAndPrescriptionIsNotNull(appUser.getId());
 
-        List<DiagnosisOrder> diagnosisOrders = diagnosisOrderRepository.findByUser_IdAndReportURLIsNotNull(appUser.getId());
+        List<DiagnosisOrder> diagnosisOrders = diagnosisOrderRepository
+                .findByUser_IdAndReportURLIsNotNull(appUser.getId());
 
         rpDTO rps = new rpDTO();
 
@@ -99,7 +102,8 @@ public class AppUserController {
             DoctorPrescriptionDTO doctorPrescriptionDTO = new DoctorPrescriptionDTO();
 
             doctorPrescriptionDTO.setPrescription(doctorSerials.get(i).getPrescription());
-            doctorPrescriptionDTO.setDoctorName(doctorSerials.get(i).getDoctor().getFirstName() + " " + doctorSerials.get(i).getDoctor().getLastName());
+            doctorPrescriptionDTO.setDoctorName(doctorSerials.get(i).getDoctor().getFirstName() + " "
+                    + doctorSerials.get(i).getDoctor().getLastName());
             doctorPrescriptionDTO.setDoctorId(doctorSerials.get(i).getDoctor().getId());
 
             rps.getAllPrescriptions().add(doctorPrescriptionDTO);
@@ -111,7 +115,8 @@ public class AppUserController {
             diagnosisReportDTO.setDescription(diagnosisOrders.get(i).getDescription());
             diagnosisReportDTO.setReportURL(diagnosisOrders.get(i).getReportURL());
             diagnosisReportDTO.setHospitalId(diagnosisOrders.get(i).getHospital().getId());
-            diagnosisReportDTO.setHospitalName(hospitalRepository.findByAppUser_Id(diagnosisOrders.get(i).getHospital().getId()).get().getHospitalName());
+            diagnosisReportDTO.setHospitalName(hospitalRepository
+                    .findByAppUser_Id(diagnosisOrders.get(i).getHospital().getId()).get().getHospitalName());
 
             rps.getAllReports().add(diagnosisReportDTO);
         }
@@ -120,7 +125,9 @@ public class AppUserController {
     }
 
     @GetMapping("bkash/execute/payment")
-    public ResponseEntity<?> executePayment(@RequestParam(name = "paymentId") String paymentId, @RequestParam(name = "status") String status, @RequestParam(name = "type") String type, @RequestParam(name = "productId") Long prouductId) {
+    public ResponseEntity<?> executePayment(@RequestParam(name = "paymentId") String paymentId,
+            @RequestParam(name = "status") String status, @RequestParam(name = "type") String type,
+            @RequestParam(name = "productId") Long prouductId) {
         if (status.equalsIgnoreCase("success")) {
             BkashExecuteResponse bkashExecuteResponse = bkashPaymentService.executePayment(paymentId);
 
@@ -178,12 +185,14 @@ public class AppUserController {
                 ambulanceTripRepository.deleteById(prouductId);
             }
 
-            return new ResponseEntity<>(ApiResponse.create("error", "Product is canceled or not successful"), HttpStatus.OK);
+            return new ResponseEntity<>(ApiResponse.create("error", "Product is canceled or not successful"),
+                    HttpStatus.OK);
         }
     }
 
     @PostMapping("/add/doctorSerial")
-    public ResponseEntity<?> createDoctorSerial(@RequestBody DoctorSerialDTO doctorSerialDTO, HttpServletRequest request) {
+    public ResponseEntity<?> createDoctorSerial(@RequestBody DoctorSerialDTO doctorSerialDTO,
+            HttpServletRequest request) {
         AppUser user = userService.returnUser(request);
 
         Optional<AppUser> opDoctor = userRepository.findById(doctorSerialDTO.getDoctor_id());
@@ -219,14 +228,11 @@ public class AppUserController {
         doctorSerial.setUser(user);
         doctorSerial.setDoctor(opDoctor.get());
 
-        Long reviewCount = reviewRepository.countByUser(user.getId(),opDoctor.get().getId());
+        Long reviewCount = reviewRepository.countByUser(user.getId(), opDoctor.get().getId());
 
-        if(reviewCount>=1)
-        {
+        if (reviewCount >= 1) {
             doctorSerial.setReviewChecked(1);
-        }
-        else
-        {
+        } else {
             doctorSerial.setReviewChecked(0);
         }
 
@@ -246,7 +252,8 @@ public class AppUserController {
     }
 
     @PostMapping("/order/diagnosis")
-    public ResponseEntity<?> createDiagnosisOrder(@RequestBody DiagnosisOrderDTO diagnosisOrderDTO, HttpServletRequest request) {
+    public ResponseEntity<?> createDiagnosisOrder(@RequestBody DiagnosisOrderDTO diagnosisOrderDTO,
+            HttpServletRequest request) {
         AppUser appUser = userService.returnUser(request);
 
         Optional<AppUser> opHospital = userRepository.findById(diagnosisOrderDTO.getHospitalId());
@@ -273,12 +280,9 @@ public class AppUserController {
 
         Long reviewCount = reviewRepository.countByUser(appUser.getId(), hospital.getId());
 
-        if(reviewCount>=1)
-        {
+        if (reviewCount >= 1) {
             diagnosisOrder.setReviewChecked(1);
-        }
-        else
-        {
+        } else {
             diagnosisOrder.setReviewChecked(0);
         }
 
@@ -286,7 +290,8 @@ public class AppUserController {
 
         hospitalRepository.save(optionalHospital.get());
 
-        BkashCreateResponse bkashCreateResponse = bkashPaymentService.createPayment(diagnosisOrder.getPrice().toString());
+        BkashCreateResponse bkashCreateResponse = bkashPaymentService
+                .createPayment(diagnosisOrder.getPrice().toString());
 
         bkashCreateResponse.setType("DiagnosisOrder");
 
@@ -313,8 +318,8 @@ public class AppUserController {
         medicineOrder.setDate(LocalDate.now());
         medicineOrder.setDelivered(0);
 
-
-        BkashCreateResponse bkashCreateResponse = bkashPaymentService.createPayment(medicineOrder.getPrice().toString());
+        BkashCreateResponse bkashCreateResponse = bkashPaymentService
+                .createPayment(medicineOrder.getPrice().toString());
 
         MedicineOrder savedMedicineOrder = medicineOrderRepository.save(medicineOrder);
 
@@ -337,7 +342,8 @@ public class AppUserController {
 
         ambulanceTrip.setDate(LocalDate.now());
 
-        BkashCreateResponse bkashCreateResponse = bkashPaymentService.createPayment(AppConstants.perUserCharge.toString());
+        BkashCreateResponse bkashCreateResponse = bkashPaymentService
+                .createPayment(AppConstants.perUserCharge.toString());
 
         AmbulanceTrip savedTrip = ambulanceTripRepository.save(ambulanceTrip);
 
@@ -350,7 +356,9 @@ public class AppUserController {
     }
 
     @PostMapping("/add/review")
-    public ResponseEntity<?> saveReview(@RequestParam(name = "review") String reviewStr, @RequestParam(name = "star") Long starCount,@RequestBody ReviewPendingDTO reviewPendingDTO, HttpServletRequest request) {
+    public ResponseEntity<?> saveReview(@RequestParam(name = "review") String reviewStr,
+            @RequestParam(name = "star") Long starCount, @RequestBody ReviewPendingDTO reviewPendingDTO,
+            HttpServletRequest request) {
 
         AppUser reviewer = userService.returnUser(request);
         Optional<AppUser> optionalSubject = userRepository.findById(reviewPendingDTO.getSubjectId());
@@ -374,17 +382,15 @@ public class AppUserController {
 
         reviewRepository.save(review);
 
-        if(reviewPendingDTO.getRole().equalsIgnoreCase("Doctor"))
-        {
-            reviewService.updateReviewCheckedForDoctorSerial(reviewPendingDTO.getOrderId(),reviewer.getId(), subject.getId());
-        }
-        else if(reviewPendingDTO.getRole().equalsIgnoreCase("Hospital"))
-        {
-            reviewService.updateReviewCheckedForDiagnosisOrder(reviewPendingDTO.getOrderId(),reviewer.getId(), subject.getId());
-        }
-        else if(reviewPendingDTO.getRole().equalsIgnoreCase("Ambulance"))
-        {
-            reviewService.updateReviewCheckedForAmbulanceTrip(reviewPendingDTO.getOrderId(),reviewer.getId(), subject.getId());
+        if (reviewPendingDTO.getRole().equalsIgnoreCase("Doctor")) {
+            reviewService.updateReviewCheckedForDoctorSerial(reviewPendingDTO.getOrderId(), reviewer.getId(),
+                    subject.getId());
+        } else if (reviewPendingDTO.getRole().equalsIgnoreCase("Hospital")) {
+            reviewService.updateReviewCheckedForDiagnosisOrder(reviewPendingDTO.getOrderId(), reviewer.getId(),
+                    subject.getId());
+        } else if (reviewPendingDTO.getRole().equalsIgnoreCase("Ambulance")) {
+            reviewService.updateReviewCheckedForAmbulanceTrip(reviewPendingDTO.getOrderId(), reviewer.getId(),
+                    subject.getId());
         }
 
         ApiResponse createResponse = ApiResponse.create("create", "Review Saved");
@@ -393,56 +399,53 @@ public class AppUserController {
     }
 
     @GetMapping("/review/pending")
-    public ResponseEntity<?> getPendingReview(HttpServletRequest request)
-    {
-        AppUser user =userService.returnUser(request);
+    public ResponseEntity<?> getPendingReview(HttpServletRequest request) {
+        AppUser user = userService.returnUser(request);
 
-        List<DiagnosisOrder>diagnosisOrders = diagnosisOrderRepository.findDiagnosisOrderByReviewChecked(user.getId());
+        List<DiagnosisOrder> diagnosisOrders = diagnosisOrderRepository.findDiagnosisOrderByReviewChecked(user.getId());
 
-        List<DoctorSerial>doctorSerials = doctorSerialRepository.findDoctorSerialByReviewChecked(user.getId());
+        List<DoctorSerial> doctorSerials = doctorSerialRepository.findDoctorSerialByReviewChecked(user.getId());
 
-        List<AmbulanceTrip>ambulanceTrips = ambulanceTripRepository.findTripByReviewChecked(user.getId());
+        List<AmbulanceTrip> ambulanceTrips = ambulanceTripRepository.findTripByReviewChecked(user.getId());
 
-        List<ReviewPendingDTO>reviewPendingDTOS = new ArrayList<>();
+        List<ReviewPendingDTO> reviewPendingDTOS = new ArrayList<>();
 
-        for(var diagnosisOrder: diagnosisOrders)
-        {
+        for (var diagnosisOrder : diagnosisOrders) {
             ReviewPendingDTO reviewPendingDTO = new ReviewPendingDTO();
             reviewPendingDTO.setOrderId(diagnosisOrder.getId());
             reviewPendingDTO.setRole("Hospital");
-            reviewPendingDTO.setSubjectName(hospitalRepository.findByAppUser_Id(diagnosisOrder.getHospital().getId()).get().getHospitalName());
+            reviewPendingDTO.setSubjectName(
+                    hospitalRepository.findByAppUser_Id(diagnosisOrder.getHospital().getId()).get().getHospitalName());
             reviewPendingDTO.setSubjectId(diagnosisOrder.getHospital().getId());
             reviewPendingDTOS.add(reviewPendingDTO);
         }
 
-        for(var doctorSerial: doctorSerials)
-        {
+        for (var doctorSerial : doctorSerials) {
             ReviewPendingDTO reviewPendingDTO = new ReviewPendingDTO();
             reviewPendingDTO.setOrderId(doctorSerial.getId());
             reviewPendingDTO.setRole("Doctor");
-            reviewPendingDTO.setSubjectName(doctorSerial.getDoctor().getFirstName()+" "+doctorSerial.getDoctor().getLastName());
+            reviewPendingDTO.setSubjectName(
+                    doctorSerial.getDoctor().getFirstName() + " " + doctorSerial.getDoctor().getLastName());
             reviewPendingDTO.setSubjectId(doctorSerial.getDoctor().getId());
             reviewPendingDTOS.add(reviewPendingDTO);
         }
 
-        for(var ambulanceTrip: ambulanceTrips)
-        {
+        for (var ambulanceTrip : ambulanceTrips) {
             ReviewPendingDTO reviewPendingDTO = new ReviewPendingDTO();
             reviewPendingDTO.setOrderId(ambulanceTrip.getId());
             reviewPendingDTO.setRole("Ambulance");
-            reviewPendingDTO.setSubjectName(ambulanceTrip.getAmbulanceProvider().getFirstName()+" "+ambulanceTrip.getAmbulanceProvider().getLastName());
+            reviewPendingDTO.setSubjectName(ambulanceTrip.getAmbulanceProvider().getFirstName() + " "
+                    + ambulanceTrip.getAmbulanceProvider().getLastName());
             reviewPendingDTO.setSubjectId(ambulanceTrip.getAmbulanceProvider().getId());
             reviewPendingDTOS.add(reviewPendingDTO);
         }
 
-        if(reviewPendingDTOS.isEmpty())
-        {
-            return new ResponseEntity<>(ApiResponse.create("empty","No pending response found"),HttpStatus.OK);
+        if (reviewPendingDTOS.isEmpty()) {
+            return new ResponseEntity<>(ApiResponse.create("empty", "No pending response found"), HttpStatus.OK);
         }
 
-        return new ResponseEntity<>(reviewPendingDTOS,HttpStatus.OK);
+        return new ResponseEntity<>(reviewPendingDTOS, HttpStatus.OK);
     }
-
 
     @PostMapping("/add/response")
     public ResponseEntity<?> addUserResponse(HttpServletRequest request, @RequestParam String message) {
@@ -465,7 +468,8 @@ public class AppUserController {
 
         Double time = timeService.convertTimeToDouble(LocalTime.now());
 
-        List<DoctorSerial> upcomingDoctorSerials = doctorSerialRepository.findByDateAndTimeAndUserId(LocalDate.now(), time, user.getId());
+        List<DoctorSerial> upcomingDoctorSerials = doctorSerialRepository.findByDateAndTimeAndUserId(LocalDate.now(),
+                time, user.getId());
 
         if (upcomingDoctorSerials.size() == 0) {
             return new ResponseEntity<>(ApiResponse.create("empty", "No upcoming found"), HttpStatus.OK);
@@ -477,7 +481,8 @@ public class AppUserController {
             UserDoctorSerialViewDTO userDoctorSerialDTO = new UserDoctorSerialViewDTO();
             userDoctorSerialDTO.setId(doctorSerial.getId());
             userDoctorSerialDTO.setTime(doctorSerial.getTime());
-            userDoctorSerialDTO.setDoctorName(doctorSerial.getDoctor().getFirstName() + " " + doctorSerial.getDoctor().getLastName());
+            userDoctorSerialDTO.setDoctorName(
+                    doctorSerial.getDoctor().getFirstName() + " " + doctorSerial.getDoctor().getLastName());
             userDoctorSerialDTO.setDoctorId(doctorSerial.getDoctor().getId());
             userDoctorSerialDTO.setContactNo(doctorSerial.getDoctor().getContactNo());
             userDoctorSerialDTO.setType(doctorSerial.getType());
@@ -494,7 +499,8 @@ public class AppUserController {
 
         Double time = timeService.convertTimeToDouble(LocalTime.now());
 
-        List<DiagnosisOrder> upcomingDiagnosisOrders = diagnosisOrderRepository.findByDateAndTimeAndUserId(LocalDate.now(), time, user.getId());
+        List<DiagnosisOrder> upcomingDiagnosisOrders = diagnosisOrderRepository
+                .findByDateAndTimeAndUserId(LocalDate.now(), time, user.getId());
 
         if (upcomingDiagnosisOrders.size() == 0) {
             return new ResponseEntity<>(ApiResponse.create("empty", "No upcoming found"), HttpStatus.OK);
@@ -510,7 +516,8 @@ public class AppUserController {
             userDiagnosisOrderViewDTO.setPlace(diagnosisOrder.getPlace());
             userDiagnosisOrderViewDTO.setHospitalId(diagnosisOrder.getHospital().getId());
             userDiagnosisOrderViewDTO.setContactNo(diagnosisOrder.getHospital().getContactNo());
-            userDiagnosisOrderViewDTO.setHospitalName(hospitalRepository.findByAppUser_Id(diagnosisOrder.getHospital().getId()).get().getHospitalName());
+            userDiagnosisOrderViewDTO.setHospitalName(
+                    hospitalRepository.findByAppUser_Id(diagnosisOrder.getHospital().getId()).get().getHospitalName());
 
             userDiagnosisOrderViewDTOS.add(userDiagnosisOrderViewDTO);
         }
@@ -546,8 +553,10 @@ public class AppUserController {
             ambulanceTripViewDTO.setId(ambulanceTrip.getId());
             ambulanceTripViewDTO.setUserId(ambulanceTrip.getUser().getId());
             ambulanceTripViewDTO.setProviderId(ambulanceTrip.getAmbulanceProvider().getId());
-            ambulanceTripViewDTO.setUserName(ambulanceTrip.getUser().getFirstName() + " " + ambulanceTrip.getUser().getLastName());
-            ambulanceTripViewDTO.setProviderName(ambulanceTrip.getAmbulanceProvider().getFirstName() + " " + ambulanceTrip.getAmbulanceProvider().getLastName());
+            ambulanceTripViewDTO
+                    .setUserName(ambulanceTrip.getUser().getFirstName() + " " + ambulanceTrip.getUser().getLastName());
+            ambulanceTripViewDTO.setProviderName(ambulanceTrip.getAmbulanceProvider().getFirstName() + " "
+                    + ambulanceTrip.getAmbulanceProvider().getLastName());
             ambulanceTripViewDTO.setSource(ambulanceTrip.getSource());
             ambulanceTripViewDTO.setDestination(ambulanceTrip.getDestination());
             ambulanceTripViewDTO.setPrice(ambulanceTrip.getPrice());
@@ -586,9 +595,12 @@ public class AppUserController {
             MedicineOrderViewDTO medicineOrderViewDTO = new MedicineOrderViewDTO();
             medicineOrderViewDTO.setId(medicineOrder.getId());
             medicineOrderViewDTO.setUserId(medicineOrder.getUser().getId());
+            medicineOrderViewDTO.setContactNo(medicineOrder.getUser().getContactNo());
             medicineOrderViewDTO.setPharmacyId(medicineOrder.getPharmacy().getId());
-            medicineOrderViewDTO.setUserName(medicineOrder.getUser().getFirstName() + " " + medicineOrder.getUser().getLastName());
-            medicineOrderViewDTO.setPharmacyName(medicineOrder.getPharmacy().getFirstName() + " " + medicineOrder.getPharmacy().getLastName());
+            medicineOrderViewDTO
+                    .setUserName(medicineOrder.getUser().getFirstName() + " " + medicineOrder.getUser().getLastName());
+            medicineOrderViewDTO.setPharmacyName(
+                    medicineOrder.getPharmacy().getFirstName() + " " + medicineOrder.getPharmacy().getLastName());
             medicineOrderViewDTO.setDescription(medicineOrder.getDescription());
             medicineOrderViewDTO.setPrice(medicineOrder.getPrice());
 
@@ -644,7 +656,6 @@ public class AppUserController {
         } else if (appUser.getRoles().get(0).getRoleType().equals("AMBULANCE")) {
             Optional<AmbulanceProvider> optional = ambulanceProviderRepository.findByAppUser_Id(appUser.getId());
 
-
             AmbulanceProviderDTO ambulanceProviderDTO = modelMapper.map(optional.get(), AmbulanceProviderDTO.class);
 
             ambulanceProviderDTO.setId(appUser.getId());
@@ -655,7 +666,6 @@ public class AppUserController {
             ambulanceProviderDTO.setDp(appUser.getDp());
             ambulanceProviderDTO.setRating(reviewRepository.findAvgRating(appUser.getId()));
             ambulanceProviderDTO.setReviewCount(reviewRepository.findCount(appUser.getId()));
-
 
             userdetails = ambulanceProviderDTO;
         }
@@ -680,23 +690,27 @@ public class AppUserController {
         LocalDate sevenDaysAgo = now.minusDays(7);
         LocalDate thirtyDaysAgo = now.minusDays(30);
 
-        statisticsDTO.set_7DaysRating(reviewRepository.findAvgRatingByDate(user.getId(),sevenDaysAgo,now));
-        statisticsDTO.set_30DaysRating(reviewRepository.findAvgRatingByDate(user.getId(),thirtyDaysAgo,now));
+        statisticsDTO.set_7DaysRating(reviewRepository.findAvgRatingByDate(user.getId(), sevenDaysAgo, now));
+        statisticsDTO.set_30DaysRating(reviewRepository.findAvgRatingByDate(user.getId(), thirtyDaysAgo, now));
         statisticsDTO.setTotalRating(reviewRepository.findAvgRating(user.getId()));
 
         String roleType = user.getRoles().get(0).getRoleType();
 
         if ("DOCTOR".equalsIgnoreCase(roleType)) {
             // Doctor statistics logic
-            statisticsDTO.set_7DaysCount(doctorSerialRepository.countSerialsByDoctorAndDate(user.getId(), sevenDaysAgo, now));
-            statisticsDTO.set_30DaysCount(doctorSerialRepository.countSerialsByDoctorAndDate(user.getId(), thirtyDaysAgo, now));
+            statisticsDTO.set_7DaysCount(
+                    doctorSerialRepository.countSerialsByDoctorAndDate(user.getId(), sevenDaysAgo, now));
+            statisticsDTO.set_30DaysCount(
+                    doctorSerialRepository.countSerialsByDoctorAndDate(user.getId(), thirtyDaysAgo, now));
             statisticsDTO.setTotalCount(doctorSerialRepository.countSerialsByDoctor(user.getId()));
-            statisticsDTO.set_7DaysIncome(doctorSerialRepository.sumPriceByDoctorAndDate(user.getId(), sevenDaysAgo, now));
-            statisticsDTO.set_30DaysIncome(doctorSerialRepository.sumPriceByDoctorAndDate(user.getId(), thirtyDaysAgo, now));
+            statisticsDTO
+                    .set_7DaysIncome(doctorSerialRepository.sumPriceByDoctorAndDate(user.getId(), sevenDaysAgo, now));
+            statisticsDTO
+                    .set_30DaysIncome(doctorSerialRepository.sumPriceByDoctorAndDate(user.getId(), thirtyDaysAgo, now));
             statisticsDTO.setTotalIncome(doctorSerialRepository.sumPriceByDoctor(user.getId()));
 
-
-            List<Object[]> incomeList = doctorSerialRepository.sumPriceByDoctorAndDateGroupByDate(user.getId(), thirtyDaysAgo, now);
+            List<Object[]> incomeList = doctorSerialRepository.sumPriceByDoctorAndDateGroupByDate(user.getId(),
+                    thirtyDaysAgo, now);
 
             statisticsDTO.setDates(new ArrayList<>());
             statisticsDTO.setIncomes(new ArrayList<>());
@@ -707,14 +721,19 @@ public class AppUserController {
             }
         } else if ("PHARMACY".equalsIgnoreCase(roleType)) {
             // Pharmacy statistics logic
-            statisticsDTO.set_7DaysCount(medicineOrderRepository.countMedicineOrdersByPharmacyAndDate(user.getId(), sevenDaysAgo, now));
-            statisticsDTO.set_30DaysCount(medicineOrderRepository.countMedicineOrdersByPharmacyAndDate(user.getId(), thirtyDaysAgo, now));
+            statisticsDTO.set_7DaysCount(
+                    medicineOrderRepository.countMedicineOrdersByPharmacyAndDate(user.getId(), sevenDaysAgo, now));
+            statisticsDTO.set_30DaysCount(
+                    medicineOrderRepository.countMedicineOrdersByPharmacyAndDate(user.getId(), thirtyDaysAgo, now));
             statisticsDTO.setTotalCount(medicineOrderRepository.countMedicineOrdersByPharmacy(user.getId()));
-            statisticsDTO.set_7DaysIncome(medicineOrderRepository.sumPriceByPharmacyAndDate(user.getId(), sevenDaysAgo, now));
-            statisticsDTO.set_30DaysIncome(medicineOrderRepository.sumPriceByPharmacyAndDate(user.getId(), thirtyDaysAgo, now));
+            statisticsDTO.set_7DaysIncome(
+                    medicineOrderRepository.sumPriceByPharmacyAndDate(user.getId(), sevenDaysAgo, now));
+            statisticsDTO.set_30DaysIncome(
+                    medicineOrderRepository.sumPriceByPharmacyAndDate(user.getId(), thirtyDaysAgo, now));
             statisticsDTO.setTotalIncome(medicineOrderRepository.sumPriceByPharmacy(user.getId()));
 
-            List<Object[]> incomeList = medicineOrderRepository.sumPriceByPharmacyAndDateGroupByDate(user.getId(), thirtyDaysAgo, now);
+            List<Object[]> incomeList = medicineOrderRepository.sumPriceByPharmacyAndDateGroupByDate(user.getId(),
+                    thirtyDaysAgo, now);
 
             statisticsDTO.setDates(new ArrayList<>());
             statisticsDTO.setIncomes(new ArrayList<>());
@@ -725,14 +744,19 @@ public class AppUserController {
             }
         } else if ("HOSPITAL".equalsIgnoreCase(roleType)) {
             // Hospital statistics logic
-            statisticsDTO.set_7DaysCount(diagnosisOrderRepository.countDiagnosisOrdersByHospitalAndDate(user.getId(), sevenDaysAgo, now));
-            statisticsDTO.set_30DaysCount(diagnosisOrderRepository.countDiagnosisOrdersByHospitalAndDate(user.getId(), thirtyDaysAgo, now));
+            statisticsDTO.set_7DaysCount(
+                    diagnosisOrderRepository.countDiagnosisOrdersByHospitalAndDate(user.getId(), sevenDaysAgo, now));
+            statisticsDTO.set_30DaysCount(
+                    diagnosisOrderRepository.countDiagnosisOrdersByHospitalAndDate(user.getId(), thirtyDaysAgo, now));
             statisticsDTO.setTotalCount(diagnosisOrderRepository.countDiagnosisOrdersByHospital(user.getId()));
-            statisticsDTO.set_7DaysIncome(diagnosisOrderRepository.sumPriceByHospitalAndDate(user.getId(), sevenDaysAgo, now));
-            statisticsDTO.set_30DaysIncome(diagnosisOrderRepository.sumPriceByHospitalAndDate(user.getId(), thirtyDaysAgo, now));
+            statisticsDTO.set_7DaysIncome(
+                    diagnosisOrderRepository.sumPriceByHospitalAndDate(user.getId(), sevenDaysAgo, now));
+            statisticsDTO.set_30DaysIncome(
+                    diagnosisOrderRepository.sumPriceByHospitalAndDate(user.getId(), thirtyDaysAgo, now));
             statisticsDTO.setTotalIncome(diagnosisOrderRepository.sumPriceByHospital(user.getId()));
 
-            List<Object[]> incomeList = diagnosisOrderRepository.sumPriceByHospitalAndDateGroupByDate(user.getId(), thirtyDaysAgo, now);
+            List<Object[]> incomeList = diagnosisOrderRepository.sumPriceByHospitalAndDateGroupByDate(user.getId(),
+                    thirtyDaysAgo, now);
 
             statisticsDTO.setDates(new ArrayList<>());
             statisticsDTO.setIncomes(new ArrayList<>());
@@ -743,14 +767,19 @@ public class AppUserController {
             }
         } else if ("AMBULANCE".equalsIgnoreCase(roleType)) {
             // Ambulance statistics logic
-            statisticsDTO.set_7DaysCount(ambulanceTripRepository.countTripsByAmbulanceProviderAndDate(user.getId(), sevenDaysAgo, now));
-            statisticsDTO.set_30DaysCount(ambulanceTripRepository.countTripsByAmbulanceProviderAndDate(user.getId(), thirtyDaysAgo, now));
+            statisticsDTO.set_7DaysCount(
+                    ambulanceTripRepository.countTripsByAmbulanceProviderAndDate(user.getId(), sevenDaysAgo, now));
+            statisticsDTO.set_30DaysCount(
+                    ambulanceTripRepository.countTripsByAmbulanceProviderAndDate(user.getId(), thirtyDaysAgo, now));
             statisticsDTO.setTotalCount(ambulanceTripRepository.countTripsByAmbulanceProvider(user.getId()));
-            statisticsDTO.set_7DaysIncome(ambulanceTripRepository.sumPriceByAmbulanceProviderAndDate(user.getId(), sevenDaysAgo, now));
-            statisticsDTO.set_30DaysIncome(ambulanceTripRepository.sumPriceByAmbulanceProviderAndDate(user.getId(), thirtyDaysAgo, now));
+            statisticsDTO.set_7DaysIncome(
+                    ambulanceTripRepository.sumPriceByAmbulanceProviderAndDate(user.getId(), sevenDaysAgo, now));
+            statisticsDTO.set_30DaysIncome(
+                    ambulanceTripRepository.sumPriceByAmbulanceProviderAndDate(user.getId(), thirtyDaysAgo, now));
             statisticsDTO.setTotalIncome(ambulanceTripRepository.sumPriceByAmbulanceProvider(user.getId()));
 
-            List<Object[]> incomeList = ambulanceTripRepository.sumPriceByAmbulanceProviderAndDateGroupByDate(user.getId(), thirtyDaysAgo, now);
+            List<Object[]> incomeList = ambulanceTripRepository
+                    .sumPriceByAmbulanceProviderAndDateGroupByDate(user.getId(), thirtyDaysAgo, now);
 
             statisticsDTO.setDates(new ArrayList<>());
             statisticsDTO.setIncomes(new ArrayList<>());
@@ -766,7 +795,6 @@ public class AppUserController {
         return new ResponseEntity<>(statisticsDTO, HttpStatus.OK);
     }
 
-
     @DeleteMapping("/delete/user")
     public ResponseEntity<?> deleteUser(HttpServletRequest request) {
 
@@ -780,7 +808,6 @@ public class AppUserController {
 
         List<Role> roles = appUser.getRoles();
 
-
         for (int i = 0; i < roles.size(); i++) {
             if (roles.get(i).getRoleType().equals("USER")) {
                 userRepository.delete(appUser);
@@ -790,7 +817,8 @@ public class AppUserController {
                 Optional<Doctor> doctor = doctorRepository.findByAppUser_Id(id);
 
                 if (!doctor.isPresent()) {
-                    return new ResponseEntity<>(ApiResponse.create("error", "User does not exist"), HttpStatus.BAD_REQUEST);
+                    return new ResponseEntity<>(ApiResponse.create("error", "User does not exist"),
+                            HttpStatus.BAD_REQUEST);
                 }
                 doctorRepository.delete(doctor.get());
             }
@@ -798,7 +826,8 @@ public class AppUserController {
                 Optional<Hospital> hospital = hospitalRepository.findByAppUser_Id(id);
 
                 if (!hospital.isPresent()) {
-                    return new ResponseEntity<>(ApiResponse.create("error", "User does not exist"), HttpStatus.BAD_REQUEST);
+                    return new ResponseEntity<>(ApiResponse.create("error", "User does not exist"),
+                            HttpStatus.BAD_REQUEST);
                 }
 
                 hospitalRepository.delete(hospital.get());
@@ -807,7 +836,8 @@ public class AppUserController {
                 Optional<Pharmacy> pharmacy = pharmacyRepository.findByAppUser_Id(id);
 
                 if (!pharmacy.isPresent()) {
-                    return new ResponseEntity<>(ApiResponse.create("error", "User does not exist"), HttpStatus.BAD_REQUEST);
+                    return new ResponseEntity<>(ApiResponse.create("error", "User does not exist"),
+                            HttpStatus.BAD_REQUEST);
                 }
 
                 pharmacyRepository.delete(pharmacy.get());
@@ -816,7 +846,8 @@ public class AppUserController {
                 Optional<AmbulanceProvider> ambulanceProvider = ambulanceProviderRepository.findByAppUser_Id(id);
 
                 if (!ambulanceProvider.isPresent()) {
-                    return new ResponseEntity<>(ApiResponse.create("error", "User does not exist"), HttpStatus.BAD_REQUEST);
+                    return new ResponseEntity<>(ApiResponse.create("error", "User does not exist"),
+                            HttpStatus.BAD_REQUEST);
                 }
 
                 ambulanceProviderRepository.delete(ambulanceProvider.get());
@@ -827,6 +858,3 @@ public class AppUserController {
     }
 
 }
-
-
-
