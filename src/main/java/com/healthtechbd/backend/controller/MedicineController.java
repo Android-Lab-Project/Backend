@@ -76,7 +76,7 @@ public class MedicineController {
 
         Pharmacy pharmacy = optionalPharmacy.get();
 
-        List<MedicineOrder> medicineOrders = medicineOrderRepository.findByPlaceIgnoreCase(pharmacy.getPlace());
+        List<MedicineOrder> medicineOrders = medicineOrderRepository.findAll();
 
         if (medicineOrders.size() == 0) {
             return new ResponseEntity<>(ApiResponse.create("empty", "No medicine order in this place"), HttpStatus.OK);
