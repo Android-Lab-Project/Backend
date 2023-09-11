@@ -1,9 +1,7 @@
 package com.healthtechbd.backend.controller;
 
-import com.healthtechbd.backend.entity.AppUser;
-import com.healthtechbd.backend.entity.Medicine;
-import com.healthtechbd.backend.entity.MedicineOrder;
-import com.healthtechbd.backend.entity.Pharmacy;
+import com.healthtechbd.backend.dto.MedicineOrderViewDTO;
+import com.healthtechbd.backend.entity.*;
 import com.healthtechbd.backend.repo.AppUserRepository;
 import com.healthtechbd.backend.repo.MedicineOrderRepository;
 import com.healthtechbd.backend.repo.MedicineRepository;
@@ -17,6 +15,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -66,6 +65,39 @@ public class MedicineController {
 
 
     }
+
+    @GetMapping("/medicine/order/all")
+    public ResponseEntity<?>getAllMedicalOrders(HttpServletRequest request)
+    {
+        AppUser user = userService.returnUser(request);
+
+        Optional<Pharmacy>optionalPharmacy =pharmacyRepository.findByAppUser_Id(user.getId());
+
+        Pharmacy pharmacy = optionalPharmacy.get();
+
+        List<MedicineOrder>medicineOrders = medicineOrderRepository.findByPlaceIgnoreCase(pharmacy.getPlace());
+
+        if(medicineOrders.size()==0)
+        {
+            return new ResponseEntity<>(ApiResponse.create("empty","No medicine order in this place"),HttpStatus.OK);
+        }
+
+        List<MedicineOrderViewDTO>medicineOrderViewDTOS = new ArrayList<>();
+
+        for (var medicineOrder : medicineOrders) {
+            MedicineOrderViewDTO medicineOrderViewDTO = new MedicineOrderViewDTO();
+            medicineOrderViewDTO.setId(medicineOrder.getId());
+            medicineOrderViewDTO.setUserId(medicineOrder.getUser().getId());
+            medicineOrderViewDTO.setUserName(medicineOrder.getUser().getFirstName() + " " + medicineOrder.getUser().getLastName());
+            medicineOrderViewDTO.setDescription(medicineOrder.getDescription());
+            medicineOrderViewDTO.setPrice(medicineOrder.getPrice());
+
+            medicineOrderViewDTOS.add(medicineOrderViewDTO);
+        }
+
+        return new ResponseEntity<>(medicineOrderViewDTOS,HttpStatus.OK);
+    }
+
 
 
     @GetMapping("/medicine/order/update/{id}")

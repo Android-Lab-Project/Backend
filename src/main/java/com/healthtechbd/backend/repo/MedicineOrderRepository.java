@@ -77,4 +77,7 @@ public interface MedicineOrderRepository extends JpaRepository<MedicineOrder, Lo
     List<MedicineOrder> findUndeliveredOrdersByPharmacy(@Param("pharmacyId") Long pharmacyId);
 
 
+    List<MedicineOrder>findByPlaceIgnoreCase(String place);
+
+
 }

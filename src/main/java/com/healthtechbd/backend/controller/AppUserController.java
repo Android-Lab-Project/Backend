@@ -23,7 +23,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-@SuppressWarnings("OptionalGetWithoutIsPresent")
+@SuppressWarnings({"OptionalGetWithoutIsPresent","Unused"})
 @CrossOrigin(origins = "*", allowedHeaders = "*", methods = {RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT, RequestMethod.DELETE})
 @RestController
 public class AppUserController {
@@ -590,6 +590,10 @@ public class AppUserController {
         LocalDate sevenDaysAgo = now.minusDays(7);
         LocalDate thirtyDaysAgo = now.minusDays(30);
 
+        statisticsDTO.set_7DaysRating(reviewRepository.findAvgRatingByDate(user.getId(),sevenDaysAgo,now));
+        statisticsDTO.set_30DaysRating(reviewRepository.findAvgRatingByDate(user.getId(),thirtyDaysAgo,now));
+        statisticsDTO.setTotalRating(reviewRepository.findAvgRating(user.getId()));
+
         String roleType = user.getRoles().get(0).getRoleType();
 
         if ("DOCTOR".equalsIgnoreCase(roleType)) {
@@ -600,6 +604,7 @@ public class AppUserController {
             statisticsDTO.set_7DaysIncome(doctorSerialRepository.sumPriceByDoctorAndDate(user.getId(), sevenDaysAgo, now));
             statisticsDTO.set_30DaysIncome(doctorSerialRepository.sumPriceByDoctorAndDate(user.getId(), thirtyDaysAgo, now));
             statisticsDTO.setTotalIncome(doctorSerialRepository.sumPriceByDoctor(user.getId()));
+
 
             List<Object[]> incomeList = doctorSerialRepository.sumPriceByDoctorAndDateGroupByDate(user.getId(), thirtyDaysAgo, now);
 

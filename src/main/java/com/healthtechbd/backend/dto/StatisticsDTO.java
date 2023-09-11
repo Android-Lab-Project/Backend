@@ -25,6 +25,12 @@ public class StatisticsDTO {
 
     private Long totalIncome;
 
+    private Double _7DaysRating;
+
+    private Double _30DaysRating;
+
+    private Double totalRating;
+
     private List<LocalDate> dates;
 
     private List<Long> incomes;

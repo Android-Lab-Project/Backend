@@ -5,6 +5,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDate;
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -19,6 +21,8 @@ public class Review {
     private Long starCount;
 
     private String review;
+
+    private LocalDate date;
 
     @ManyToOne
     @JoinColumn(name = "reviewer_id")
