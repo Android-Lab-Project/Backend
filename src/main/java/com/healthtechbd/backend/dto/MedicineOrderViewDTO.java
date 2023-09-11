@@ -17,4 +17,5 @@ public class MedicineOrderViewDTO {
     private Long price;
     private String place;
     private String contactNo;
+    private Long distance;
 }
