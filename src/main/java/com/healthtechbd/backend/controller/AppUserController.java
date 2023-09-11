@@ -346,7 +346,7 @@ public class AppUserController {
         savedTrip.setPaymentId(bkashCreateResponse.getPaymentId());
         ambulanceTripRepository.save(savedTrip);
 
-        return new ResponseEntity<>(ApiResponse.create("create", "Trip created"), HttpStatus.OK);
+        return new ResponseEntity<>(bkashCreateResponse, HttpStatus.OK);
     }
 
     @PostMapping("/add/review")
