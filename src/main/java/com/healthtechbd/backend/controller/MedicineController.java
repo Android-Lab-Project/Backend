@@ -92,6 +92,7 @@ public class MedicineController {
             medicineOrderViewDTO
                     .setUserName(medicineOrder.getUser().getFirstName() + " " + medicineOrder.getUser().getLastName());
             medicineOrderViewDTO.setDescription(medicineOrder.getDescription());
+            medicineOrderViewDTO.setPlace(medicineOrder.getPlace());
             medicineOrderViewDTO.setPrice(medicineOrder.getPrice());
 
             medicineOrderViewDTOS.add(medicineOrderViewDTO);

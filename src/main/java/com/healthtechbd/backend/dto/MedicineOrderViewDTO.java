@@ -15,5 +15,6 @@ public class MedicineOrderViewDTO {
     private String pharmacyName;
     private String description;
     private Long price;
+    private String place;
     private String contactNo;
 }

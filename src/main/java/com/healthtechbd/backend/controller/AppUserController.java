@@ -595,6 +595,7 @@ public class AppUserController {
             MedicineOrderViewDTO medicineOrderViewDTO = new MedicineOrderViewDTO();
             medicineOrderViewDTO.setId(medicineOrder.getId());
             medicineOrderViewDTO.setUserId(medicineOrder.getUser().getId());
+            medicineOrderViewDTO.setPlace(medicineOrder.getPlace());
             medicineOrderViewDTO.setContactNo(medicineOrder.getUser().getContactNo());
             medicineOrderViewDTO.setPharmacyId(medicineOrder.getPharmacy().getId());
             medicineOrderViewDTO
