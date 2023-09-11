@@ -18,7 +18,8 @@ import org.springframework.web.bind.annotation.*;
 import java.time.LocalDate;
 import java.util.Optional;
 
-@CrossOrigin(origins = "*", allowedHeaders = "*", methods = {RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT, RequestMethod.DELETE})
+@CrossOrigin(origins = "*", allowedHeaders = "*", methods = { RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT,
+        RequestMethod.DELETE })
 @RestController
 public class AmbulanceProviderController {
 
@@ -51,7 +52,8 @@ public class AmbulanceProviderController {
     }
 
     @PostMapping("/update/ambulanceProvider")
-    public ResponseEntity<ApiResponse> updateProvider(HttpServletRequest request, @RequestBody AmbulanceProvider ambulanceProvider) {
+    public ResponseEntity<ApiResponse> updateProvider(HttpServletRequest request,
+            @RequestBody AmbulanceProvider ambulanceProvider) {
         AppUser appUser = userService.returnUser(request);
         Long appUserId = appUser.getId();
         var roles = appUser.getRoles();

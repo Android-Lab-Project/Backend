@@ -20,7 +20,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-@CrossOrigin(origins = "*", allowedHeaders = "*", methods = {RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT, RequestMethod.DELETE})
+@CrossOrigin(origins = "*", allowedHeaders = "*", methods = { RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT,
+        RequestMethod.DELETE })
 @RestController
 public class AmbulanceController {
 
@@ -58,7 +59,8 @@ public class AmbulanceController {
 
         Ambulance ambulance = modelMapper.map(ambulanceDTO, Ambulance.class);
 
-        Optional<AmbulanceProvider> optionalAmbulanceProvider = ambulanceProviderRepository.findByAppUser_Id(appUser.getId());
+        Optional<AmbulanceProvider> optionalAmbulanceProvider = ambulanceProviderRepository
+                .findByAppUser_Id(appUser.getId());
 
         if (!optionalAmbulanceProvider.isPresent()) {
             return new ResponseEntity<>(ApiResponse.create("error", "Provider not found"), HttpStatus.BAD_REQUEST);
@@ -76,7 +78,8 @@ public class AmbulanceController {
 
         Optional<AmbulanceProvider> optionalAmbulanceProvider = ambulanceProviderRepository.findByAppUser_Id(id);
 
-        List<Ambulance> ambulances = ambulanceRepository.findByAmbulanceProvider_Id(optionalAmbulanceProvider.get().getId());
+        List<Ambulance> ambulances = ambulanceRepository
+                .findByAmbulanceProvider_Id(optionalAmbulanceProvider.get().getId());
 
         if (ambulances.size() == 0) {
             return new ResponseEntity<>(ApiResponse.create("empty", "No Ambulance Found"), HttpStatus.OK);
@@ -98,19 +101,18 @@ public class AmbulanceController {
         try {
             ambulanceRepository.deleteById(id);
         } catch (Exception e) {
-            return new ResponseEntity<>(ApiResponse.create("error", "Ambulance can't be deleted"), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(ApiResponse.create("error", "Ambulance can't be deleted"),
+                    HttpStatus.BAD_REQUEST);
         }
 
         return new ResponseEntity<>(ApiResponse.create("delete", "Ambulance deleted"), HttpStatus.OK);
     }
 
     @GetMapping("/ambulance/trip/all")
-    public ResponseEntity<?>getAllTrips()
-    {
-        List<AmbulanceTrip>ambulanceTrips = ambulanceTripRepository.findAll();
-        if(ambulanceTrips.size()==0)
-        {
-            return new ResponseEntity<>(ApiResponse.create("empty","No Trip found"),HttpStatus.OK);
+    public ResponseEntity<?> getAllTrips() {
+        List<AmbulanceTrip> ambulanceTrips = ambulanceTripRepository.findAll();
+        if (ambulanceTrips.size() == 0) {
+            return new ResponseEntity<>(ApiResponse.create("empty", "No Trip found"), HttpStatus.OK);
         }
         List<AmbulanceTripViewDTO> ambulanceTripViewDTOS = new ArrayList<>();
 
@@ -118,7 +120,8 @@ public class AmbulanceController {
             AmbulanceTripViewDTO ambulanceTripViewDTO = new AmbulanceTripViewDTO();
             ambulanceTripViewDTO.setId(ambulanceTrip.getId());
             ambulanceTripViewDTO.setUserId(ambulanceTrip.getUser().getId());
-            ambulanceTripViewDTO.setUserName(ambulanceTrip.getUser().getFirstName() + " " + ambulanceTrip.getUser().getLastName());
+            ambulanceTripViewDTO
+                    .setUserName(ambulanceTrip.getUser().getFirstName() + " " + ambulanceTrip.getUser().getLastName());
             ambulanceTripViewDTO.setSource(ambulanceTrip.getSource());
             ambulanceTripViewDTO.setDestination(ambulanceTrip.getDestination());
             ambulanceTripViewDTO.setPrice(ambulanceTrip.getPrice());
@@ -127,9 +130,8 @@ public class AmbulanceController {
             ambulanceTripViewDTOS.add(ambulanceTripViewDTO);
         }
 
-        return new ResponseEntity<>(ambulanceTripViewDTOS,HttpStatus.OK);
+        return new ResponseEntity<>(ambulanceTripViewDTOS, HttpStatus.OK);
     }
-
 
     @GetMapping("/ambulance/trip/bid/{id}")
     public ResponseEntity<?> addBidderToTrip(HttpServletRequest request, @PathVariable(name = "id") Long id) {
@@ -151,7 +153,8 @@ public class AmbulanceController {
     }
 
     @GetMapping("update/ambulancetrip/{id1}/{id2}")
-    public ResponseEntity<?> updateAmbulanceTrip(HttpServletRequest request, @PathVariable(name = "id1") Long id1, @PathVariable(name = "id2") Long id2) {
+    public ResponseEntity<?> updateAmbulanceTrip(HttpServletRequest request, @PathVariable(name = "id1") Long id1,
+            @PathVariable(name = "id2") Long id2) {
         Optional<AmbulanceProvider> optionalProvider = ambulanceProviderRepository.findByAppUser_Id(id2);
 
         Optional<AmbulanceTrip> optionalAmbulanceTrip = ambulanceTripRepository.findById(id1);
@@ -164,14 +167,12 @@ public class AmbulanceController {
 
         ambulanceTrip.setAmbulanceProvider(optionalProvider.get().getAppUser());
 
-        Long reviewCount = reviewRepository.countByUser(ambulanceTrip.getUser().getId(),ambulanceTrip.getAmbulanceProvider().getId());
+        Long reviewCount = reviewRepository.countByUser(ambulanceTrip.getUser().getId(),
+                ambulanceTrip.getAmbulanceProvider().getId());
 
-        if(reviewCount>=1)
-        {
+        if (reviewCount >= 1) {
             ambulanceTrip.setReviewChecked(1);
-        }
-        else
-        {
+        } else {
             ambulanceTrip.setReviewChecked(0);
         }
 

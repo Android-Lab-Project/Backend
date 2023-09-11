@@ -27,7 +27,8 @@ import org.springframework.web.bind.annotation.*;
 import java.time.LocalDate;
 import java.util.Optional;
 
-@CrossOrigin(origins = "*", allowedHeaders = "*", methods = {RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT, RequestMethod.DELETE})
+@CrossOrigin(origins = "*", allowedHeaders = "*", methods = { RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT,
+        RequestMethod.DELETE })
 @RestController
 public class AuthController {
 
@@ -75,7 +76,6 @@ public class AuthController {
     @Autowired
     private DoctorRepository doctorRepository;
 
-
     @PostMapping("/signin")
     public ResponseEntity<?> authenticateAppUser(@RequestBody SignInDTO signInDTO) {
 
@@ -83,9 +83,7 @@ public class AuthController {
             authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(
                             signInDTO.getEmail(),
-                            signInDTO.getPassword()
-                    )
-            );
+                            signInDTO.getPassword()));
         } catch (Exception e) {
 
             ApiResponse errorResponse = ApiResponse.create("error", "Invaild user email or password");
@@ -101,7 +99,6 @@ public class AuthController {
         String token = jwtService.generateToken(userDetails);
         JWTDTO jwtdto = new JWTDTO(token, appUser.getId(), appUser.getRoles().get(0).getRoleType());
 
-
         return new ResponseEntity<>(jwtdto, HttpStatus.OK);
     }
 
@@ -109,7 +106,6 @@ public class AuthController {
     public ResponseEntity<?> registerAppUser(@RequestBody SignUpDTO signUpDTO) {
 
         RegistrationResponse response;
-
 
         if (signUpDTO.getEmail().equals(adminEmail)) {
             response = userService.registerUser(signUpDTO, "ADMIN");
@@ -128,7 +124,6 @@ public class AuthController {
             userService.AddUserCount(LocalDate.now());
 
             return ResponseEntity.ok(response.getResponse());
-
 
         } else {
             response = userService.registerUser(signUpDTO, "USER");
@@ -168,4 +163,3 @@ public class AuthController {
 
     }
 }
-

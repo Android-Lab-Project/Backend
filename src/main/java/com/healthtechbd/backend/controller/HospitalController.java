@@ -26,10 +26,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-@CrossOrigin(origins = "*", allowedHeaders = "*", methods = {RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT, RequestMethod.DELETE})
+@CrossOrigin(origins = "*", allowedHeaders = "*", methods = { RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT,
+        RequestMethod.DELETE })
 @RestController
 public class HospitalController {
-
 
     @Autowired
     private AppUserRepository userRepository;
@@ -54,7 +54,6 @@ public class HospitalController {
 
     @Autowired
     private ModelMapper modelMapper;
-
 
     @PostMapping("/register/hospital")
     public ResponseEntity<?> registerHospital(@RequestBody Hospital hospital) {
@@ -108,7 +107,6 @@ public class HospitalController {
         return new ResponseEntity<>(updateUserResponse.getResponse(), HttpStatus.OK);
     }
 
-
     @GetMapping("/hospital/{id}/diagnoses")
     public ResponseEntity<?> getAlldiagnoses(@PathVariable(name = "id") Long id) {
         Optional<AppUser> optional = userRepository.findById(id);
@@ -127,14 +125,16 @@ public class HospitalController {
             diagnosisDTOS.get(i).setHospitalId(diagnoses.get(i).getHospital().getAppUser().getId());
             diagnosisDTOS.get(i).setHospitalName(diagnoses.get(i).getHospital().getHospitalName());
             diagnosisDTOS.get(i).setPlace(diagnoses.get(i).getHospital().getPlace());
-            diagnosisDTOS.get(i).setRating(reviewRepository.findAvgRating(diagnoses.get(i).getHospital().getAppUser().getId()));
+            diagnosisDTOS.get(i)
+                    .setRating(reviewRepository.findAvgRating(diagnoses.get(i).getHospital().getAppUser().getId()));
         }
 
         return new ResponseEntity<>(diagnosisDTOS, HttpStatus.OK);
     }
 
     @GetMapping("/update/diagnosis/order/report/{id}")
-    public ResponseEntity<?> updateDiagnosisReport(@RequestParam(name = "report") String report, @PathVariable(name = "id") Long id) {
+    public ResponseEntity<?> updateDiagnosisReport(@RequestParam(name = "report") String report,
+            @PathVariable(name = "id") Long id) {
         Optional<DiagnosisOrder> optionalDiagnosisOrder = diagnosisOrderRepository.findById(id);
         DiagnosisOrder diagnosisOrder = optionalDiagnosisOrder.get();
         diagnosisOrder.setReportURL(report);
@@ -143,12 +143,12 @@ public class HospitalController {
         return new ResponseEntity<>(ApiResponse.create("update", "Report added"), HttpStatus.OK);
     }
 
-
     @GetMapping("/dashboard/hospital/pending")
     public ResponseEntity<?> getAllPendingReports(HttpServletRequest request) {
         AppUser hospital = userService.returnUser(request);
 
-        List<DiagnosisOrder> diagnosisOrders = diagnosisOrderRepository.findByReportURLIsNullAndHospitalId(hospital.getId());
+        List<DiagnosisOrder> diagnosisOrders = diagnosisOrderRepository
+                .findByReportURLIsNullAndHospitalId(hospital.getId());
 
         if (diagnosisOrders.size() == 0) {
             return new ResponseEntity<>(ApiResponse.create("empty", "No pending found"), HttpStatus.OK);
@@ -178,7 +178,8 @@ public class HospitalController {
 
         Double time = timeService.convertTimeToDouble(LocalTime.now());
 
-        List<DiagnosisOrder> diagnosisOrders = diagnosisOrderRepository.findByDateAndTimeAndHospitalId(LocalDate.now(), time, hospital.getId());
+        List<DiagnosisOrder> diagnosisOrders = diagnosisOrderRepository.findByDateAndTimeAndHospitalId(LocalDate.now(),
+                time, hospital.getId());
 
         if (diagnosisOrders.size() == 0) {
             return new ResponseEntity<>(ApiResponse.create("empty", "No upcoming found"), HttpStatus.OK);
@@ -201,8 +202,6 @@ public class HospitalController {
 
         return new ResponseEntity<>(diagnosisOrderViewDTOS, HttpStatus.OK);
 
-
     }
-
 
 }

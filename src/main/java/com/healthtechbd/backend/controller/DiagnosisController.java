@@ -19,7 +19,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-@CrossOrigin(origins = "*", allowedHeaders = "*", methods = {RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT, RequestMethod.DELETE})
+@CrossOrigin(origins = "*", allowedHeaders = "*", methods = { RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT,
+        RequestMethod.DELETE })
 @RestController
 public class DiagnosisController {
 
@@ -44,7 +45,6 @@ public class DiagnosisController {
     @Autowired
     private UserService userService;
 
-
     @PostMapping("/add/diagnosis")
     public ResponseEntity<?> addDiagnosis(@RequestBody AddDiagnosisDTO addDiagnosisDTO, HttpServletRequest request) {
         if (addDiagnosisDTO.getName() == null || addDiagnosisDTO.getName().trim().length() == 0) {
@@ -52,7 +52,8 @@ public class DiagnosisController {
         }
 
         if (addDiagnosisDTO.getDescription() == null || addDiagnosisDTO.getDescription().trim().length() == 0) {
-            return new ResponseEntity<>(ApiResponse.create("error", "Description can't be empty"), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(ApiResponse.create("error", "Description can't be empty"),
+                    HttpStatus.BAD_REQUEST);
         }
 
         if (addDiagnosisDTO.getPrice() == null || addDiagnosisDTO.getPrice() <= 0) {
@@ -82,7 +83,6 @@ public class DiagnosisController {
         return new ResponseEntity<>(ApiResponse.create("create", "Diagnosis added"), HttpStatus.OK);
     }
 
-
     @GetMapping("/diagnosis/all")
     public ResponseEntity<?> showAllDiagnosisDetails() {
         List<Diagnosis> diagnoses = diagnosisRepository.findAll();
@@ -98,23 +98,23 @@ public class DiagnosisController {
             diagnosisDTOS.get(i).setHospitalId(diagnoses.get(i).getHospital().getAppUser().getId());
             diagnosisDTOS.get(i).setHospitalName(diagnoses.get(i).getHospital().getHospitalName());
             diagnosisDTOS.get(i).setPlace(diagnoses.get(i).getHospital().getPlace());
-            diagnosisDTOS.get(i).setRating(reviewRepository.findAvgRating(diagnoses.get(i).getHospital().getAppUser().getId()));
+            diagnosisDTOS.get(i)
+                    .setRating(reviewRepository.findAvgRating(diagnoses.get(i).getHospital().getAppUser().getId()));
         }
 
         return new ResponseEntity<>(diagnosisDTOS, HttpStatus.OK);
     }
-
 
     @DeleteMapping("/delete/diagnosis/{id}")
     public ResponseEntity<?> deleteDiagnosis(@PathVariable(name = "id") Long id) {
         try {
             diagnosisRepository.deleteById(id);
         } catch (Exception e) {
-            return new ResponseEntity<>(ApiResponse.create("error", "Diagnosis can't be deleted"), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(ApiResponse.create("error", "Diagnosis can't be deleted"),
+                    HttpStatus.BAD_REQUEST);
         }
 
         return new ResponseEntity<>(ApiResponse.create("delete", "Diagnosis deleted"), HttpStatus.OK);
     }
-
 
 }

@@ -41,13 +41,14 @@ public class SecurityConfig {
         return authenticationConfiguration.getAuthenticationManager();
     }
 
-
     @Bean
     protected SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .csrf((csrf) -> csrf.disable())
-                .exceptionHandling((exceptionHandling) -> exceptionHandling.authenticationEntryPoint(jwtUnauthorizedEntryPoint))
-                .sessionManagement((sessionManagement) -> sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .exceptionHandling(
+                        (exceptionHandling) -> exceptionHandling.authenticationEntryPoint(jwtUnauthorizedEntryPoint))
+                .sessionManagement(
+                        (sessionManagement) -> sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeRequests()
                 .requestMatchers(HttpMethod.POST, "/signin").permitAll()
                 .requestMatchers(HttpMethod.POST, "/signup").permitAll()
@@ -80,12 +81,9 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.GET, "/doctorserial/**").permitAll()
                 .anyRequest().authenticated();
 
-
         http.addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
         http.cors(Customizer.withDefaults());
         return http.build();
     }
 
-
 }
-

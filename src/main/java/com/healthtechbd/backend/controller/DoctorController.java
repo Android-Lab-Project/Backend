@@ -32,7 +32,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-@CrossOrigin(origins = "*", allowedHeaders = "*", methods = {RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT, RequestMethod.DELETE})
+@CrossOrigin(origins = "*", allowedHeaders = "*", methods = { RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT,
+        RequestMethod.DELETE })
 @RestController
 public class DoctorController {
 
@@ -60,7 +61,6 @@ public class DoctorController {
     @Autowired
     private TimeService timeService;
 
-
     @PostMapping("/register/doctor")
     public ResponseEntity<?> registerDoctor(@RequestBody DoctorSignUpDTO doctorSignUpDTO) {
 
@@ -80,7 +80,8 @@ public class DoctorController {
             doctor.getAvailableTimes().get(i).setId(null);
             doctor.getAvailableTimes().get(i).setCount(0);
             doctor.getAvailableTimes().get(i).setAvailTime(0.0);
-            doctor.getAvailableTimes().get(i).setDate(DoctorService.currentDate(doctor.getAvailableTimes().get(i).getDay()));
+            doctor.getAvailableTimes().get(i)
+                    .setDate(DoctorService.currentDate(doctor.getAvailableTimes().get(i).getDay()));
 
         }
         for (int i = 0; i < doctor.getAvailableOnlineTimes().size(); i++) {
@@ -88,7 +89,8 @@ public class DoctorController {
             doctor.getAvailableOnlineTimes().get(i).setId(null);
             doctor.getAvailableOnlineTimes().get(i).setCount(0);
             doctor.getAvailableOnlineTimes().get(i).setAvailTime(0.0);
-            doctor.getAvailableOnlineTimes().get(i).setDate(DoctorService.currentDate(doctor.getAvailableOnlineTimes().get(i).getDay()));
+            doctor.getAvailableOnlineTimes().get(i)
+                    .setDate(DoctorService.currentDate(doctor.getAvailableOnlineTimes().get(i).getDay()));
         }
 
         doctor.setBalance(0L);
@@ -138,7 +140,8 @@ public class DoctorController {
             doctor.getAvailableTimes().get(i).setId(null);
             doctor.getAvailableTimes().get(i).setCount(0);
             doctor.getAvailableTimes().get(i).setAvailTime(0.0);
-            doctor.getAvailableTimes().get(i).setDate(DoctorService.currentDate(doctor.getAvailableTimes().get(i).getDay()));
+            doctor.getAvailableTimes().get(i)
+                    .setDate(DoctorService.currentDate(doctor.getAvailableTimes().get(i).getDay()));
 
         }
         for (int i = 0; i < doctor.getAvailableOnlineTimes().size(); i++) {
@@ -146,9 +149,9 @@ public class DoctorController {
             doctor.getAvailableOnlineTimes().get(i).setId(null);
             doctor.getAvailableOnlineTimes().get(i).setCount(0);
             doctor.getAvailableOnlineTimes().get(i).setAvailTime(0.0);
-            doctor.getAvailableOnlineTimes().get(i).setDate(DoctorService.currentDate(doctor.getAvailableOnlineTimes().get(i).getDay()));
+            doctor.getAvailableOnlineTimes().get(i)
+                    .setDate(DoctorService.currentDate(doctor.getAvailableOnlineTimes().get(i).getDay()));
         }
-
 
         doctor.setId(doctorId);
         doctor.setBalance(balance);
@@ -158,7 +161,6 @@ public class DoctorController {
 
         return new ResponseEntity<>(updateUserResponse.getResponse(), HttpStatus.OK);
     }
-
 
     @GetMapping("/doctor/{id}")
     public ResponseEntity<?> showDoctorDetails(@PathVariable Long id) {
@@ -173,7 +175,8 @@ public class DoctorController {
         for (int i = 0; i < doctor.getAvailableTimes().size(); i++) {
 
             if (doctor.getAvailableTimes().get(i).getDate().isBefore(LocalDate.now())) {
-                doctor.getAvailableTimes().get(i).setDate(DoctorService.nextDate(doctor.getAvailableTimes().get(i).getDay()));
+                doctor.getAvailableTimes().get(i)
+                        .setDate(DoctorService.nextDate(doctor.getAvailableTimes().get(i).getDay()));
                 doctor.getAvailableTimes().get(i).setCount(0);
             }
         }
@@ -181,11 +184,11 @@ public class DoctorController {
         for (int i = 0; i < doctor.getAvailableOnlineTimes().size(); i++) {
 
             if (doctor.getAvailableOnlineTimes().get(i).getDate().isBefore(LocalDate.now())) {
-                doctor.getAvailableOnlineTimes().get(i).setDate(DoctorService.nextDate(doctor.getAvailableTimes().get(i).getDay()));
+                doctor.getAvailableOnlineTimes().get(i)
+                        .setDate(DoctorService.nextDate(doctor.getAvailableTimes().get(i).getDay()));
                 doctor.getAvailableOnlineTimes().get(i).setCount(0);
             }
         }
-
 
         DoctorService.setSerialTime(doctor);
 
@@ -219,20 +222,20 @@ public class DoctorController {
             for (int i = 0; i < doctor.getAvailableTimes().size(); i++) {
 
                 if (doctor.getAvailableTimes().get(i).getDate().isBefore(LocalDate.now())) {
-                    doctor.getAvailableTimes().get(i).setDate(DoctorService.nextDate(doctor.getAvailableTimes().get(i).getDay()));
+                    doctor.getAvailableTimes().get(i)
+                            .setDate(DoctorService.nextDate(doctor.getAvailableTimes().get(i).getDay()));
                     doctor.getAvailableTimes().get(i).setCount(0);
                 }
             }
 
-
             for (int i = 0; i < doctor.getAvailableOnlineTimes().size(); i++) {
 
                 if (doctor.getAvailableOnlineTimes().get(i).getDate().isBefore(LocalDate.now())) {
-                    doctor.getAvailableOnlineTimes().get(i).setDate(DoctorService.nextDate(doctor.getAvailableTimes().get(i).getDay()));
+                    doctor.getAvailableOnlineTimes().get(i)
+                            .setDate(DoctorService.nextDate(doctor.getAvailableTimes().get(i).getDay()));
                     doctor.getAvailableOnlineTimes().get(i).setCount(0);
                 }
             }
-
 
             DoctorService.setSerialTime(doctor);
 
@@ -258,7 +261,8 @@ public class DoctorController {
     }
 
     @GetMapping("/update/doctor/serial/pres/{id}")
-    public ResponseEntity<?> updateDiagnosisReport(@RequestParam(name = "prescription") String prescription, @PathVariable(name = "id") Long id) {
+    public ResponseEntity<?> updateDiagnosisReport(@RequestParam(name = "prescription") String prescription,
+            @PathVariable(name = "id") Long id) {
         Optional<DoctorSerial> optionalDoctorSerial = doctorSerialRepository.findById(id);
         var diagnosisOrder = optionalDoctorSerial.get();
         diagnosisOrder.setPrescription(prescription);
@@ -271,7 +275,8 @@ public class DoctorController {
     public ResponseEntity<?> getAllPendingPrescriptions(HttpServletRequest request) {
         AppUser doctor = userService.returnUser(request);
 
-        List<DoctorSerial> pendingDoctorSerials = doctorSerialRepository.findByPrescriptionIsNullAndDoctorId(doctor.getId());
+        List<DoctorSerial> pendingDoctorSerials = doctorSerialRepository
+                .findByPrescriptionIsNullAndDoctorId(doctor.getId());
 
         if (pendingDoctorSerials.size() == 0) {
             return new ResponseEntity<>(ApiResponse.create("empty", "No pending found"), HttpStatus.OK);
@@ -283,7 +288,8 @@ public class DoctorController {
             DoctorSerialViewDTO doctorSerialViewDTO = new DoctorSerialViewDTO();
             doctorSerialViewDTO.setId(doctorSerial.getId());
             doctorSerialViewDTO.setTime(doctorSerial.getTime());
-            doctorSerialViewDTO.setPatientName(doctorSerial.getUser().getFirstName() + " " + doctorSerial.getUser().getLastName());
+            doctorSerialViewDTO
+                    .setPatientName(doctorSerial.getUser().getFirstName() + " " + doctorSerial.getUser().getLastName());
             doctorSerialViewDTO.setType(doctorSerial.getType());
             doctorSerialViewDTO.setPatientId(doctorSerial.getUser().getId());
             doctorSerialViewDTO.setContanctNo(doctorSerial.getUser().getContactNo());
@@ -300,7 +306,8 @@ public class DoctorController {
 
         Double time = timeService.convertTimeToDouble(LocalTime.now());
 
-        List<DoctorSerial> upcomingDoctorSerials = doctorSerialRepository.findByDateAndTimeAndDoctorId(LocalDate.now(), time, doctor.getId());
+        List<DoctorSerial> upcomingDoctorSerials = doctorSerialRepository.findByDateAndTimeAndDoctorId(LocalDate.now(),
+                time, doctor.getId());
 
         if (upcomingDoctorSerials.size() == 0) {
             return new ResponseEntity<>(ApiResponse.create("empty", "No upcoming found"), HttpStatus.OK);
@@ -313,7 +320,8 @@ public class DoctorController {
             doctorSerialViewDTO.setId(doctorSerial.getId());
             doctorSerialViewDTO.setTime(doctorSerial.getTime());
             doctorSerialViewDTO.setAppointmentDate(doctorSerial.getAppointmentDate());
-            doctorSerialViewDTO.setPatientName(doctorSerial.getUser().getFirstName() + " " + doctorSerial.getUser().getLastName());
+            doctorSerialViewDTO
+                    .setPatientName(doctorSerial.getUser().getFirstName() + " " + doctorSerial.getUser().getLastName());
             doctorSerialViewDTO.setType(doctorSerial.getType());
             doctorSerialViewDTO.setPatientId(doctorSerial.getUser().getId());
             doctorSerialViewDTO.setContanctNo(doctorSerial.getUser().getContactNo());
@@ -340,12 +348,12 @@ public class DoctorController {
 
         doctorRepository.save(optionalDoctor.get());
 
-        BkashRefundResponse bkashRefundResponse = bkashPaymentService.refundPayment(doctorSerial.getPaymentId(), doctorSerial.getTrxId(), doctorSerial.getPrice().toString());
+        BkashRefundResponse bkashRefundResponse = bkashPaymentService.refundPayment(doctorSerial.getPaymentId(),
+                doctorSerial.getTrxId(), doctorSerial.getPrice().toString());
 
         doctorSerialRepository.delete(doctorSerial);
 
         return new ResponseEntity<>(bkashRefundResponse, HttpStatus.OK);
     }
-
 
 }

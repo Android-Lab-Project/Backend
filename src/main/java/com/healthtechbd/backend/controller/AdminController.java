@@ -18,7 +18,8 @@ import java.util.List;
 import java.util.Optional;
 
 @RestController
-@CrossOrigin(origins = "*", allowedHeaders = "*", methods = {RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT, RequestMethod.DELETE})
+@CrossOrigin(origins = "*", allowedHeaders = "*", methods = { RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT,
+        RequestMethod.DELETE })
 public class AdminController {
 
     @Autowired
@@ -54,25 +55,37 @@ public class AdminController {
         adminStatisticsDTO.set_30daysUserCount(userCountStatsRepository.countUserByDate(thirtyDaysAgo, today));
         adminStatisticsDTO.setTotalUserCount(userCountStatsRepository.countUser());
 
-        adminStatisticsDTO.setTotalDoctorSerialCount(doctorSerialRepository.countDoctorSerialsByDate(sevenDaysAgo, today));
-        adminStatisticsDTO.setTotalDiagnosisOrderCount(diagnosisOrderRepository.countDiagnosisOrdersByDate(sevenDaysAgo, today));
-        adminStatisticsDTO.setTotalMedicineOrderCount(medicineOrderRepository.countMedicineOrdersByDate(sevenDaysAgo, today));
-        adminStatisticsDTO.setTotalAmbulanceTripCount(ambulanceTripRepository.countAmbulanceTripsByDate(sevenDaysAgo, today));
+        adminStatisticsDTO
+                .setTotalDoctorSerialCount(doctorSerialRepository.countDoctorSerialsByDate(sevenDaysAgo, today));
+        adminStatisticsDTO
+                .setTotalDiagnosisOrderCount(diagnosisOrderRepository.countDiagnosisOrdersByDate(sevenDaysAgo, today));
+        adminStatisticsDTO
+                .setTotalMedicineOrderCount(medicineOrderRepository.countMedicineOrdersByDate(sevenDaysAgo, today));
+        adminStatisticsDTO
+                .setTotalAmbulanceTripCount(ambulanceTripRepository.countAmbulanceTripsByDate(sevenDaysAgo, today));
 
-        Long _7daysDSIncome = doctorSerialRepository.countDoctorSerialsByDate(sevenDaysAgo, today) * AppConstants.perUserCharge;
-        Long _30daysDSIncome = doctorSerialRepository.countDoctorSerialsByDate(thirtyDaysAgo, today) * AppConstants.perUserCharge;
+        Long _7daysDSIncome = doctorSerialRepository.countDoctorSerialsByDate(sevenDaysAgo, today)
+                * AppConstants.perUserCharge;
+        Long _30daysDSIncome = doctorSerialRepository.countDoctorSerialsByDate(thirtyDaysAgo, today)
+                * AppConstants.perUserCharge;
         Long totalDSIncome = doctorSerialRepository.countDoctorSerials() * AppConstants.perUserCharge;
 
-        Long _7daysDOIncome = diagnosisOrderRepository.countDiagnosisOrdersByDate(sevenDaysAgo, today) * AppConstants.perUserCharge;
-        Long _30daysDOIncome = diagnosisOrderRepository.countDiagnosisOrdersByDate(thirtyDaysAgo, today) * AppConstants.perUserCharge;
+        Long _7daysDOIncome = diagnosisOrderRepository.countDiagnosisOrdersByDate(sevenDaysAgo, today)
+                * AppConstants.perUserCharge;
+        Long _30daysDOIncome = diagnosisOrderRepository.countDiagnosisOrdersByDate(thirtyDaysAgo, today)
+                * AppConstants.perUserCharge;
         Long totalDOIncome = diagnosisOrderRepository.countDiagnosisOrders() * AppConstants.perUserCharge;
 
-        Long _7daysMOIncome = medicineOrderRepository.countMedicineOrdersByDate(sevenDaysAgo, today) * AppConstants.perUserCharge;
-        Long _30daysMOIncome = medicineOrderRepository.countMedicineOrdersByDate(thirtyDaysAgo, today) * AppConstants.perUserCharge;
+        Long _7daysMOIncome = medicineOrderRepository.countMedicineOrdersByDate(sevenDaysAgo, today)
+                * AppConstants.perUserCharge;
+        Long _30daysMOIncome = medicineOrderRepository.countMedicineOrdersByDate(thirtyDaysAgo, today)
+                * AppConstants.perUserCharge;
         Long totalMOIncome = medicineOrderRepository.countMedicineOrders() * AppConstants.perUserCharge;
 
-        Long _7daysATIncome = ambulanceTripRepository.countAmbulanceTripsByDate(sevenDaysAgo, today) * AppConstants.perUserCharge;
-        Long _30daysATIncome = ambulanceTripRepository.countAmbulanceTripsByDate(thirtyDaysAgo, today) * AppConstants.perUserCharge;
+        Long _7daysATIncome = ambulanceTripRepository.countAmbulanceTripsByDate(sevenDaysAgo, today)
+                * AppConstants.perUserCharge;
+        Long _30daysATIncome = ambulanceTripRepository.countAmbulanceTripsByDate(thirtyDaysAgo, today)
+                * AppConstants.perUserCharge;
         Long totalATIncome = ambulanceTripRepository.countAmbulanceTrips() * AppConstants.perUserCharge;
 
         adminStatisticsDTO.set_7daysIncome(_7daysDSIncome + _7daysDOIncome + _7daysMOIncome + _7daysATIncome);
@@ -81,7 +94,8 @@ public class AdminController {
 
         Optional<Admin> optionalAdmin = adminRepository.findById(1L);
 
-        optionalAdmin.ifPresent(admin -> admin.setBalance(totalDSIncome + totalDOIncome + totalMOIncome + totalATIncome));
+        optionalAdmin
+                .ifPresent(admin -> admin.setBalance(totalDSIncome + totalDOIncome + totalMOIncome + totalATIncome));
 
         adminRepository.save(optionalAdmin.orElse(null));
 
@@ -168,7 +182,8 @@ public class AdminController {
             userResponseRepository.save(userResponse);
             return new ResponseEntity<>(ApiResponse.create("update", "Response is checked"), HttpStatus.OK);
         } else {
-            return new ResponseEntity<>(ApiResponse.create("not_found", "User response not found"), HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>(ApiResponse.create("not_found", "User response not found"),
+                    HttpStatus.NOT_FOUND);
         }
     }
 
@@ -183,4 +198,3 @@ public class AdminController {
         }
     }
 }
-

@@ -19,7 +19,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-@CrossOrigin(origins = "*", allowedHeaders = "*", methods = {RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT, RequestMethod.DELETE})
+@CrossOrigin(origins = "*", allowedHeaders = "*", methods = { RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT,
+        RequestMethod.DELETE })
 @RestController
 public class MedicineController {
 
@@ -50,12 +51,14 @@ public class MedicineController {
             return new ResponseEntity<>(ApiResponse.create("error", "Company name is empty"), HttpStatus.BAD_REQUEST);
         }
         if (medicine.getPrice() == null || medicine.getPrice() <= 0) {
-            return new ResponseEntity<>(ApiResponse.create("error", "Invalid or empty medicine price"), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(ApiResponse.create("error", "Invalid or empty medicine price"),
+                    HttpStatus.BAD_REQUEST);
         }
         if (medicine.getGeneric_name() == null || medicine.getGeneric_name().trim().length() == 0) {
             return new ResponseEntity<>(ApiResponse.create("error", "Generic name is empty"), HttpStatus.BAD_REQUEST);
         }
-        if (medicineRepository.existsByName(medicine.getName()) && medicineRepository.existsByCompany(medicine.getCompany())) {
+        if (medicineRepository.existsByName(medicine.getName())
+                && medicineRepository.existsByCompany(medicine.getCompany())) {
             return new ResponseEntity<>(ApiResponse.create("error", "Medicine already exists"), HttpStatus.BAD_REQUEST);
         }
 
@@ -63,42 +66,39 @@ public class MedicineController {
 
         return new ResponseEntity<>(ApiResponse.create("create", "Medicine successfully added/updated"), HttpStatus.OK);
 
-
     }
 
     @GetMapping("/medicine/order/all")
-    public ResponseEntity<?>getAllMedicalOrders(HttpServletRequest request)
-    {
+    public ResponseEntity<?> getAllMedicalOrders(HttpServletRequest request) {
         AppUser user = userService.returnUser(request);
 
-        Optional<Pharmacy>optionalPharmacy =pharmacyRepository.findByAppUser_Id(user.getId());
+        Optional<Pharmacy> optionalPharmacy = pharmacyRepository.findByAppUser_Id(user.getId());
 
         Pharmacy pharmacy = optionalPharmacy.get();
 
-        List<MedicineOrder>medicineOrders = medicineOrderRepository.findByPlaceIgnoreCase(pharmacy.getPlace());
+        List<MedicineOrder> medicineOrders = medicineOrderRepository.findByPlaceIgnoreCase(pharmacy.getPlace());
 
-        if(medicineOrders.size()==0)
-        {
-            return new ResponseEntity<>(ApiResponse.create("empty","No medicine order in this place"),HttpStatus.OK);
+        if (medicineOrders.size() == 0) {
+            return new ResponseEntity<>(ApiResponse.create("empty", "No medicine order in this place"), HttpStatus.OK);
         }
 
-        List<MedicineOrderViewDTO>medicineOrderViewDTOS = new ArrayList<>();
+        List<MedicineOrderViewDTO> medicineOrderViewDTOS = new ArrayList<>();
 
         for (var medicineOrder : medicineOrders) {
             MedicineOrderViewDTO medicineOrderViewDTO = new MedicineOrderViewDTO();
             medicineOrderViewDTO.setId(medicineOrder.getId());
             medicineOrderViewDTO.setUserId(medicineOrder.getUser().getId());
-            medicineOrderViewDTO.setUserName(medicineOrder.getUser().getFirstName() + " " + medicineOrder.getUser().getLastName());
+            medicineOrderViewDTO.setContactNo(medicineOrder.getUser().getContactNo());
+            medicineOrderViewDTO
+                    .setUserName(medicineOrder.getUser().getFirstName() + " " + medicineOrder.getUser().getLastName());
             medicineOrderViewDTO.setDescription(medicineOrder.getDescription());
             medicineOrderViewDTO.setPrice(medicineOrder.getPrice());
 
             medicineOrderViewDTOS.add(medicineOrderViewDTO);
         }
 
-        return new ResponseEntity<>(medicineOrderViewDTOS,HttpStatus.OK);
+        return new ResponseEntity<>(medicineOrderViewDTOS, HttpStatus.OK);
     }
-
-
 
     @GetMapping("/medicine/order/update/{id}")
     public ResponseEntity<?> updateMedicineOrder(@PathVariable(name = "id") Long id, HttpServletRequest request) {
@@ -111,7 +111,8 @@ public class MedicineController {
         Optional<MedicineOrder> optionalMedicineOrder = medicineOrderRepository.findById(id);
 
         if (!optionalMedicineOrder.isPresent()) {
-            return new ResponseEntity<>(ApiResponse.create("error", "Medicine Order not found"), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(ApiResponse.create("error", "Medicine Order not found"),
+                    HttpStatus.BAD_REQUEST);
         }
 
         MedicineOrder medicineOrder = optionalMedicineOrder.get();
@@ -134,7 +135,8 @@ public class MedicineController {
         Optional<MedicineOrder> optionalMedicineOrder = medicineOrderRepository.findById(id);
 
         if (!optionalMedicineOrder.isPresent()) {
-            return new ResponseEntity<>(ApiResponse.create("error", "Medicine Order not found"), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(ApiResponse.create("error", "Medicine Order not found"),
+                    HttpStatus.BAD_REQUEST);
         }
 
         MedicineOrder medicineOrder = optionalMedicineOrder.get();
@@ -146,7 +148,6 @@ public class MedicineController {
         return new ResponseEntity<>(ApiResponse.create("update", "medicine order delivered"), HttpStatus.OK);
 
     }
-
 
     @GetMapping("/medicine/all")
     public ResponseEntity<?> showAllMedicineDetails() {
@@ -165,9 +166,9 @@ public class MedicineController {
             medicineRepository.deleteById(id);
             return new ResponseEntity<>(ApiResponse.create("delete", "Medicine is deleted"), HttpStatus.OK);
         } catch (Exception e) {
-            return new ResponseEntity<>(ApiResponse.create("error", "Medicine can not be deleted at this moment"), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(ApiResponse.create("error", "Medicine can not be deleted at this moment"),
+                    HttpStatus.BAD_REQUEST);
         }
     }
-
 
 }
