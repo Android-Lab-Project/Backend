@@ -26,7 +26,7 @@ jobs:
       uses: mr-smithers-excellent/docker-build-push@v6
       with:
         image: drfahim/springapi
-        tags: ${{github.run_number}}
+        tags: latest
         registry: docker.io
         dockerfile: Dockerfile
         username: ${{ secrets.DOCKER_USERNAME }}
