@@ -20,24 +20,23 @@ public class AppUser {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
     private String firstName;
 
-    @Column(nullable = false)
+
     private String lastName;
 
-    @Column(nullable = false)
+
     private String email;
 
-    @Column(nullable = false)
+
     private String password;
 
     private String dp;
 
-    @Column(nullable = false)
+
     private String contactNo;
 
-    @Column(nullable = false)
+
     private boolean accountVerified;
 
     @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)

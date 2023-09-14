@@ -14,7 +14,7 @@ public class DoctorSerialViewDTO {
 
     private Long patientId;
 
-    private String contanctNo;
+    private String contactNo;
 
     private String patientName;
 

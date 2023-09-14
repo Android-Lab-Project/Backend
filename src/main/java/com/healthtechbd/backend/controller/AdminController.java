@@ -9,6 +9,7 @@ import com.healthtechbd.backend.utils.AppConstants;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
@@ -20,6 +21,7 @@ import java.util.Optional;
 @RestController
 @CrossOrigin(origins = "*", allowedHeaders = "*", methods = { RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT,
         RequestMethod.DELETE })
+@PreAuthorize("hasAuthority('ADMIN')")
 public class AdminController {
 
     @Autowired
@@ -42,6 +44,7 @@ public class AdminController {
 
     @Autowired
     private AmbulanceTripRepository ambulanceTripRepository;
+
 
     @GetMapping("/statistics/admin")
     public ResponseEntity<AdminStatisticsDTO> getAdminStats() {
@@ -157,7 +160,6 @@ public class AdminController {
             }
 
             if (count != 0) {
-                System.out.println(count);
                 dates.add(date);
                 incomes.add(count * AppConstants.perUserCharge);
             }

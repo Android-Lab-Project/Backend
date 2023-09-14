@@ -14,6 +14,7 @@ import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
@@ -46,6 +47,7 @@ public class AmbulanceController {
     @Autowired
     private UserService userService;
 
+    @PreAuthorize("hasAuthority('AMBULANCE')")
     @PostMapping("/add/ambulance")
     public ResponseEntity<?> addAmbulance(@RequestBody AmbulanceDTO ambulanceDTO, HttpServletRequest request) {
         AppUser appUser = userService.returnUser(request);
@@ -62,7 +64,7 @@ public class AmbulanceController {
         Optional<AmbulanceProvider> optionalAmbulanceProvider = ambulanceProviderRepository
                 .findByAppUser_Id(appUser.getId());
 
-        if (!optionalAmbulanceProvider.isPresent()) {
+        if (optionalAmbulanceProvider.isEmpty()) {
             return new ResponseEntity<>(ApiResponse.create("error", "Provider not found"), HttpStatus.BAD_REQUEST);
         }
 
@@ -73,6 +75,7 @@ public class AmbulanceController {
         return new ResponseEntity<>(ApiResponse.create("create", "Ambulance added"), HttpStatus.OK);
     }
 
+    @PreAuthorize("hasAnyAuthority('AMBULANCE','USER')")
     @GetMapping("/ambulance/{id}")
     public ResponseEntity<?> getAllAmbulances(@PathVariable(name = "id") Long id) {
 
@@ -81,7 +84,7 @@ public class AmbulanceController {
         List<Ambulance> ambulances = ambulanceRepository
                 .findByAmbulanceProvider_Id(optionalAmbulanceProvider.get().getId());
 
-        if (ambulances.size() == 0) {
+        if (ambulances.isEmpty()) {
             return new ResponseEntity<>(ApiResponse.create("empty", "No Ambulance Found"), HttpStatus.OK);
         }
 
@@ -93,9 +96,8 @@ public class AmbulanceController {
         }
 
         return new ResponseEntity<>(ambulanceDTOS, HttpStatus.OK);
-
     }
-
+    @PreAuthorize("hasAuthority('AMBULANCE')")
     @DeleteMapping("/delete/ambulance/{id}")
     public ResponseEntity<?> deleteDiagnosis(@PathVariable(name = "id") Long id) {
         try {
@@ -104,14 +106,13 @@ public class AmbulanceController {
             return new ResponseEntity<>(ApiResponse.create("error", "Ambulance can't be deleted"),
                     HttpStatus.BAD_REQUEST);
         }
-
         return new ResponseEntity<>(ApiResponse.create("delete", "Ambulance deleted"), HttpStatus.OK);
     }
-
+    @PreAuthorize("hasAuthority('AMBULANCE')")
     @GetMapping("/ambulance/trip/all")
     public ResponseEntity<?> getAllTrips() {
         List<AmbulanceTrip> ambulanceTrips = ambulanceTripRepository.findAll();
-        if (ambulanceTrips.size() == 0) {
+        if (ambulanceTrips.isEmpty()) {
             return new ResponseEntity<>(ApiResponse.create("empty", "No Trip found"), HttpStatus.OK);
         }
         List<AmbulanceTripViewDTO> ambulanceTripViewDTOS = new ArrayList<>();
@@ -132,14 +133,14 @@ public class AmbulanceController {
 
         return new ResponseEntity<>(ambulanceTripViewDTOS, HttpStatus.OK);
     }
-
+    @PreAuthorize("hasAuthority('AMBULANCE')")
     @GetMapping("/ambulance/trip/bid/{id}")
     public ResponseEntity<?> addBidderToTrip(HttpServletRequest request, @PathVariable(name = "id") Long id) {
         AppUser bidder = userService.returnUser(request);
 
         Optional<AmbulanceTrip> optionalAmbulanceTrip = ambulanceTripRepository.findById(id);
 
-        if (!optionalAmbulanceTrip.isPresent()) {
+        if (optionalAmbulanceTrip.isEmpty()) {
             return new ResponseEntity<>(ApiResponse.create("error", "trip not found"), HttpStatus.BAD_REQUEST);
         }
 
@@ -151,38 +152,37 @@ public class AmbulanceController {
 
         return new ResponseEntity<>(ApiResponse.create("update", "trip updated"), HttpStatus.OK);
     }
-
+    @PreAuthorize("hasAnyAuthority('AMBULANCE','USER')")
     @GetMapping("update/ambulancetrip/{id1}/{id2}")
     public ResponseEntity<?> updateAmbulanceTrip(HttpServletRequest request, @PathVariable(name = "id1") Long id1,
-            @PathVariable(name = "id2") Long id2) {
+                                                 @PathVariable(name = "id2") Long id2) {
         Optional<AmbulanceProvider> optionalProvider = ambulanceProviderRepository.findByAppUser_Id(id2);
-
         Optional<AmbulanceTrip> optionalAmbulanceTrip = ambulanceTripRepository.findById(id1);
 
-        if (!optionalAmbulanceTrip.isPresent()) {
-            return new ResponseEntity<>(ApiResponse.create("error", "trip not found"), HttpStatus.BAD_REQUEST);
-        }
+        if (optionalProvider.isPresent() && optionalAmbulanceTrip.isPresent()) {
+            AmbulanceProvider provider = optionalProvider.get();
+            AmbulanceTrip ambulanceTrip = optionalAmbulanceTrip.get();
 
-        AmbulanceTrip ambulanceTrip = optionalAmbulanceTrip.get();
+            ambulanceTrip.setAmbulanceProvider(provider.getAppUser());
 
-        ambulanceTrip.setAmbulanceProvider(optionalProvider.get().getAppUser());
+            Long reviewCount = reviewRepository.countByUser(ambulanceTrip.getUser().getId(),
+                    ambulanceTrip.getAmbulanceProvider().getId());
 
-        Long reviewCount = reviewRepository.countByUser(ambulanceTrip.getUser().getId(),
-                ambulanceTrip.getAmbulanceProvider().getId());
+            if (reviewCount >= 1) {
+                ambulanceTrip.setReviewChecked(1);
+            } else {
+                ambulanceTrip.setReviewChecked(0);
+            }
 
-        if (reviewCount >= 1) {
-            ambulanceTrip.setReviewChecked(1);
+            provider.balance += ambulanceTrip.getPrice();
+            ambulanceProviderRepository.save(provider);
+            ambulanceTripRepository.save(ambulanceTrip);
+
+            return new ResponseEntity<>(ApiResponse.create("update", "Ambulance trip updated"), HttpStatus.OK);
         } else {
-            ambulanceTrip.setReviewChecked(0);
+            return new ResponseEntity<>(ApiResponse.create("error", "Ambulance provider or trip not found"),
+                    HttpStatus.NOT_FOUND);
         }
-
-        optionalProvider.get().balance += ambulanceTrip.getPrice();
-
-        ambulanceProviderRepository.save(optionalProvider.get());
-
-        ambulanceTripRepository.save(ambulanceTrip);
-
-        return new ResponseEntity<>(ApiResponse.create("update", "trip updated"), HttpStatus.OK);
-
     }
+
 }

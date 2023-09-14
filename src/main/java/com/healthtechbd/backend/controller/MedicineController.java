@@ -13,6 +13,7 @@ import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
@@ -42,6 +43,7 @@ public class MedicineController {
     @Autowired
     private UserService userService;
 
+    @PreAuthorize("hasAuthority('ADMIN')")
     @PostMapping("/add/medicine")
     public ResponseEntity<?> addMedicine(@RequestBody Medicine medicine) {
         if (medicine.getName() == null || medicine.getName().trim().length() == 0) {
@@ -64,22 +66,42 @@ public class MedicineController {
 
         medicineRepository.save(medicine);
 
-        return new ResponseEntity<>(ApiResponse.create("create", "Medicine successfully added/updated"), HttpStatus.OK);
+        return new ResponseEntity<>(ApiResponse.create("create", "Medicine successfully added"), HttpStatus.OK);
 
     }
 
+    @PreAuthorize("hasAnyAuthority('PHARMACY','USER','ADMIN')")
+    @GetMapping("/medicine/all")
+    public ResponseEntity<?> showAllMedicineDetails() {
+        List<Medicine> medicines = medicineRepository.findAll();
+
+        if (medicines.isEmpty()) {
+            return new ResponseEntity<>(ApiResponse.create("error", "No medicine exists"), HttpStatus.BAD_REQUEST);
+        }
+
+        return new ResponseEntity<>(medicines, HttpStatus.OK);
+    }
+
+    @PreAuthorize("hasAuthority('ADMIN')")
+    @DeleteMapping("delete/medicine/{id}")
+    public ResponseEntity<?> deleteMedicine(@PathVariable(name = "id") Long id) {
+        try {
+            medicineRepository.deleteById(id);
+            return new ResponseEntity<>(ApiResponse.create("delete", "Medicine is deleted"), HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(ApiResponse.create("error", "Medicine can not be deleted at this moment"),
+                    HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @PreAuthorize("hasAnyAuthority('PHARMACY','USER')")
     @GetMapping("/medicine/order/all")
-    public ResponseEntity<?> getAllMedicalOrders(HttpServletRequest request) {
-        AppUser user = userService.returnUser(request);
-
-        Optional<Pharmacy> optionalPharmacy = pharmacyRepository.findByAppUser_Id(user.getId());
-
-        Pharmacy pharmacy = optionalPharmacy.get();
+    public ResponseEntity<?> getAllMedicalOrders() {
 
         List<MedicineOrder> medicineOrders = medicineOrderRepository.findAll();
 
-        if (medicineOrders.size() == 0) {
-            return new ResponseEntity<>(ApiResponse.create("empty", "No medicine order in this place"), HttpStatus.OK);
+        if (medicineOrders.isEmpty()) {
+            return new ResponseEntity<>(ApiResponse.create("empty", "No medicine order found at this moment"), HttpStatus.OK);
         }
 
         List<MedicineOrderViewDTO> medicineOrderViewDTOS = new ArrayList<>();
@@ -101,41 +123,46 @@ public class MedicineController {
         return new ResponseEntity<>(medicineOrderViewDTOS, HttpStatus.OK);
     }
 
+    @PreAuthorize("hasAnyAuthority('PHARMACY','USER')")
     @GetMapping("/medicine/order/update/{id}")
     public ResponseEntity<?> updateMedicineOrder(@PathVariable(name = "id") Long id, HttpServletRequest request) {
         AppUser appUser = userService.returnUser(request);
 
         if (appUser == null) {
-            return new ResponseEntity<>(ApiResponse.create("error", "Hospital not found"), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(ApiResponse.create("error", "Pharmacy not found"), HttpStatus.NOT_FOUND);
         }
 
         Optional<MedicineOrder> optionalMedicineOrder = medicineOrderRepository.findById(id);
 
-        if (!optionalMedicineOrder.isPresent()) {
-            return new ResponseEntity<>(ApiResponse.create("error", "Medicine Order not found"),
-                    HttpStatus.BAD_REQUEST);
+        if (optionalMedicineOrder.isPresent()) {
+            MedicineOrder medicineOrder = optionalMedicineOrder.get();
+
+            medicineOrder.setPharmacy(appUser);
+
+            Optional<Pharmacy> optionalPharmacy = pharmacyRepository.findByAppUser_Id(appUser.getId());
+
+            if (optionalPharmacy.isPresent()) {
+                Pharmacy pharmacy = optionalPharmacy.get();
+                pharmacy.balance += medicineOrder.getPrice();
+                pharmacyRepository.save(pharmacy);
+
+                medicineOrderRepository.save(medicineOrder);
+
+                return new ResponseEntity<>(ApiResponse.create("update", "Medicine order updated"), HttpStatus.OK);
+            } else {
+                return new ResponseEntity<>(ApiResponse.create("error", "Pharmacy not found"), HttpStatus.NOT_FOUND);
+            }
+        } else {
+            return new ResponseEntity<>(ApiResponse.create("error", "Medicine Order not found"), HttpStatus.NOT_FOUND);
         }
-
-        MedicineOrder medicineOrder = optionalMedicineOrder.get();
-
-        medicineOrder.setPharmacy(appUser);
-
-        Optional<Pharmacy> optionalPharmacy = pharmacyRepository.findByAppUser_Id(appUser.getId());
-
-        optionalPharmacy.get().balance += medicineOrder.getPrice();
-
-        pharmacyRepository.save(optionalPharmacy.get());
-
-        medicineOrderRepository.save(medicineOrder);
-
-        return new ResponseEntity<>(ApiResponse.create("update", "medicine order updated"), HttpStatus.OK);
     }
 
+    @PreAuthorize("hasAnyAuthority('PHARMACY','USER')")
     @GetMapping("/medicine/order/update/delivered/{id}")
-    public ResponseEntity<?> updateMedicineOrdrerToDelivered(@PathVariable(name = "id") Long id) {
+    public ResponseEntity<?> updateMedicineOrderToDelivered(@PathVariable(name = "id") Long id) {
         Optional<MedicineOrder> optionalMedicineOrder = medicineOrderRepository.findById(id);
 
-        if (!optionalMedicineOrder.isPresent()) {
+        if (optionalMedicineOrder.isEmpty()) {
             return new ResponseEntity<>(ApiResponse.create("error", "Medicine Order not found"),
                     HttpStatus.BAD_REQUEST);
         }
@@ -148,28 +175,6 @@ public class MedicineController {
 
         return new ResponseEntity<>(ApiResponse.create("update", "medicine order delivered"), HttpStatus.OK);
 
-    }
-
-    @GetMapping("/medicine/all")
-    public ResponseEntity<?> showAllMedicineDetails() {
-        List<Medicine> medicines = medicineRepository.findAll();
-
-        if (medicines.size() == 0) {
-            return new ResponseEntity<>(ApiResponse.create("error", "No medicine exists"), HttpStatus.BAD_REQUEST);
-        }
-
-        return new ResponseEntity<>(medicines, HttpStatus.OK);
-    }
-
-    @DeleteMapping("delete/medicine/{id}")
-    public ResponseEntity<?> deleteMedicine(@PathVariable(name = "id") Long id) {
-        try {
-            medicineRepository.deleteById(id);
-            return new ResponseEntity<>(ApiResponse.create("delete", "Medicine is deleted"), HttpStatus.OK);
-        } catch (Exception e) {
-            return new ResponseEntity<>(ApiResponse.create("error", "Medicine can not be deleted at this moment"),
-                    HttpStatus.BAD_REQUEST);
-        }
     }
 
 }

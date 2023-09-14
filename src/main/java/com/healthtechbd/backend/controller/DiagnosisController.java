@@ -13,6 +13,7 @@ import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
@@ -45,6 +46,7 @@ public class DiagnosisController {
     @Autowired
     private UserService userService;
 
+    @PreAuthorize("hasAuthority('HOSPITAL')")
     @PostMapping("/add/diagnosis")
     public ResponseEntity<?> addDiagnosis(@RequestBody AddDiagnosisDTO addDiagnosisDTO, HttpServletRequest request) {
         if (addDiagnosisDTO.getName() == null || addDiagnosisDTO.getName().trim().length() == 0) {
@@ -68,8 +70,8 @@ public class DiagnosisController {
 
         Optional<Hospital> optionalHospital = hospitalRepository.findByAppUser_Id(appUser.getId());
 
-        if (!optionalHospital.isPresent()) {
-            return new ResponseEntity<>(ApiResponse.create("error", "User does not exist"), HttpStatus.BAD_REQUEST);
+        if (optionalHospital.isEmpty()) {
+            return new ResponseEntity<>(ApiResponse.create("error", "User does not exist"), HttpStatus.NOT_FOUND);
         }
 
         Diagnosis diagnosis = new Diagnosis();
@@ -82,12 +84,13 @@ public class DiagnosisController {
 
         return new ResponseEntity<>(ApiResponse.create("create", "Diagnosis added"), HttpStatus.OK);
     }
-
+    @PreAuthorize("hasAnyAuthority('HOSPITAL','USER')")
     @GetMapping("/diagnosis/all")
     public ResponseEntity<?> showAllDiagnosisDetails() {
+
         List<Diagnosis> diagnoses = diagnosisRepository.findAll();
 
-        if (diagnoses.size() == 0) {
+        if (diagnoses.isEmpty()) {
             return new ResponseEntity<>(ApiResponse.create("empty", "No Diagnosis Found"), HttpStatus.OK);
         }
 
@@ -105,6 +108,7 @@ public class DiagnosisController {
         return new ResponseEntity<>(diagnosisDTOS, HttpStatus.OK);
     }
 
+    @PreAuthorize("hasAuthority('HOSPITAL')")
     @DeleteMapping("/delete/diagnosis/{id}")
     public ResponseEntity<?> deleteDiagnosis(@PathVariable(name = "id") Long id) {
         try {

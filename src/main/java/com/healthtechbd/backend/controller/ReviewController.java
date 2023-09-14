@@ -34,26 +34,31 @@ public class ReviewController {
     public ResponseEntity<?> getAllReviews(@PathVariable(name = "id") Long id) {
         Optional<AppUser> opSubject = userRepository.findById(id);
 
-        List<Review> reviewList = reviewRepository.findBySubject_Id(opSubject.get().getId());
+        if (opSubject.isPresent()) {
+            List<Review> reviewList = reviewRepository.findBySubject_Id(opSubject.get().getId());
 
-        if (reviewList.size() == 0) {
-            return new ResponseEntity<>(ApiResponse.create("empty", "No review found"), HttpStatus.OK);
+            if (reviewList.isEmpty()) {
+                return new ResponseEntity<>(ApiResponse.create("empty", "No review found"), HttpStatus.OK);
+            }
+
+            List<ReviewDTO> reviewDTOS = new ArrayList<>();
+
+            for (var i : reviewList) {
+                ReviewDTO reviewDTO = new ReviewDTO();
+
+                reviewDTO.setReviewerId(i.getReviewer().getId());
+                reviewDTO.setStarCount(i.getStarCount());
+                reviewDTO.setReview(i.getReview());
+                reviewDTO.setReviewerName(i.getReviewer().getFirstName() + " " + i.getReviewer().getLastName());
+
+                reviewDTOS.add(reviewDTO);
+            }
+
+            return new ResponseEntity<>(reviewDTOS, HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>(ApiResponse.create("error", "User not found"), HttpStatus.NOT_FOUND);
         }
-
-        List<ReviewDTO> reviewDTOS = new ArrayList<>();
-
-        for (var i : reviewList) {
-            ReviewDTO reviewDTO = new ReviewDTO();
-
-            reviewDTO.setReviewerId(i.getReviewer().getId());
-            reviewDTO.setStarCount(i.getStarCount());
-            reviewDTO.setReview(i.getReview());
-            reviewDTO.setReviewerName(i.getReviewer().getFirstName() + " " + i.getReviewer().getLastName());
-
-            reviewDTOS.add(reviewDTO);
-        }
-
-        return new ResponseEntity<>(reviewDTOS, HttpStatus.OK);
     }
+
 
 }

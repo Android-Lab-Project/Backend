@@ -29,10 +29,12 @@ public class BkashPaymentService {
 
         OkHttpClient client = new OkHttpClient();
 
+        final String CREATE_TOKEN_ENDPOINT = "/tokenized/checkout/token/grant";
+
         MediaType mediaType = MediaType.parse("application/json");
         RequestBody body = RequestBody.create(mediaType, "{\"app_key\":\"4f6o0cjiki2rfm34kfdadl1eqq\",\"app_secret\":\"2is7hdktrekvrbljjh44ll3d9l1dtjo4pasmjvs5vl5qr3fug4b\"}");
         Request request = new Request.Builder()
-                .url("https://tokenized.sandbox.bka.sh/v1.2.0-beta/tokenized/checkout/token/grant")
+                .url(API_BASE_URL+CREATE_TOKEN_ENDPOINT)
                 .post(body)
                 .addHeader("accept", "application/json")
                 .addHeader("username", "sandboxTokenizedUser02")

@@ -15,6 +15,7 @@ import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
@@ -23,6 +24,7 @@ import java.util.Optional;
 @CrossOrigin(origins = "*", allowedHeaders = "*", methods = { RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT,
         RequestMethod.DELETE })
 @RestController
+@PreAuthorize("hasAuthority('PHARMACY')")
 public class PharmacyController {
 
     @Autowired
@@ -60,15 +62,12 @@ public class PharmacyController {
     }
 
     @PostMapping("/update/pharmacy")
-    public ResponseEntity<?> upatePharmacy(HttpServletRequest request, @RequestBody Pharmacy pharmacy) {
+    public ResponseEntity<?> updatePharmacy(HttpServletRequest request, @RequestBody Pharmacy pharmacy) {
         AppUser appUser = userService.returnUser(request);
-
         Long appUserId = appUser.getId();
-
         var roles = appUser.getRoles();
 
         SignUpDTO signUpDTO = modelMapper.map(pharmacy.getAppUser(), SignUpDTO.class);
-
         UpdateUserResponse updateUserResponse = userService.updateUser(signUpDTO);
 
         if (updateUserResponse.getResponse().haveError()) {
@@ -76,20 +75,22 @@ public class PharmacyController {
         }
 
         appUser = updateUserResponse.getUser();
-
         appUser.setId(appUserId);
         appUser.setRoles(roles);
 
         Optional<Pharmacy> optionalPharmacy = pharmacyRepository.findByAppUser_Id(appUserId);
 
-        pharmacy.setId(optionalPharmacy.get().getId());
-        pharmacy.setBalance(optionalPharmacy.get().getBalance());
-        pharmacy.setAppUser(appUser);
+        if (optionalPharmacy.isPresent()) {
+            Pharmacy existingPharmacy = optionalPharmacy.get();
+            pharmacy.setId(existingPharmacy.getId());
+            pharmacy.setBalance(existingPharmacy.getBalance());
+            pharmacy.setAppUser(appUser);
 
-        pharmacyRepository.save(pharmacy);
+            pharmacyRepository.save(pharmacy);
 
-        return new ResponseEntity<>(updateUserResponse.getResponse(), HttpStatus.OK);
-
+            return new ResponseEntity<>(updateUserResponse.getResponse(), HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>(ApiResponse.create("error", "Pharmacy not found"), HttpStatus.NOT_FOUND);
+        }
     }
-
 }

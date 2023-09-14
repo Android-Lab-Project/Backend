@@ -24,6 +24,7 @@ import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
@@ -126,6 +127,11 @@ public class DoctorController {
 
         Optional<Doctor> optionalDoctor = doctorRepository.findByAppUser_Id(appUserId);
 
+        if(optionalDoctor.isEmpty())
+        {
+            return new ResponseEntity<>(ApiResponse.create("error","Doctor not found"),HttpStatus.NOT_FOUND);
+        }
+
         Doctor doctor = optionalDoctor.get();
 
         Long doctorId = doctor.getId();
@@ -162,6 +168,7 @@ public class DoctorController {
         return new ResponseEntity<>(updateUserResponse.getResponse(), HttpStatus.OK);
     }
 
+    @PreAuthorize("hasAnyAuthority('DOCTOR','USER')")
     @GetMapping("/doctor/{id}")
     public ResponseEntity<?> showDoctorDetails(@PathVariable Long id) {
         Optional<Doctor> optionalDoctor = doctorRepository.findByAppUser_Id(id);
@@ -208,11 +215,13 @@ public class DoctorController {
         return new ResponseEntity<>(doctorDTO, HttpStatus.OK);
     }
 
+    @PreAuthorize("hasAnyAuthority('DOCTOR','USER')")
     @GetMapping("/doctor/all")
     public ResponseEntity<?> showAllDoctorDetails() {
+
         List<Doctor> allDoctors = DoctorService.getAllDoctors();
 
-        if (allDoctors.size() == 0) {
+        if (allDoctors.isEmpty()) {
             return new ResponseEntity<>(ApiResponse.create("error", "No Doctor Found"), HttpStatus.BAD_REQUEST);
         }
 
@@ -260,17 +269,24 @@ public class DoctorController {
 
     }
 
+    @PreAuthorize("hasAuthority('DOCTOR')")
     @GetMapping("/update/doctor/serial/pres/{id}")
     public ResponseEntity<?> updateDiagnosisReport(@RequestParam(name = "prescription") String prescription,
             @PathVariable(name = "id") Long id) {
+
         Optional<DoctorSerial> optionalDoctorSerial = doctorSerialRepository.findById(id);
-        var diagnosisOrder = optionalDoctorSerial.get();
-        diagnosisOrder.setPrescription(prescription);
-        doctorSerialRepository.save(diagnosisOrder);
+        if(optionalDoctorSerial.isEmpty())
+        {
+            return new ResponseEntity<>(ApiResponse.create("error", "DoctorSerial not Found"), HttpStatus.NOT_FOUND);
+        }
+        var doctorSerial = optionalDoctorSerial.get();
+        doctorSerial.setPrescription(prescription);
+        doctorSerialRepository.save(doctorSerial);
 
         return new ResponseEntity<>(ApiResponse.create("update", "Prescription added"), HttpStatus.OK);
     }
 
+    @PreAuthorize("hasAuthority('DOCTOR')")
     @GetMapping("/dashboard/doctor/pending")
     public ResponseEntity<?> getAllPendingPrescriptions(HttpServletRequest request) {
         AppUser doctor = userService.returnUser(request);
@@ -278,7 +294,7 @@ public class DoctorController {
         List<DoctorSerial> pendingDoctorSerials = doctorSerialRepository
                 .findByPrescriptionIsNullAndDoctorId(doctor.getId());
 
-        if (pendingDoctorSerials.size() == 0) {
+        if (pendingDoctorSerials.isEmpty()) {
             return new ResponseEntity<>(ApiResponse.create("empty", "No pending found"), HttpStatus.OK);
         }
 
@@ -292,7 +308,7 @@ public class DoctorController {
                     .setPatientName(doctorSerial.getUser().getFirstName() + " " + doctorSerial.getUser().getLastName());
             doctorSerialViewDTO.setType(doctorSerial.getType());
             doctorSerialViewDTO.setPatientId(doctorSerial.getUser().getId());
-            doctorSerialViewDTO.setContanctNo(doctorSerial.getUser().getContactNo());
+            doctorSerialViewDTO.setContactNo(doctorSerial.getUser().getContactNo());
 
             doctorSerialViewDTOS.add(doctorSerialViewDTO);
         }
@@ -300,6 +316,7 @@ public class DoctorController {
         return new ResponseEntity<>(doctorSerialViewDTOS, HttpStatus.OK);
     }
 
+    @PreAuthorize("hasAuthority('DOCTOR')")
     @GetMapping("/dashboard/doctor/upcoming")
     public ResponseEntity<?> getAllUpcoming(HttpServletRequest request) {
         AppUser doctor = userService.returnUser(request);
@@ -309,7 +326,7 @@ public class DoctorController {
         List<DoctorSerial> upcomingDoctorSerials = doctorSerialRepository.findByDateAndTimeAndDoctorId(LocalDate.now(),
                 time, doctor.getId());
 
-        if (upcomingDoctorSerials.size() == 0) {
+        if (upcomingDoctorSerials.isEmpty()) {
             return new ResponseEntity<>(ApiResponse.create("empty", "No upcoming found"), HttpStatus.OK);
         }
 
@@ -324,7 +341,7 @@ public class DoctorController {
                     .setPatientName(doctorSerial.getUser().getFirstName() + " " + doctorSerial.getUser().getLastName());
             doctorSerialViewDTO.setType(doctorSerial.getType());
             doctorSerialViewDTO.setPatientId(doctorSerial.getUser().getId());
-            doctorSerialViewDTO.setContanctNo(doctorSerial.getUser().getContactNo());
+            doctorSerialViewDTO.setContactNo(doctorSerial.getUser().getContactNo());
 
             doctorSerialViewDTOS.add(doctorSerialViewDTO);
         }
@@ -332,28 +349,37 @@ public class DoctorController {
         return new ResponseEntity<>(doctorSerialViewDTOS, HttpStatus.OK);
     }
 
+    @PreAuthorize("hasAuthority('DOCTOR')")
     @DeleteMapping("/delete/doctor/serial/{id}")
     public ResponseEntity<?> deleteUpcomingSerial(@PathVariable(name = "id") Long id, HttpServletRequest request) {
         AppUser doctorUser = userService.returnUser(request);
 
         Optional<Doctor> optionalDoctor = doctorRepository.findByAppUser_Id(doctorUser.getId());
 
-        Optional<DoctorSerial> optionalDoctorSerial = doctorSerialRepository.findById(id);
+        if (optionalDoctor.isPresent()) {
+            Optional<DoctorSerial> optionalDoctorSerial = doctorSerialRepository.findById(id);
 
-        DoctorSerial doctorSerial = optionalDoctorSerial.get();
+            if (optionalDoctorSerial.isPresent()) {
+                DoctorSerial doctorSerial = optionalDoctorSerial.get();
+                Doctor doctor = optionalDoctor.get();
 
-        optionalDoctor.get().balance -= (doctorSerial.getPrice() - 10);
+                doctor.balance -= (doctorSerial.getPrice() - 10);
+                doctorSerial.setPrice(doctorSerial.getPrice() - 10);
 
-        doctorSerial.setPrice(doctorSerial.getPrice() - 10);
+                doctorRepository.save(doctor);
 
-        doctorRepository.save(optionalDoctor.get());
+                BkashRefundResponse bkashRefundResponse = bkashPaymentService.refundPayment(doctorSerial.getPaymentId(),
+                        doctorSerial.getTrxId(), doctorSerial.getPrice().toString());
 
-        BkashRefundResponse bkashRefundResponse = bkashPaymentService.refundPayment(doctorSerial.getPaymentId(),
-                doctorSerial.getTrxId(), doctorSerial.getPrice().toString());
+                doctorSerialRepository.delete(doctorSerial);
 
-        doctorSerialRepository.delete(doctorSerial);
-
-        return new ResponseEntity<>(bkashRefundResponse, HttpStatus.OK);
+                return new ResponseEntity<>(bkashRefundResponse, HttpStatus.OK);
+            } else {
+                return new ResponseEntity<>(ApiResponse.create("error", "Doctor Serial not found"), HttpStatus.NOT_FOUND);
+            }
+        } else {
+            return new ResponseEntity<>(ApiResponse.create("error", "Doctor not found"), HttpStatus.NOT_FOUND);
+        }
     }
 
 }

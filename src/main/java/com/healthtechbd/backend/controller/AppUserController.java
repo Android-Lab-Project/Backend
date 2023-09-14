@@ -16,6 +16,7 @@ import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
@@ -28,6 +29,7 @@ import java.util.Optional;
 @CrossOrigin(origins = "*", allowedHeaders = "*", methods = { RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT,
         RequestMethod.DELETE })
 @RestController
+@PreAuthorize("hasAuthority('USER')")
 public class AppUserController {
 
     @Autowired
@@ -85,6 +87,7 @@ public class AppUserController {
 
     @GetMapping("/dashboard/reports&prescriptions")
     public ResponseEntity<?> getAllReportsPrescriptions(HttpServletRequest request) {
+
         AppUser appUser = userService.returnUser(request);
 
         List<DoctorSerial> doctorSerials = doctorSerialRepository
@@ -126,69 +129,99 @@ public class AppUserController {
 
     @GetMapping("bkash/execute/payment")
     public ResponseEntity<?> executePayment(@RequestParam(name = "paymentId") String paymentId,
-            @RequestParam(name = "status") String status, @RequestParam(name = "type") String type,
-            @RequestParam(name = "productId") Long prouductId) {
+                                            @RequestParam(name = "status") String status, @RequestParam(name = "type") String type,
+                                            @RequestParam(name = "productId") Long productId) {
         if (status.equalsIgnoreCase("success")) {
             BkashExecuteResponse bkashExecuteResponse = bkashPaymentService.executePayment(paymentId);
 
             if (type.equalsIgnoreCase("DiagnosisOrder")) {
-                Optional<DiagnosisOrder> optionalDiagnosisOrder = diagnosisOrderRepository.findById(prouductId);
+                Optional<DiagnosisOrder> optionalDiagnosisOrder = diagnosisOrderRepository.findById(productId);
 
-                optionalDiagnosisOrder.get().setTrxId(bkashExecuteResponse.getTrxID());
-                diagnosisOrderRepository.save(optionalDiagnosisOrder.get());
+                if (optionalDiagnosisOrder.isPresent()) {
+                    DiagnosisOrder diagnosisOrder = optionalDiagnosisOrder.get();
+                    diagnosisOrder.setTrxId(bkashExecuteResponse.getTrxID());
+                    diagnosisOrderRepository.save(diagnosisOrder);
 
-                AppUser hospitalUser = optionalDiagnosisOrder.get().getHospital();
+                    AppUser hospitalUser = diagnosisOrder.getHospital();
+                    Optional<Hospital> hospital = hospitalRepository.findByAppUser_Id(hospitalUser.getId());
 
-                Optional<Hospital> hospital = hospitalRepository.findByAppUser_Id(hospitalUser.getId());
-
-                hospital.get().balance += optionalDiagnosisOrder.get().getPrice();
-
-                hospitalRepository.save(hospital.get());
-
+                    if (hospital.isPresent()) {
+                        Hospital hospitalEntity = hospital.get();
+                        hospitalEntity.setBalance(hospitalEntity.getBalance() + diagnosisOrder.getPrice());
+                        hospitalRepository.save(hospitalEntity);
+                    } else {
+                        return new ResponseEntity<>(ApiResponse.create("error", "Hospital not found"),
+                                HttpStatus.NOT_FOUND);
+                    }
+                } else {
+                    return new ResponseEntity<>(ApiResponse.create("error", "DiagnosisOrder not found"),
+                            HttpStatus.NOT_FOUND);
+                }
             } else if (type.equalsIgnoreCase("DoctorSerial")) {
-                Optional<DoctorSerial> optionalDoctorSerial = doctorSerialRepository.findById(prouductId);
+                Optional<DoctorSerial> optionalDoctorSerial = doctorSerialRepository.findById(productId);
 
-                optionalDoctorSerial.get().setTrxId(bkashExecuteResponse.getTrxID());
+                if (optionalDoctorSerial.isPresent()) {
+                    DoctorSerial doctorSerial = optionalDoctorSerial.get();
+                    doctorSerial.setTrxId(bkashExecuteResponse.getTrxID());
+                    doctorSerialRepository.save(doctorSerial);
 
-                doctorSerialRepository.save(optionalDoctorSerial.get());
+                    AppUser doctorUser = doctorSerial.getDoctor();
+                    Optional<Doctor> doctor = doctorRepository.findByAppUser_Id(doctorUser.getId());
 
-                AppUser doctorUser = optionalDoctorSerial.get().getDoctor();
-
-                Optional<Doctor> doctor = doctorRepository.findByAppUser_Id(doctorUser.getId());
-
-                doctor.get().balance += optionalDoctorSerial.get().getPrice();
-
-                doctorRepository.save(doctor.get());
+                    if (doctor.isPresent()) {
+                        Doctor doctorEntity = doctor.get();
+                        doctorEntity.setBalance(doctorEntity.getBalance() + doctorSerial.getPrice());
+                        doctorRepository.save(doctorEntity);
+                    } else {
+                        return new ResponseEntity<>(ApiResponse.create("error", "Doctor not found"),
+                                HttpStatus.NOT_FOUND);
+                    }
+                } else {
+                    return new ResponseEntity<>(ApiResponse.create("error", "DoctorSerial not found"),
+                            HttpStatus.NOT_FOUND);
+                }
             } else if (type.equalsIgnoreCase("MedicineOrder")) {
-                Optional<MedicineOrder> optionalMedicineOrder = medicineOrderRepository.findById(prouductId);
+                Optional<MedicineOrder> optionalMedicineOrder = medicineOrderRepository.findById(productId);
 
-                optionalMedicineOrder.get().setTrxId(bkashExecuteResponse.getTrxID());
-
-                medicineOrderRepository.save(optionalMedicineOrder.get());
+                if (optionalMedicineOrder.isPresent()) {
+                    MedicineOrder medicineOrder = optionalMedicineOrder.get();
+                    medicineOrder.setTrxId(bkashExecuteResponse.getTrxID());
+                    medicineOrderRepository.save(medicineOrder);
+                } else {
+                    return new ResponseEntity<>(ApiResponse.create("error", "MedicineOrder not found"),
+                            HttpStatus.NOT_FOUND);
+                }
             } else if (type.equalsIgnoreCase("AmbulanceTrip")) {
-                Optional<AmbulanceTrip> optionalAmbulanceTrip = ambulanceTripRepository.findById(prouductId);
+                Optional<AmbulanceTrip> optionalAmbulanceTrip = ambulanceTripRepository.findById(productId);
 
-                optionalAmbulanceTrip.get().setTrxId(bkashExecuteResponse.getTrxID());
-
-                ambulanceTripRepository.save(optionalAmbulanceTrip.get());
+                if (optionalAmbulanceTrip.isPresent()) {
+                    AmbulanceTrip ambulanceTrip = optionalAmbulanceTrip.get();
+                    ambulanceTrip.setTrxId(bkashExecuteResponse.getTrxID());
+                    ambulanceTripRepository.save(ambulanceTrip);
+                } else {
+                    return new ResponseEntity<>(ApiResponse.create("error", "AmbulanceTrip not found"),
+                            HttpStatus.NOT_FOUND);
+                }
             }
 
             return new ResponseEntity<>(bkashExecuteResponse, HttpStatus.OK);
         } else {
+
             if (type.equalsIgnoreCase("DiagnosisOrder")) {
-                diagnosisOrderRepository.deleteById(prouductId);
+                diagnosisOrderRepository.deleteById(productId);
             } else if (type.equalsIgnoreCase("DoctorSerial")) {
-                doctorSerialRepository.deleteById(prouductId);
+                doctorSerialRepository.deleteById(productId);
             } else if (type.equalsIgnoreCase("MedicineOrder")) {
-                medicineOrderRepository.deleteById(prouductId);
+                medicineOrderRepository.deleteById(productId);
             } else if (type.equalsIgnoreCase("AmbulanceTrip")) {
-                ambulanceTripRepository.deleteById(prouductId);
+                ambulanceTripRepository.deleteById(productId);
             }
 
             return new ResponseEntity<>(ApiResponse.create("error", "Product is canceled or not successful"),
                     HttpStatus.OK);
         }
     }
+
 
     @PostMapping("/add/doctorSerial")
     public ResponseEntity<?> createDoctorSerial(@RequestBody DoctorSerialDTO doctorSerialDTO,
@@ -197,9 +230,21 @@ public class AppUserController {
 
         Optional<AppUser> opDoctor = userRepository.findById(doctorSerialDTO.getDoctor_id());
 
+        if(opDoctor.isEmpty())
+        {
+            return new ResponseEntity<>(ApiResponse.create("error","Dcotor not found"),HttpStatus.NOT_FOUND);
+        }
+
+        AppUser doctorUser = opDoctor.get();
+
         DoctorSerial doctorSerial = modelMapper.map(doctorSerialDTO, DoctorSerial.class);
 
         Optional<Doctor> optionalDoctor = doctorRepository.findByAppUser_Id(opDoctor.get().getId());
+
+        if(optionalDoctor.isEmpty())
+        {
+            return new ResponseEntity<>(ApiResponse.create("error","Dcotor not found"),HttpStatus.NOT_FOUND);
+        }
 
         Doctor doctor = optionalDoctor.get();
 
@@ -226,7 +271,7 @@ public class AppUserController {
         doctorSerial.setDate(LocalDate.now());
 
         doctorSerial.setUser(user);
-        doctorSerial.setDoctor(opDoctor.get());
+        doctorSerial.setDoctor(doctorUser);
 
         Long reviewCount = reviewRepository.countByUser(user.getId(), opDoctor.get().getId());
 
@@ -258,15 +303,20 @@ public class AppUserController {
 
         Optional<AppUser> opHospital = userRepository.findById(diagnosisOrderDTO.getHospitalId());
 
-        AppUser hospital = new AppUser();
-
-        if (!opHospital.isPresent()) {
+        if (opHospital.isEmpty()) {
             return new ResponseEntity<>(ApiResponse.create("error", "Hospital does not exist"), HttpStatus.BAD_REQUEST);
         }
 
-        hospital = opHospital.get();
+        AppUser hospitalUser = opHospital.get();
 
-        Optional<Hospital> optionalHospital = hospitalRepository.findByAppUser_Id(opHospital.get().getId());
+        Optional<Hospital> optionalHospital = hospitalRepository.findByAppUser_Id(hospitalUser.getId());
+
+        if(optionalHospital.isEmpty())
+        {
+            return new ResponseEntity<>(ApiResponse.create("error", "Hospital Not Found"), HttpStatus.NOT_FOUND);
+        }
+
+        Hospital hospital = optionalHospital.get();
 
         DiagnosisOrder diagnosisOrder = new DiagnosisOrder();
 
@@ -274,11 +324,11 @@ public class AppUserController {
         diagnosisOrder.setPrice(diagnosisOrderDTO.getPrice());
         diagnosisOrder.setTime(diagnosisOrder.getTime());
         diagnosisOrder.setUser(appUser);
-        diagnosisOrder.setHospital(hospital);
+        diagnosisOrder.setHospital(hospitalUser);
         diagnosisOrder.setOrderDate(diagnosisOrderDTO.getOrderDate());
         diagnosisOrder.setDate(LocalDate.now());
 
-        Long reviewCount = reviewRepository.countByUser(appUser.getId(), hospital.getId());
+        Long reviewCount = reviewRepository.countByUser(appUser.getId(), hospitalUser.getId());
 
         if (reviewCount >= 1) {
             diagnosisOrder.setReviewChecked(1);
@@ -286,9 +336,9 @@ public class AppUserController {
             diagnosisOrder.setReviewChecked(0);
         }
 
-        optionalHospital.get().balance += diagnosisOrder.getPrice() - AppConstants.perUserCharge;
+        hospital.balance += diagnosisOrder.getPrice() - AppConstants.perUserCharge;
 
-        hospitalRepository.save(optionalHospital.get());
+        hospitalRepository.save(hospital);
 
         BkashCreateResponse bkashCreateResponse = bkashPaymentService
                 .createPayment(diagnosisOrder.getPrice().toString());
@@ -310,6 +360,7 @@ public class AppUserController {
     @PostMapping("/add/medicine/order")
     public ResponseEntity<?> createMedicineOrder(@RequestBody MedicineOrder medicineOrder, HttpServletRequest request) {
         AppUser user = userService.returnUser(request);
+
         if (user == null) {
             return new ResponseEntity<>(ApiResponse.create("error", "Hospital not found"), HttpStatus.BAD_REQUEST);
         }
@@ -471,7 +522,7 @@ public class AppUserController {
         List<DoctorSerial> upcomingDoctorSerials = doctorSerialRepository.findByDateAndTimeAndUserId(LocalDate.now(),
                 time, user.getId());
 
-        if (upcomingDoctorSerials.size() == 0) {
+        if (upcomingDoctorSerials.isEmpty()) {
             return new ResponseEntity<>(ApiResponse.create("empty", "No upcoming found"), HttpStatus.OK);
         }
 
@@ -502,7 +553,7 @@ public class AppUserController {
         List<DiagnosisOrder> upcomingDiagnosisOrders = diagnosisOrderRepository
                 .findByDateAndTimeAndUserId(LocalDate.now(), time, user.getId());
 
-        if (upcomingDiagnosisOrders.size() == 0) {
+        if (upcomingDiagnosisOrders.isEmpty()) {
             return new ResponseEntity<>(ApiResponse.create("empty", "No upcoming found"), HttpStatus.OK);
         }
 
@@ -525,9 +576,11 @@ public class AppUserController {
         return new ResponseEntity<>(userDiagnosisOrderViewDTOS, HttpStatus.OK);
     }
 
+    @PreAuthorize("hasAnyAuthority('AMBULANCE','USER')")
     @GetMapping("/ambulance/trip/upcoming")
     public ResponseEntity<?> getAllUpcomingTrip(HttpServletRequest request) {
         AppUser user = userService.returnUser(request);
+
         if (user == null) {
             return new ResponseEntity<>(ApiResponse.create("error", "user not found"), HttpStatus.BAD_REQUEST);
         }
@@ -542,7 +595,7 @@ public class AppUserController {
             ambulanceTrips = ambulanceTripRepository.findUpcomingTripsByProvider(LocalDate.now(), user.getId());
         }
 
-        if (ambulanceTrips.size() == 0) {
+        if (ambulanceTrips.isEmpty()) {
             return new ResponseEntity<>(ApiResponse.create("empty", "No upcoming trip found"), HttpStatus.OK);
         }
 
@@ -567,7 +620,7 @@ public class AppUserController {
 
         return new ResponseEntity<>(ambulanceTripViewDTOS, HttpStatus.OK);
     }
-
+    @PreAuthorize("hasAnyAuthority('PHARMACY','USER')")
     @GetMapping("/medicineorder/undelivered")
     public ResponseEntity<?> getAllUndelivered(HttpServletRequest request) {
         AppUser user = userService.returnUser(request);
@@ -585,7 +638,7 @@ public class AppUserController {
             medicineOrders = medicineOrderRepository.findUndeliveredOrdersByPharmacy(user.getId());
         }
 
-        if (medicineOrders.size() == 0) {
+        if (medicineOrders.isEmpty()) {
             return new ResponseEntity<>(ApiResponse.create("empty", "Undelivered not found"), HttpStatus.OK);
         }
 
@@ -611,10 +664,13 @@ public class AppUserController {
         return new ResponseEntity<>(medicineOrderViewDTOS, HttpStatus.OK);
     }
 
+    @PreAuthorize("hasAnyAuthority('HOSPITAL','AMBULANCE',PHARMACY','USER','ADMIN')")
     @GetMapping("/profile")
     public ResponseEntity<?> getProfileDetails(HttpServletRequest request) {
         AppUser appUser = userService.returnUser(request);
+
         Object userdetails = null;
+
         if (appUser.getRoles().get(0).getRoleType().equals("USER")) {
             UserDTO userDTO = modelMapper.map(appUser, UserDTO.class);
 
@@ -677,7 +733,7 @@ public class AppUserController {
 
         return new ResponseEntity<>(userdetails, HttpStatus.OK);
     }
-
+    @PreAuthorize("hasAnyAuthority('DOCTOR',HOSPITAL','AMBULANCE',PHARMACY')")
     @GetMapping("/statistics")
     public ResponseEntity<?> getStatistics(HttpServletRequest request) {
         AppUser user = userService.returnUser(request);
@@ -796,13 +852,14 @@ public class AppUserController {
         return new ResponseEntity<>(statisticsDTO, HttpStatus.OK);
     }
 
+    @PreAuthorize("hasAnyAuthority('DOCTOR',HOSPITAL','AMBULANCE',PHARMACY','USER')")
     @DeleteMapping("/delete/user")
     public ResponseEntity<?> deleteUser(HttpServletRequest request) {
 
         AppUser appUser = userService.returnUser(request);
 
         if (appUser == null) {
-            return new ResponseEntity<>(ApiResponse.create("error", "User does not exist"), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(ApiResponse.create("error", "User does not exist"), HttpStatus.NOT_FOUND);
         }
 
         Long id = appUser.getId();
@@ -817,7 +874,7 @@ public class AppUserController {
 
                 Optional<Doctor> doctor = doctorRepository.findByAppUser_Id(id);
 
-                if (!doctor.isPresent()) {
+                if (doctor.isEmpty()) {
                     return new ResponseEntity<>(ApiResponse.create("error", "User does not exist"),
                             HttpStatus.BAD_REQUEST);
                 }
@@ -826,7 +883,7 @@ public class AppUserController {
             if (roles.get(i).getRoleType().equals("HOSPITAL")) {
                 Optional<Hospital> hospital = hospitalRepository.findByAppUser_Id(id);
 
-                if (!hospital.isPresent()) {
+                if (hospital.isEmpty()) {
                     return new ResponseEntity<>(ApiResponse.create("error", "User does not exist"),
                             HttpStatus.BAD_REQUEST);
                 }
@@ -836,7 +893,7 @@ public class AppUserController {
             if (roles.get(i).getRoleType().equals("PHARMACY")) {
                 Optional<Pharmacy> pharmacy = pharmacyRepository.findByAppUser_Id(id);
 
-                if (!pharmacy.isPresent()) {
+                if (pharmacy.isEmpty()) {
                     return new ResponseEntity<>(ApiResponse.create("error", "User does not exist"),
                             HttpStatus.BAD_REQUEST);
                 }
@@ -846,7 +903,7 @@ public class AppUserController {
             if (roles.get(i).getRoleType().equals("AMBULANCE")) {
                 Optional<AmbulanceProvider> ambulanceProvider = ambulanceProviderRepository.findByAppUser_Id(id);
 
-                if (!ambulanceProvider.isPresent()) {
+                if (ambulanceProvider.isEmpty()) {
                     return new ResponseEntity<>(ApiResponse.create("error", "User does not exist"),
                             HttpStatus.BAD_REQUEST);
                 }

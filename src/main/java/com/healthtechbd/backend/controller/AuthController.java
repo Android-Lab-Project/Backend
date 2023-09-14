@@ -96,6 +96,10 @@ public class AuthController {
         if (optionalAppUser.isPresent()) {
             appUser = optionalAppUser.get();
         }
+        else
+        {
+            return new ResponseEntity<>(ApiResponse.create("error","User not found"), HttpStatus.NOT_FOUND);
+        }
         String token = jwtService.generateToken(userDetails);
         JWTDTO jwtdto = new JWTDTO(token, appUser.getId(), appUser.getRoles().get(0).getRoleType());
 

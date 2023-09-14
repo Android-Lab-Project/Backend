@@ -13,6 +13,7 @@ import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
@@ -21,6 +22,7 @@ import java.util.Optional;
 @CrossOrigin(origins = "*", allowedHeaders = "*", methods = { RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT,
         RequestMethod.DELETE })
 @RestController
+@PreAuthorize("hasAuthority('AMBULANCE')")
 public class AmbulanceProviderController {
 
     @Autowired
@@ -53,7 +55,7 @@ public class AmbulanceProviderController {
 
     @PostMapping("/update/ambulanceProvider")
     public ResponseEntity<ApiResponse> updateProvider(HttpServletRequest request,
-            @RequestBody AmbulanceProvider ambulanceProvider) {
+                                                      @RequestBody AmbulanceProvider ambulanceProvider) {
         AppUser appUser = userService.returnUser(request);
         Long appUserId = appUser.getId();
         var roles = appUser.getRoles();
@@ -71,12 +73,19 @@ public class AmbulanceProviderController {
 
         Optional<AmbulanceProvider> optionalAmbulanceProvider = ambulanceProviderRepository.findByAppUser_Id(appUserId);
 
-        ambulanceProvider.setId(optionalAmbulanceProvider.get().getId());
-        ambulanceProvider.setBalance(optionalAmbulanceProvider.get().getBalance());
-        ambulanceProvider.setAppUser(appUser);
+        if (optionalAmbulanceProvider.isPresent()) {
+            AmbulanceProvider existingProvider = optionalAmbulanceProvider.get();
+            ambulanceProvider.setId(existingProvider.getId());
+            ambulanceProvider.setBalance(existingProvider.getBalance());
+            ambulanceProvider.setAppUser(appUser);
 
-        ambulanceProviderRepository.save(ambulanceProvider);
+            ambulanceProviderRepository.save(ambulanceProvider);
 
-        return new ResponseEntity<>(updateUserResponse.getResponse(), HttpStatus.OK);
+            return new ResponseEntity<>(updateUserResponse.getResponse(), HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>(ApiResponse.create("error", "Ambulance provider not found"),
+                    HttpStatus.NOT_FOUND);
+        }
     }
+
 }
