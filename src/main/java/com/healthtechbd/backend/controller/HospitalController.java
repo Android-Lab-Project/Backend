@@ -134,6 +134,16 @@ public class HospitalController {
         hospitalDTO.setRating(reviewRepository.findAvgRating(hospital.getAppUser().getId()));
         hospitalDTO.setReviewCount(reviewRepository.findCount(hospital.getAppUser().getId()));
 
+        if(hospitalDTO.getRating()==null)
+        {
+            hospitalDTO.setRating(0.0);
+        }
+
+        if(hospitalDTO.getReviewCount()==null)
+        {
+            hospitalDTO.setReviewCount(0L);
+        }
+
         return new ResponseEntity<>(hospitalDTO,HttpStatus.OK);
     }
 
