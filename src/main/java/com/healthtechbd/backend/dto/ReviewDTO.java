@@ -16,4 +16,6 @@ public class ReviewDTO {
     private String review;
 
     private String reviewerName;
+
+    private String reviewerDp;
 }

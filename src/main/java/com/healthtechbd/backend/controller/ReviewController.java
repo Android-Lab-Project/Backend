@@ -50,6 +50,8 @@ public class ReviewController {
                 reviewDTO.setStarCount(i.getStarCount());
                 reviewDTO.setReview(i.getReview());
                 reviewDTO.setReviewerName(i.getReviewer().getFirstName() + " " + i.getReviewer().getLastName());
+                reviewDTO.setReviewerDp(i.getReviewer().getDp());
+
 
                 reviewDTOS.add(reviewDTO);
             }
