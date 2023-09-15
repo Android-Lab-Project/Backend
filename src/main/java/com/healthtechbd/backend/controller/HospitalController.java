@@ -1,8 +1,6 @@
 package com.healthtechbd.backend.controller;
 
-import com.healthtechbd.backend.dto.DiagnosisDTO;
-import com.healthtechbd.backend.dto.DiagnosisOrderViewDTO;
-import com.healthtechbd.backend.dto.SignUpDTO;
+import com.healthtechbd.backend.dto.*;
 import com.healthtechbd.backend.entity.AppUser;
 import com.healthtechbd.backend.entity.Diagnosis;
 import com.healthtechbd.backend.entity.DiagnosisOrder;
@@ -112,6 +110,33 @@ public class HospitalController {
             return new ResponseEntity<>(ApiResponse.create("error", "Hospital not found"), HttpStatus.NOT_FOUND);
         }
     }
+
+    @PreAuthorize("hasAnyAuthority('HOSPITAL','USER')")
+    @GetMapping("/hospital/{id}")
+    public ResponseEntity<?>getHospitalInfo(@PathVariable(name="id")Long id)
+    {
+        Optional<Hospital> optionalHospital = hospitalRepository.findByAppUser_Id(id);
+
+        if(optionalHospital.isEmpty())
+        {
+            return new ResponseEntity<>(ApiResponse.create("error","Hospital not found"),HttpStatus.NOT_FOUND);
+        }
+
+        Hospital hospital = optionalHospital.get();
+
+        HospitalDTO hospitalDTO = modelMapper.map(hospital, HospitalDTO.class);
+        hospitalDTO.setId(id);
+        hospitalDTO.setFirstName(hospital.getAppUser().getFirstName());
+        hospitalDTO.setLastName(hospital.getAppUser().getLastName());
+        hospitalDTO.setEmail(hospital.getAppUser().getEmail());
+        hospitalDTO.setContactNo(hospital.getAppUser().getContactNo());
+        hospitalDTO.setDp(hospital.getAppUser().getDp());
+        hospitalDTO.setRating(reviewRepository.findAvgRating(hospital.getAppUser().getId()));
+        hospitalDTO.setReviewCount(reviewRepository.findCount(hospital.getAppUser().getId()));
+
+        return new ResponseEntity<>(hospitalDTO,HttpStatus.OK);
+    }
+
 
 
     @PreAuthorize("hasAnyAuthority('HOSPITAL','USER')")
