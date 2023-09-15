@@ -694,6 +694,16 @@ public class AppUserController {
             hospitalDTO.setRating(reviewRepository.findAvgRating(appUser.getId()));
             hospitalDTO.setReviewCount(reviewRepository.findCount(appUser.getId()));
 
+            if(hospitalDTO.getRating()==null)
+            {
+                hospitalDTO.setRating(0.0);
+            }
+
+            if(hospitalDTO.getReviewCount()==null)
+            {
+                hospitalDTO.setReviewCount(0L);
+            }
+
             userdetails = hospitalDTO;
         } else if (appUser.getRoles().get(0).getRoleType().equals("PHARMACY")) {
             Optional<Pharmacy> optional = pharmacyRepository.findByAppUser_Id(appUser.getId());
@@ -709,6 +719,16 @@ public class AppUserController {
             pharmacyDTO.setRating(reviewRepository.findAvgRating(appUser.getId()));
             pharmacyDTO.setReviewCount(reviewRepository.findCount(appUser.getId()));
 
+            if(pharmacyDTO.getRating()==null)
+            {
+                pharmacyDTO.setRating(0.0);
+            }
+
+            if(pharmacyDTO.getReviewCount()==null)
+            {
+                pharmacyDTO.setReviewCount(0L);
+            }
+
             userdetails = pharmacyDTO;
         } else if (appUser.getRoles().get(0).getRoleType().equals("AMBULANCE")) {
             Optional<AmbulanceProvider> optional = ambulanceProviderRepository.findByAppUser_Id(appUser.getId());
@@ -723,6 +743,16 @@ public class AppUserController {
             ambulanceProviderDTO.setDp(appUser.getDp());
             ambulanceProviderDTO.setRating(reviewRepository.findAvgRating(appUser.getId()));
             ambulanceProviderDTO.setReviewCount(reviewRepository.findCount(appUser.getId()));
+
+            if(ambulanceProviderDTO.getRating()==null)
+            {
+                ambulanceProviderDTO.setRating(0.0);
+            }
+
+            if(ambulanceProviderDTO.getReviewCount()==null)
+            {
+                ambulanceProviderDTO.setReviewCount(0L);
+            }
 
             userdetails = ambulanceProviderDTO;
         }

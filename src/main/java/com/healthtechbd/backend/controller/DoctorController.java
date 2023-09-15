@@ -210,8 +210,18 @@ public class DoctorController {
         doctorDTO.setContactNo(doctor.getAppUser().getContactNo());
         doctorDTO.setDp(doctor.getAppUser().getDp());
         doctorDTO.setRating(reviewRepository.findAvgRating(id));
+
         doctorDTO.setReviewCount(reviewRepository.findCount(id));
 
+        if(doctorDTO.getRating()==null)
+        {
+            doctorDTO.setRating(0.0);
+        }
+
+        if(doctorDTO.getReviewCount()==null)
+        {
+            doctorDTO.setReviewCount(0L);
+        }
         return new ResponseEntity<>(doctorDTO, HttpStatus.OK);
     }
 
@@ -264,6 +274,15 @@ public class DoctorController {
             allDoctorsDTO.get(i).setDp(allDoctors.get(i).getAppUser().getDp());
             allDoctorsDTO.get(i).setRating(reviewRepository.findAvgRating(allDoctors.get(i).getAppUser().getId()));
             allDoctorsDTO.get(i).setReviewCount(reviewRepository.findCount(allDoctors.get(i).getAppUser().getId()));
+            if(allDoctorsDTO.get(i).getRating()==null)
+            {
+                allDoctorsDTO.get(i).setRating(0.0);
+            }
+
+            if(allDoctorsDTO.get(i).getReviewCount()==null)
+            {
+                allDoctorsDTO.get(i).setReviewCount(0L);
+            }
         }
         return new ResponseEntity<>(allDoctorsDTO, HttpStatus.OK);
 
