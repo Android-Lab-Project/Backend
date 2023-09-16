@@ -19,6 +19,8 @@ public class UserResponse {
 
     private Integer checked;
 
+    private String name;
+
     private String email;
 
     private String message;

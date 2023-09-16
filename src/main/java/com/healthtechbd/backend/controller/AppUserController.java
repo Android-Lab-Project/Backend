@@ -498,16 +498,16 @@ public class AppUserController {
         return new ResponseEntity<>(reviewPendingDTOS, HttpStatus.OK);
     }
 
-    @PostMapping("/add/response")
-    public ResponseEntity<?> addUserResponse(HttpServletRequest request, @RequestParam String message) {
-        AppUser user = userService.returnUser(request);
+    @PreAuthorize("permitAll()")
+    @GetMapping("/add/response")
+    public ResponseEntity<?> addUserResponse(@RequestParam(name="name")String name, @RequestParam(name="email")String email, @RequestParam(name="message") String message) {
 
         UserResponse userResponse = new UserResponse();
         userResponse.setDate(LocalDate.now());
-        userResponse.setEmail(user.getEmail());
+        userResponse.setName(name);
+        userResponse.setEmail(email);
         userResponse.setMessage(message);
         userResponse.setChecked(0);
-
         userResponseRepository.save(userResponse);
 
         return new ResponseEntity<>(ApiResponse.create("create", "Response created"), HttpStatus.OK);
