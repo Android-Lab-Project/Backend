@@ -12,8 +12,8 @@ import java.util.List;
 @AllArgsConstructor
 public class AdminStatisticsDTO {
 
-    private Long _7daysUserCount;
-    private Long _30daysUserCount;
+    private Long _7DaysUserCount;
+    private Long _30DaysUserCount;
     private Long totalUserCount;
 
     private Long totalDoctorSerialCount;
@@ -21,9 +21,9 @@ public class AdminStatisticsDTO {
     private Long totalMedicineOrderCount;
     private Long totalAmbulanceTripCount;
 
-    private Long _7daysIncome;
+    private Long _7DaysIncome;
 
-    private Long _30daysIncome;
+    private Long _30DaysIncome;
 
     private Long totalIncome;
 

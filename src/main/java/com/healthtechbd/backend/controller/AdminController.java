@@ -54,8 +54,8 @@ public class AdminController {
         LocalDate sevenDaysAgo = today.minusDays(7);
         LocalDate thirtyDaysAgo = today.minusDays(30);
 
-        adminStatisticsDTO.set_7daysUserCount(userCountStatsRepository.countUserByDate(sevenDaysAgo, today));
-        adminStatisticsDTO.set_30daysUserCount(userCountStatsRepository.countUserByDate(thirtyDaysAgo, today));
+        adminStatisticsDTO.set_7DaysUserCount(userCountStatsRepository.countUserByDate(sevenDaysAgo, today));
+        adminStatisticsDTO.set_30DaysUserCount(userCountStatsRepository.countUserByDate(thirtyDaysAgo, today));
         adminStatisticsDTO.setTotalUserCount(userCountStatsRepository.countUser());
 
         adminStatisticsDTO
@@ -91,8 +91,8 @@ public class AdminController {
                 * AppConstants.perUserCharge;
         Long totalATIncome = ambulanceTripRepository.countAmbulanceTrips() * AppConstants.perUserCharge;
 
-        adminStatisticsDTO.set_7daysIncome(_7daysDSIncome + _7daysDOIncome + _7daysMOIncome + _7daysATIncome);
-        adminStatisticsDTO.set_30daysIncome(_30daysDSIncome + _30daysDOIncome + _30daysMOIncome + _30daysATIncome);
+        adminStatisticsDTO.set_7DaysIncome(_7daysDSIncome + _7daysDOIncome + _7daysMOIncome + _7daysATIncome);
+        adminStatisticsDTO.set_30DaysIncome(_30daysDSIncome + _30daysDOIncome + _30daysMOIncome + _30daysATIncome);
         adminStatisticsDTO.setTotalIncome(totalDSIncome + totalDOIncome + totalMOIncome + totalATIncome);
 
         Optional<Admin> optionalAdmin = adminRepository.findById(1L);
