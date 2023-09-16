@@ -83,6 +83,26 @@ public class MedicineController {
     }
 
     @PreAuthorize("hasAuthority('ADMIN')")
+    @GetMapping("/update/medicine/{id}")
+    public ResponseEntity<?>updateMedicine(@PathVariable(name="id")Long id, @RequestParam(name="new_price")Long new_price)
+    {
+        Optional<Medicine>optionalMedicine = medicineRepository.findById(id);
+
+        if(optionalMedicine.isEmpty())
+        {
+            return new ResponseEntity<>(ApiResponse.create("error","Medicine not found"),HttpStatus.NOT_FOUND);
+        }
+
+        Medicine medicine =optionalMedicine.get();
+
+        medicine.setPrice(new_price*1.0);
+
+        medicineRepository.save(medicine);
+
+        return new ResponseEntity<>(ApiResponse.create("update", "Medicine Price updated"),HttpStatus.OK);
+    }
+
+    @PreAuthorize("hasAuthority('ADMIN')")
     @DeleteMapping("delete/medicine/{id}")
     public ResponseEntity<?> deleteMedicine(@PathVariable(name = "id") Long id) {
         try {
