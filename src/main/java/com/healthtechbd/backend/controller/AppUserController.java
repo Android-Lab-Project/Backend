@@ -664,7 +664,7 @@ public class AppUserController {
         return new ResponseEntity<>(medicineOrderViewDTOS, HttpStatus.OK);
     }
 
-    @PreAuthorize("hasAnyAuthority('HOSPITAL','AMBULANCE',PHARMACY','USER','ADMIN')")
+    @PreAuthorize("hasAnyAuthority('HOSPITAL','AMBULANCE','PHARMACY','USER','ADMIN')")
     @GetMapping("/profile")
     public ResponseEntity<?> getProfileDetails(HttpServletRequest request) {
         AppUser appUser = userService.returnUser(request);
@@ -763,7 +763,7 @@ public class AppUserController {
 
         return new ResponseEntity<>(userdetails, HttpStatus.OK);
     }
-    @PreAuthorize("hasAnyAuthority('DOCTOR',HOSPITAL','AMBULANCE',PHARMACY')")
+    @PreAuthorize("hasAnyAuthority('DOCTOR','HOSPITAL','AMBULANCE','PHARMACY')")
     @GetMapping("/statistics")
     public ResponseEntity<?> getStatistics(HttpServletRequest request) {
         AppUser user = userService.returnUser(request);
@@ -882,7 +882,7 @@ public class AppUserController {
         return new ResponseEntity<>(statisticsDTO, HttpStatus.OK);
     }
 
-    @PreAuthorize("hasAnyAuthority('DOCTOR',HOSPITAL','AMBULANCE',PHARMACY','USER')")
+    @PreAuthorize("hasAnyAuthority('DOCTOR','HOSPITAL','AMBULANCE','PHARMACY','USER')")
     @DeleteMapping("/delete/user")
     public ResponseEntity<?> deleteUser(HttpServletRequest request) {
 
