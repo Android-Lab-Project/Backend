@@ -14,7 +14,9 @@ public class AmbulanceTripViewDTO {
     private Long userId;
     private Long providerId;
     private String userName;
+    private String userContactNo;
     private String providerName;
+    private String providerContactNo;
     private String source;
     private String destination;
     private Long price;

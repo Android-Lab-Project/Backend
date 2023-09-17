@@ -110,8 +110,10 @@ public class AmbulanceController {
     }
     @PreAuthorize("hasAuthority('AMBULANCE')")
     @GetMapping("/ambulance/trip/all")
-    public ResponseEntity<?> getAllTrips() {
-        List<AmbulanceTrip> ambulanceTrips = ambulanceTripRepository.findAll();
+    public ResponseEntity<?> getAllTrips(HttpServletRequest request) {
+        AppUser provider = userService.returnUser(request);
+
+        List<AmbulanceTrip> ambulanceTrips = ambulanceTripRepository.findByAmbulanceProviderIsNullAndNotBidder(provider.getId());
         if (ambulanceTrips.isEmpty()) {
             return new ResponseEntity<>(ApiResponse.create("empty", "No Trip found"), HttpStatus.OK);
         }
@@ -121,6 +123,7 @@ public class AmbulanceController {
             AmbulanceTripViewDTO ambulanceTripViewDTO = new AmbulanceTripViewDTO();
             ambulanceTripViewDTO.setId(ambulanceTrip.getId());
             ambulanceTripViewDTO.setUserId(ambulanceTrip.getUser().getId());
+            ambulanceTripViewDTO.setUserContactNo(ambulanceTrip.getUser().getContactNo());
             ambulanceTripViewDTO
                     .setUserName(ambulanceTrip.getUser().getFirstName() + " " + ambulanceTrip.getUser().getLastName());
             ambulanceTripViewDTO.setSource(ambulanceTrip.getSource());

@@ -85,47 +85,6 @@ public class AppUserController {
     @Autowired
     private ModelMapper modelMapper;
 
-    @GetMapping("/dashboard/reports&prescriptions")
-    public ResponseEntity<?> getAllReportsPrescriptions(HttpServletRequest request) {
-
-        AppUser appUser = userService.returnUser(request);
-
-        List<DoctorSerial> doctorSerials = doctorSerialRepository
-                .findByUser_IdAndPrescriptionIsNotNull(appUser.getId());
-
-        List<DiagnosisOrder> diagnosisOrders = diagnosisOrderRepository
-                .findByUser_IdAndReportURLIsNotNull(appUser.getId());
-
-        rpDTO rps = new rpDTO();
-
-        rps.setAllPrescriptions(new ArrayList<>());
-        rps.setAllReports(new ArrayList<>());
-
-        for (int i = 0; i < doctorSerials.size(); i++) {
-            DoctorPrescriptionDTO doctorPrescriptionDTO = new DoctorPrescriptionDTO();
-
-            doctorPrescriptionDTO.setPrescription(doctorSerials.get(i).getPrescription());
-            doctorPrescriptionDTO.setDoctorName(doctorSerials.get(i).getDoctor().getFirstName() + " "
-                    + doctorSerials.get(i).getDoctor().getLastName());
-            doctorPrescriptionDTO.setDoctorId(doctorSerials.get(i).getDoctor().getId());
-
-            rps.getAllPrescriptions().add(doctorPrescriptionDTO);
-        }
-
-        for (int i = 0; i < diagnosisOrders.size(); i++) {
-            DiagnosisReportDTO diagnosisReportDTO = new DiagnosisReportDTO();
-
-            diagnosisReportDTO.setDescription(diagnosisOrders.get(i).getDescription());
-            diagnosisReportDTO.setReportURL(diagnosisOrders.get(i).getReportURL());
-            diagnosisReportDTO.setHospitalId(diagnosisOrders.get(i).getHospital().getId());
-            diagnosisReportDTO.setHospitalName(hospitalRepository
-                    .findByAppUser_Id(diagnosisOrders.get(i).getHospital().getId()).get().getHospitalName());
-
-            rps.getAllReports().add(diagnosisReportDTO);
-        }
-
-        return new ResponseEntity<>(rps, HttpStatus.OK);
-    }
 
     @GetMapping("bkash/execute/payment")
     public ResponseEntity<?> executePayment(@RequestParam(name = "paymentId") String paymentId,
@@ -511,6 +470,48 @@ public class AppUserController {
         userResponseRepository.save(userResponse);
 
         return new ResponseEntity<>(ApiResponse.create("create", "Response created"), HttpStatus.OK);
+    }
+
+    @GetMapping("/dashboard/reports&prescriptions")
+    public ResponseEntity<?> getAllReportsPrescriptions(HttpServletRequest request) {
+
+        AppUser appUser = userService.returnUser(request);
+
+        List<DoctorSerial> doctorSerials = doctorSerialRepository
+                .findByUser_IdAndPrescriptionIsNotNull(appUser.getId());
+
+        List<DiagnosisOrder> diagnosisOrders = diagnosisOrderRepository
+                .findByUser_IdAndReportURLIsNotNull(appUser.getId());
+
+        rpDTO rps = new rpDTO();
+
+        rps.setAllPrescriptions(new ArrayList<>());
+        rps.setAllReports(new ArrayList<>());
+
+        for (int i = 0; i < doctorSerials.size(); i++) {
+            DoctorPrescriptionDTO doctorPrescriptionDTO = new DoctorPrescriptionDTO();
+
+            doctorPrescriptionDTO.setPrescription(doctorSerials.get(i).getPrescription());
+            doctorPrescriptionDTO.setDoctorName(doctorSerials.get(i).getDoctor().getFirstName() + " "
+                    + doctorSerials.get(i).getDoctor().getLastName());
+            doctorPrescriptionDTO.setDoctorId(doctorSerials.get(i).getDoctor().getId());
+
+            rps.getAllPrescriptions().add(doctorPrescriptionDTO);
+        }
+
+        for (int i = 0; i < diagnosisOrders.size(); i++) {
+            DiagnosisReportDTO diagnosisReportDTO = new DiagnosisReportDTO();
+
+            diagnosisReportDTO.setDescription(diagnosisOrders.get(i).getDescription());
+            diagnosisReportDTO.setReportURL(diagnosisOrders.get(i).getReportURL());
+            diagnosisReportDTO.setHospitalId(diagnosisOrders.get(i).getHospital().getId());
+            diagnosisReportDTO.setHospitalName(hospitalRepository
+                    .findByAppUser_Id(diagnosisOrders.get(i).getHospital().getId()).get().getHospitalName());
+
+            rps.getAllReports().add(diagnosisReportDTO);
+        }
+
+        return new ResponseEntity<>(rps, HttpStatus.OK);
     }
 
     @GetMapping("/dashboard/user/upcoming/doctorserial")

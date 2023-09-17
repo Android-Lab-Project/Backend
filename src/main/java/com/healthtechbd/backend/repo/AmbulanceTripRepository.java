@@ -76,7 +76,13 @@ public interface AmbulanceTripRepository extends JpaRepository<AmbulanceTrip, Lo
     @Query("SELECT at FROM AmbulanceTrip at WHERE at.user.id = :userId AND at.reviewChecked = 0")
     List<AmbulanceTrip> findTripByReviewChecked(@Param("userId") Long userId);
 
+    @Query("SELECT at FROM AmbulanceTrip at WHERE at.ambulanceProvider IS NULL AND NOT EXISTS (SELECT 1 FROM at.bidders b WHERE b.id = :id)")
+    List<AmbulanceTrip> findByAmbulanceProviderIsNullAndNotBidder(@Param("id") Long id);
+
     @Modifying
     @Query("UPDATE AmbulanceTrip SET reviewChecked = 1 WHERE id = :o_id AND user.id = :user_id AND ambulanceProvider.id = :subject_id")
     void updateReviewChecked(@Param("o_id")Long o_id,@Param("user_id") Long user_id, @Param("subject_id")Long subject_id);
+
+
+
 }
