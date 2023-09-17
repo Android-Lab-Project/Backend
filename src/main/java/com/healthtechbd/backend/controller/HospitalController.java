@@ -55,6 +55,7 @@ public class HospitalController {
     @Autowired
     private ModelMapper modelMapper;
 
+    @PreAuthorize("permitAll()")
     @PostMapping("/register/hospital")
     public ResponseEntity<?> registerHospital(@RequestBody Hospital hospital) {
         SignUpDTO signUpDTO = modelMapper.map(hospital.getAppUser(), SignUpDTO.class);

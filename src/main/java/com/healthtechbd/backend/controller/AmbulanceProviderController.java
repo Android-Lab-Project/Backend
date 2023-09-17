@@ -33,7 +33,7 @@ public class AmbulanceProviderController {
 
     @Autowired
     private ModelMapper modelMapper;
-
+    @PreAuthorize("permitAll()")
     @PostMapping("/register/ambulanceProvider")
     public ResponseEntity<ApiResponse> registerAmbulanceProvider(@RequestBody AmbulanceProvider ambulanceProvider) {
         SignUpDTO signUpDTO = modelMapper.map(ambulanceProvider.getAppUser(), SignUpDTO.class);

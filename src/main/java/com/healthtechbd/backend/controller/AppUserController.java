@@ -352,17 +352,9 @@ public class AppUserController {
 
         ambulanceTrip.setDate(LocalDate.now());
 
-        BkashCreateResponse bkashCreateResponse = bkashPaymentService
-                .createPayment(AppConstants.perUserCharge.toString());
+        ambulanceTripRepository.save(ambulanceTrip);
 
-        AmbulanceTrip savedTrip = ambulanceTripRepository.save(ambulanceTrip);
-
-        bkashCreateResponse.setProductId(savedTrip.getId());
-        bkashCreateResponse.setType("AmbulanceTrip");
-        savedTrip.setPaymentId(bkashCreateResponse.getPaymentId());
-        ambulanceTripRepository.save(savedTrip);
-
-        return new ResponseEntity<>(bkashCreateResponse, HttpStatus.OK);
+        return new ResponseEntity<>(ApiResponse.create("create","Trip created"), HttpStatus.OK);
     }
 
     @PostMapping("/add/review")

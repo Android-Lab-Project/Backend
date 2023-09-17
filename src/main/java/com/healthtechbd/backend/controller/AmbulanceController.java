@@ -8,8 +8,11 @@ import com.healthtechbd.backend.entity.AmbulanceProvider;
 import com.healthtechbd.backend.entity.AmbulanceTrip;
 import com.healthtechbd.backend.entity.AppUser;
 import com.healthtechbd.backend.repo.*;
+import com.healthtechbd.backend.service.BkashPaymentService;
 import com.healthtechbd.backend.service.UserService;
 import com.healthtechbd.backend.utils.ApiResponse;
+import com.healthtechbd.backend.utils.AppConstants;
+import com.healthtechbd.backend.utils.BkashCreateResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,6 +50,9 @@ public class AmbulanceController {
 
     @Autowired
     private UserService userService;
+
+    @Autowired
+    BkashPaymentService bkashPaymentService;
 
     @PreAuthorize("hasAuthority('AMBULANCE')")
     @PostMapping("/add/ambulance")
@@ -178,11 +184,19 @@ public class AmbulanceController {
                 ambulanceTrip.setReviewChecked(0);
             }
 
-            provider.balance += ambulanceTrip.getPrice();
+            provider.balance += ambulanceTrip.getPrice()- AppConstants.perUserCharge;
             ambulanceProviderRepository.save(provider);
-            ambulanceTripRepository.save(ambulanceTrip);
 
-            return new ResponseEntity<>(ApiResponse.create("update", "Ambulance trip updated"), HttpStatus.OK);
+            BkashCreateResponse bkashCreateResponse = bkashPaymentService
+                    .createPayment(ambulanceTrip.getPrice().toString());
+
+            AmbulanceTrip savedTrip = ambulanceTripRepository.save(ambulanceTrip);
+
+            bkashCreateResponse.setProductId(savedTrip.getId());
+            bkashCreateResponse.setType("AmbulanceTrip");
+            savedTrip.setPaymentId(bkashCreateResponse.getPaymentId());
+
+            return new ResponseEntity<>(bkashCreateResponse, HttpStatus.OK);
         } else {
             return new ResponseEntity<>(ApiResponse.create("error", "Ambulance provider or trip not found"),
                     HttpStatus.NOT_FOUND);

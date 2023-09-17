@@ -61,7 +61,7 @@ public class DoctorController {
 
     @Autowired
     private TimeService timeService;
-
+    @PreAuthorize("permitAll()")
     @PostMapping("/register/doctor")
     public ResponseEntity<?> registerDoctor(@RequestBody DoctorSignUpDTO doctorSignUpDTO) {
 

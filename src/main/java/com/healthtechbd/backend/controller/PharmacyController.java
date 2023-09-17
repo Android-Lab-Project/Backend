@@ -42,6 +42,7 @@ public class PharmacyController {
     @Autowired
     private ModelMapper modelMapper;
 
+    @PreAuthorize("permitAll()")
     @PostMapping("/register/pharmacy")
     public ResponseEntity<?> registerPharmacy(@RequestBody Pharmacy pharmacy) {
         SignUpDTO signUpDTO = modelMapper.map(pharmacy.getAppUser(), SignUpDTO.class);
