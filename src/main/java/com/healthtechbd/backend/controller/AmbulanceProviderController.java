@@ -1,9 +1,11 @@
 package com.healthtechbd.backend.controller;
 
+import com.healthtechbd.backend.dto.AmbulanceProviderDTO;
 import com.healthtechbd.backend.dto.SignUpDTO;
 import com.healthtechbd.backend.entity.AmbulanceProvider;
 import com.healthtechbd.backend.entity.AppUser;
 import com.healthtechbd.backend.repo.AmbulanceProviderRepository;
+import com.healthtechbd.backend.repo.ReviewRepository;
 import com.healthtechbd.backend.service.UserService;
 import com.healthtechbd.backend.utils.ApiResponse;
 import com.healthtechbd.backend.utils.RegistrationResponse;
@@ -27,6 +29,9 @@ public class AmbulanceProviderController {
 
     @Autowired
     private AmbulanceProviderRepository ambulanceProviderRepository;
+
+    @Autowired
+    private ReviewRepository reviewRepository;
 
     @Autowired
     private UserService userService;
@@ -87,5 +92,42 @@ public class AmbulanceProviderController {
                     HttpStatus.NOT_FOUND);
         }
     }
+    @PreAuthorize("hasAnyAuthority('AMBULANCE','USER')")
+    @GetMapping("/ambulanceProvider/{id}")
+    public ResponseEntity<?>getProviderInfo(@PathVariable(name="id")Long id)
+    {
+        Optional<AmbulanceProvider> optional = ambulanceProviderRepository.findByAppUser_Id(id);
+
+        if(optional.isEmpty())
+        {
+            return  new ResponseEntity<>(ApiResponse.create("error","Provider not found"),HttpStatus.NOT_FOUND);
+        }
+
+        AmbulanceProvider provider = optional.get();
+
+        AmbulanceProviderDTO ambulanceProviderDTO = modelMapper.map(optional.get(), AmbulanceProviderDTO.class);
+
+        ambulanceProviderDTO.setId(id);
+        ambulanceProviderDTO.setFirstName(provider.getAppUser().getFirstName());
+        ambulanceProviderDTO.setLastName(provider.getAppUser().getLastName());
+        ambulanceProviderDTO.setEmail(provider.getAppUser().getEmail());
+        ambulanceProviderDTO.setContactNo(provider.getAppUser().getContactNo());
+        ambulanceProviderDTO.setDp(provider.getAppUser().getDp());
+        ambulanceProviderDTO.setRating(reviewRepository.findAvgRating(provider.getAppUser().getId()));
+        ambulanceProviderDTO.setReviewCount(reviewRepository.findCount(provider.getAppUser().getId()));
+
+        if(ambulanceProviderDTO.getRating()==null)
+        {
+            ambulanceProviderDTO.setRating(0.0);
+        }
+
+        if(ambulanceProviderDTO.getReviewCount()==null)
+        {
+            ambulanceProviderDTO.setReviewCount(0L);
+        }
+
+        return new ResponseEntity<>(ambulanceProviderDTO,HttpStatus.OK);
+    }
+
 
 }
