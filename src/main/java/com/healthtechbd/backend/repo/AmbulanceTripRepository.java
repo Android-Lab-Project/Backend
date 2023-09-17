@@ -66,18 +66,24 @@ public interface AmbulanceTripRepository extends JpaRepository<AmbulanceTrip, Lo
             "WHERE at.ambulanceProvider.id = :ambulanceProviderId")
     Long sumPriceByAmbulanceProvider(@Param("ambulanceProviderId") Long ambulanceProviderId);
 
-    @Query("SELECT at FROM AmbulanceTrip at WHERE at.orderDate>=:date AND at.user.id = :userId")
+    @Query("SELECT at FROM AmbulanceTrip at WHERE at.orderDate>=:date AND at.user.id = :userId AND at.ambulanceProvider.id is Not NULL")
     List<AmbulanceTrip> findUpcomingTripsByUser(@Param("date") LocalDate date, @Param("userId") Long userId);
 
     @Query("SELECT at FROM AmbulanceTrip at WHERE at.orderDate>=:date AND at.ambulanceProvider.id = :ambulanceProviderId")
     List<AmbulanceTrip> findUpcomingTripsByProvider(@Param("date") LocalDate date, @Param("ambulanceProviderId") Long ambulanceProviderId);
 
+    @Query("SELECT at FROM AmbulanceTrip at WHERE at.ambulanceProvider IS NULL AND NOT EXISTS (SELECT 1 FROM at.bidders b WHERE b.id = :id)")
+    List<AmbulanceTrip> findByAmbulanceProviderIsNullAndNotBidder(@Param("id") Long id);
+
+    @Query("SELECT at FROM AmbulanceTrip at WHERE  at.user.id = :userId AND at.ambulanceProvider.id is NULL")
+    List<AmbulanceTrip> findTripsByUserProviderNULL(@Param("userId") Long userId);
+
+
 
     @Query("SELECT at FROM AmbulanceTrip at WHERE at.user.id = :userId AND at.reviewChecked = 0")
     List<AmbulanceTrip> findTripByReviewChecked(@Param("userId") Long userId);
 
-    @Query("SELECT at FROM AmbulanceTrip at WHERE at.ambulanceProvider IS NULL AND NOT EXISTS (SELECT 1 FROM at.bidders b WHERE b.id = :id)")
-    List<AmbulanceTrip> findByAmbulanceProviderIsNullAndNotBidder(@Param("id") Long id);
+
 
     @Modifying
     @Query("UPDATE AmbulanceTrip SET reviewChecked = 1 WHERE id = :o_id AND user.id = :user_id AND ambulanceProvider.id = :subject_id")

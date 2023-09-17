@@ -2,6 +2,7 @@ package com.healthtechbd.backend.controller;
 
 import com.healthtechbd.backend.dto.AmbulanceDTO;
 import com.healthtechbd.backend.dto.AmbulanceTripViewDTO;
+import com.healthtechbd.backend.dto.ProviderTripViewDTO;
 import com.healthtechbd.backend.entity.Ambulance;
 import com.healthtechbd.backend.entity.AmbulanceProvider;
 import com.healthtechbd.backend.entity.AmbulanceTrip;
@@ -117,10 +118,10 @@ public class AmbulanceController {
         if (ambulanceTrips.isEmpty()) {
             return new ResponseEntity<>(ApiResponse.create("empty", "No Trip found"), HttpStatus.OK);
         }
-        List<AmbulanceTripViewDTO> ambulanceTripViewDTOS = new ArrayList<>();
+        List<ProviderTripViewDTO> ambulanceTripViewDTOS = new ArrayList<>();
 
         for (var ambulanceTrip : ambulanceTrips) {
-            AmbulanceTripViewDTO ambulanceTripViewDTO = new AmbulanceTripViewDTO();
+            ProviderTripViewDTO ambulanceTripViewDTO = new ProviderTripViewDTO();
             ambulanceTripViewDTO.setId(ambulanceTrip.getId());
             ambulanceTripViewDTO.setUserId(ambulanceTrip.getUser().getId());
             ambulanceTripViewDTO.setUserContactNo(ambulanceTrip.getUser().getContactNo());

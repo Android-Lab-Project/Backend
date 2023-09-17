@@ -621,6 +621,56 @@ public class AppUserController {
 
         return new ResponseEntity<>(ambulanceTripViewDTOS, HttpStatus.OK);
     }
+
+
+    @GetMapping("/ambulance/trip/pending")
+    public ResponseEntity<?>getAllPendingTrips(HttpServletRequest request)
+    {
+        AppUser user = userService.returnUser(request);
+
+        List<AmbulanceTrip>ambulanceTrips = ambulanceTripRepository.findTripsByUserProviderNULL(user.getId());
+
+        if(ambulanceTrips.isEmpty())
+        {
+            return  new ResponseEntity<>(ApiResponse.create("empty","No pending  Trip  found"),HttpStatus.OK);
+        }
+
+        List<AmbulanceTripPendingViewDTO>ambulanceTripPendingViewDTOS = new ArrayList<>();
+
+        for(var i:ambulanceTrips)
+        {
+            AmbulanceTripPendingViewDTO ambulanceTripPendingViewDTO = new AmbulanceTripPendingViewDTO();
+            ambulanceTripPendingViewDTO.setId(i.getId());
+            ambulanceTripPendingViewDTO.setPrice(i.getPrice());
+            ambulanceTripPendingViewDTO.setSource(i.getSource());
+            ambulanceTripPendingViewDTO.setDestination(i.getDestination());
+            ambulanceTripPendingViewDTO.setOrderDate(i.getOrderDate());
+
+            List<BidderDTO>bidderDTOS = new ArrayList<>();
+
+            for(var j:i.getBidders())
+            {
+                BidderDTO bidderDTO = new BidderDTO();
+                bidderDTO.setId(j.getId());
+                bidderDTO.setName(j.getFirstName()+" "+j.getLastName());
+                bidderDTO.setRating(reviewRepository.findAvgRating(j.getId()));
+
+                if(bidderDTO.getRating()==null)
+                {
+                    bidderDTO.setRating(0.0);
+                }
+                bidderDTOS.add(bidderDTO);
+            }
+
+            ambulanceTripPendingViewDTO.setBidders(bidderDTOS);
+
+            ambulanceTripPendingViewDTOS.add(ambulanceTripPendingViewDTO);
+        }
+
+        return new ResponseEntity<>(ambulanceTripPendingViewDTOS,HttpStatus.OK);
+    }
+
+
     @PreAuthorize("hasAnyAuthority('PHARMACY','USER')")
     @GetMapping("/medicineorder/undelivered")
     public ResponseEntity<?> getAllUndelivered(HttpServletRequest request) {
