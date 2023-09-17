@@ -11,4 +11,5 @@ public class BidderDTO {
     private Long id;
     private String name;
     private Double rating;
+    private String contactNo;
 }
