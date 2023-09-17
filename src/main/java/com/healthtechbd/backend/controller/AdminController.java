@@ -91,6 +91,14 @@ public class AdminController {
                 * AppConstants.perUserCharge;
         Long totalATIncome = ambulanceTripRepository.countAmbulanceTrips() * AppConstants.perUserCharge;
 
+        adminStatisticsDTO.set_7DaysUserCount(adminStatisticsDTO.get_7DaysUserCount() != null ? adminStatisticsDTO.get_7DaysUserCount() : 0L);
+        adminStatisticsDTO.set_30DaysUserCount(adminStatisticsDTO.get_30DaysUserCount() != null ? adminStatisticsDTO.get_30DaysUserCount() : 0L);
+        adminStatisticsDTO.setTotalUserCount(adminStatisticsDTO.getTotalUserCount() != null ? adminStatisticsDTO.getTotalUserCount() : 0L);
+        adminStatisticsDTO.setTotalDoctorSerialCount(adminStatisticsDTO.getTotalDoctorSerialCount() != null ? adminStatisticsDTO.getTotalDoctorSerialCount() : 0L);
+        adminStatisticsDTO.setTotalDiagnosisOrderCount(adminStatisticsDTO.getTotalDiagnosisOrderCount() != null ? adminStatisticsDTO.getTotalDiagnosisOrderCount() : 0L);
+        adminStatisticsDTO.setTotalMedicineOrderCount(adminStatisticsDTO.getTotalMedicineOrderCount() != null ? adminStatisticsDTO.getTotalMedicineOrderCount() : 0L);
+        adminStatisticsDTO.setTotalAmbulanceTripCount(adminStatisticsDTO.getTotalAmbulanceTripCount() != null ? adminStatisticsDTO.getTotalAmbulanceTripCount() : 0L);
+
         adminStatisticsDTO.set_7DaysIncome(_7daysDSIncome + _7daysDOIncome + _7daysMOIncome + _7daysATIncome);
         adminStatisticsDTO.set_30DaysIncome(_30daysDSIncome + _30daysDOIncome + _30daysMOIncome + _30daysATIncome);
         adminStatisticsDTO.setTotalIncome(totalDSIncome + totalDOIncome + totalMOIncome + totalATIncome);

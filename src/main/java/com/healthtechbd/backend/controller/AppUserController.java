@@ -669,7 +669,7 @@ public class AppUserController {
     public ResponseEntity<?> getAllUndelivered(HttpServletRequest request) {
         AppUser user = userService.returnUser(request);
         if (user == null) {
-            return new ResponseEntity<>(ApiResponse.create("error", "user not found"), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(ApiResponse.create("error", "user not found"), HttpStatus.NOT_FOUND);
         }
 
         String roleType = user.getRoles().get(0).getRoleType();
@@ -922,6 +922,18 @@ public class AppUserController {
         } else {
             return new ResponseEntity<>(ApiResponse.create("error", "invalid role type"), HttpStatus.BAD_REQUEST);
         }
+
+        statisticsDTO.set_7DaysCount(statisticsDTO.get_7DaysCount()==null?0L:statisticsDTO.get_7DaysCount());
+        statisticsDTO.set_30DaysCount(statisticsDTO.get_30DaysCount()==null?0L:statisticsDTO.get_30DaysCount());
+        statisticsDTO.setTotalCount(statisticsDTO.getTotalCount()==null?0L:statisticsDTO.getTotalCount());
+        statisticsDTO.set_7DaysIncome(statisticsDTO.get_7DaysIncome()==null?0L:statisticsDTO.get_7DaysIncome());
+        statisticsDTO.set_30DaysIncome(statisticsDTO.get_30DaysIncome()==null?0L:statisticsDTO.get_30DaysIncome());
+        statisticsDTO.setTotalIncome(statisticsDTO.getTotalIncome()==null?0L:statisticsDTO.getTotalIncome());
+        statisticsDTO.set_7DaysRating(statisticsDTO.get_7DaysRating()==null?0L:statisticsDTO.get_7DaysRating());
+        statisticsDTO.set_30DaysRating(statisticsDTO.get_30DaysRating()==null?0L:statisticsDTO.get_30DaysRating());
+        statisticsDTO.setTotalRating(statisticsDTO.getTotalRating()==null?0L:statisticsDTO.getTotalRating());
+
+
 
         return new ResponseEntity<>(statisticsDTO, HttpStatus.OK);
     }

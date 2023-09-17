@@ -151,7 +151,7 @@ public class AmbulanceController {
         Optional<AmbulanceTrip> optionalAmbulanceTrip = ambulanceTripRepository.findById(id);
 
         if (optionalAmbulanceTrip.isEmpty()) {
-            return new ResponseEntity<>(ApiResponse.create("error", "trip not found"), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(ApiResponse.create("error", "trip not found"), HttpStatus.NOT_FOUND);
         }
 
         AmbulanceTrip ambulanceTrip = optionalAmbulanceTrip.get();
@@ -165,6 +165,38 @@ public class AmbulanceController {
         ambulanceTripRepository.save(ambulanceTrip);
 
         return new ResponseEntity<>(ApiResponse.create("update", "trip updated"), HttpStatus.OK);
+    }
+
+    @PreAuthorize("hasAuthority('USER')")
+    @GetMapping("/ambulance/trip/reject/{id1}/{id2}")
+    public ResponseEntity<?> deleteBidderFromTrip( @PathVariable(name = "id1") Long id1, @PathVariable(name = "id2") Long id2) {
+
+        Optional<AmbulanceTrip> optionalAmbulanceTrip = ambulanceTripRepository.findById(id1);
+
+        if (optionalAmbulanceTrip.isEmpty()) {
+            return new ResponseEntity<>(ApiResponse.create("error", "Trip not found"), HttpStatus.NOT_FOUND);
+        }
+
+        Optional<AppUser>optionalProvider = userRepository.findById(id2);
+
+        if(optionalProvider.isEmpty())
+        {
+            return new ResponseEntity<>(ApiResponse.create("error", "Provider not found"), HttpStatus.NOT_FOUND);
+        }
+
+        AppUser bidder = optionalProvider.get();
+
+        AmbulanceTrip ambulanceTrip = optionalAmbulanceTrip.get();
+
+        List<AppUser>bidders = ambulanceTrip.getBidders();
+
+        bidders.remove(bidder);
+
+        ambulanceTrip.setBidders(bidders);
+
+        ambulanceTripRepository.save(ambulanceTrip);
+
+        return new ResponseEntity<>(ApiResponse.create("delete", "Bidder Rejected"), HttpStatus.OK);
     }
     @PreAuthorize("hasAnyAuthority('AMBULANCE','USER')")
     @GetMapping("update/ambulancetrip/{id1}/{id2}")
