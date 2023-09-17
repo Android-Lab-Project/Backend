@@ -156,7 +156,11 @@ public class AmbulanceController {
 
         AmbulanceTrip ambulanceTrip = optionalAmbulanceTrip.get();
 
-        ambulanceTrip.getBidders().add(bidder);
+        List<AppUser>bidders = ambulanceTrip.getBidders();
+
+        bidders.add(bidder);
+
+        ambulanceTrip.setBidders(bidders);
 
         ambulanceTripRepository.save(ambulanceTrip);
 
