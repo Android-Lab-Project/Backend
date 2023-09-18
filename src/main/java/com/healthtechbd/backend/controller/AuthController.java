@@ -103,6 +103,7 @@ public class AuthController {
         String token = jwtService.generateToken(userDetails);
         JWTDTO jwtdto = new JWTDTO();
         jwtdto.setAccessToken(token);
+        jwtdto.setId(appUser.getId());
         jwtdto.setEmail(appUser.getEmail());
         jwtdto.setTokenType("Bearer");
         jwtdto.setRole(appUser.getRoles().get(0).getRoleType());
