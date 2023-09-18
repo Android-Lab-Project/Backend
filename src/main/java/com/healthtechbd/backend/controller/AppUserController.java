@@ -643,6 +643,7 @@ public class AppUserController {
                 BidderDTO bidderDTO = new BidderDTO();
                 bidderDTO.setId(j.getId());
                 bidderDTO.setName(j.getFirstName()+" "+j.getLastName());
+                bidderDTO.setEmail(j.getEmail());
                 bidderDTO.setContactNo(j.getContactNo());
                 bidderDTO.setRating(reviewRepository.findAvgRating(j.getId()));
 
