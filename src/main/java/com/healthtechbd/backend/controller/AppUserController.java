@@ -348,8 +348,6 @@ public class AppUserController {
 
         ambulanceTrip.setUser(user);
 
-        ambulanceTrip.setBidders(new ArrayList<>());
-
         ambulanceTrip.setDate(LocalDate.now());
 
         ambulanceTripRepository.save(ambulanceTrip);

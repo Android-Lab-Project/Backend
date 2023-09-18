@@ -156,7 +156,7 @@ public class AmbulanceController {
 
         AmbulanceTrip ambulanceTrip = optionalAmbulanceTrip.get();
 
-        List<AppUser>bidders = ambulanceTrip.getBidders();
+        List<AppUser>bidders = ambulanceTrip.getBidders()==null?new ArrayList<>():ambulanceTrip.getBidders();
 
         bidders.add(bidder);
 
