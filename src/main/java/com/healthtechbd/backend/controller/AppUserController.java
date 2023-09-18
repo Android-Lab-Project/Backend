@@ -281,7 +281,7 @@ public class AppUserController {
 
         diagnosisOrder.setDescription(diagnosisOrderDTO.getDescription());
         diagnosisOrder.setPrice(diagnosisOrderDTO.getPrice());
-        diagnosisOrder.setTime(diagnosisOrder.getTime());
+        diagnosisOrder.setTime(diagnosisOrderDTO.getTime());
         diagnosisOrder.setUser(appUser);
         diagnosisOrder.setHospital(hospitalUser);
         diagnosisOrder.setOrderDate(diagnosisOrderDTO.getOrderDate());
