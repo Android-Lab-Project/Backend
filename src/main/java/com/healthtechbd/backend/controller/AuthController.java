@@ -101,7 +101,11 @@ public class AuthController {
             return new ResponseEntity<>(ApiResponse.create("error","User not found"), HttpStatus.NOT_FOUND);
         }
         String token = jwtService.generateToken(userDetails);
-        JWTDTO jwtdto = new JWTDTO(token, appUser.getId(), appUser.getRoles().get(0).getRoleType());
+        JWTDTO jwtdto = new JWTDTO();
+        jwtdto.setAccessToken(token);
+        jwtdto.setEmail(appUser.getEmail());
+        jwtdto.setTokenType("Bearer");
+        jwtdto.setRole(appUser.getRoles().get(0).getRoleType());
 
         return new ResponseEntity<>(jwtdto, HttpStatus.OK);
     }
