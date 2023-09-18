@@ -84,6 +84,42 @@ public class DiagnosisController {
 
         return new ResponseEntity<>(ApiResponse.create("create", "Diagnosis added"), HttpStatus.OK);
     }
+    @PreAuthorize("hasAuthority('HOSPITAL')")
+    @PostMapping("/update/diagnosis/{id}")
+    public ResponseEntity<?> updateDiagnosis(@RequestBody AddDiagnosisDTO addDiagnosisDTO,@PathVariable(name="id")Long id) {
+
+        if (addDiagnosisDTO.getName() == null || addDiagnosisDTO.getName().trim().length() == 0) {
+            return new ResponseEntity<>(ApiResponse.create("error", "Name can't be empty"), HttpStatus.BAD_REQUEST);
+        }
+
+        if (addDiagnosisDTO.getDescription() == null || addDiagnosisDTO.getDescription().trim().length() == 0) {
+            return new ResponseEntity<>(ApiResponse.create("error", "Description can't be empty"),
+                    HttpStatus.BAD_REQUEST);
+        }
+
+        if (addDiagnosisDTO.getPrice() == null || addDiagnosisDTO.getPrice() <= 0) {
+            return new ResponseEntity<>(ApiResponse.create("error", "Invalid Cost"), HttpStatus.BAD_REQUEST);
+        }
+
+
+
+        Optional<Diagnosis> optionalDiagnosis = diagnosisRepository.findById(id);
+
+        if(optionalDiagnosis.isEmpty())
+        {
+            return new ResponseEntity<>(ApiResponse.create("error","Diagnosis not found"),HttpStatus.NOT_FOUND);
+        }
+
+        Diagnosis diagnosis = optionalDiagnosis.get();
+
+        diagnosis.setDescription(addDiagnosisDTO.getDescription());
+        diagnosis.setPrice(addDiagnosisDTO.getPrice());
+        diagnosis.setName(addDiagnosisDTO.getName());
+
+        diagnosisRepository.save(diagnosis);
+
+        return new ResponseEntity<>(ApiResponse.create("update", "Diagnosis updated"), HttpStatus.OK);
+    }
     @PreAuthorize("hasAnyAuthority('HOSPITAL','USER')")
     @GetMapping("/diagnosis/all")
     public ResponseEntity<?> showAllDiagnosisDetails() {
