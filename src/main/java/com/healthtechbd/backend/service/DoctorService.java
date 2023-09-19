@@ -8,19 +8,19 @@ import org.springframework.stereotype.Service;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.time.temporal.TemporalAdjusters;
 import java.util.List;
 
 @Service
 public class DoctorService {
 
-
-    private static DoctorRepository doctorRepository;
+    @Autowired
+    private  DoctorRepository doctorRepository;
 
     @Autowired
-    public DoctorService(DoctorRepository doctorRepository) {
-        DoctorService.doctorRepository = doctorRepository;
-    }
+    private TimeService timeService;
+
 
     public static LocalDate currentDate(String day) {
         DayOfWeek inputDay = DayOfWeek.valueOf(day.toUpperCase());
@@ -36,25 +36,31 @@ public class DoctorService {
         return nextWeekDate;
     }
 
-    public static List<Doctor> getAllDoctors() {
+    public  List<Doctor> getAllDoctors() {
         return doctorRepository.findAll();
     }
 
-    public static void setSerialTime(Doctor doctor) {
-        Double serialTime;
+    public  void setSerialTime(Doctor doctor) {
+
+
         for (int i = 0; i < doctor.getAvailableTimes().size(); i++) {
-            Double startTime = doctor.getAvailableTimes().get(i).getStartTime();
 
             Double endTime = doctor.getAvailableTimes().get(i).getEndTime();
 
-            Integer count = doctor.getAvailableTimes().get(i).getCount();
+            Double  availTime = doctor.getAvailableTimes().get(i).getAvailTime();
 
-
-            serialTime = startTime * 1.0 + ((count * AppConstants.perConsultTime) / 60) + (((count * AppConstants.perConsultTime) % 60) / 100.0);
-            if (serialTime > endTime) {
-                doctor.getAvailableTimes().get(i).setAvailTime(0.0);
+            if(doctor.getAvailableTimes().get(i).getDate().equals(LocalDate.now()))
+            {
+                Double currentTime = timeService.convertTimeToDouble(LocalTime.now());
+                if(availTime<currentTime)
+                {
+                    availTime =currentTime;
+                }
+            }
+            if (availTime > endTime) {
+                doctor.getAvailableTimes().get(i).setAvailTime(null);
             } else {
-                doctor.getAvailableTimes().get(i).setAvailTime(serialTime);
+                doctor.getAvailableTimes().get(i).setAvailTime(availTime);
             }
 
 
@@ -62,21 +68,41 @@ public class DoctorService {
 
         for (int i = 0; i < doctor.getAvailableOnlineTimes().size(); i++) {
 
-            Double onlineStartTime = doctor.getAvailableOnlineTimes().get(i).getStartTime();
-
             Double onlineEndTime = doctor.getAvailableOnlineTimes().get(i).getEndTime();
 
-            Integer onlineCount = doctor.getAvailableOnlineTimes().get(i).getCount();
+            Double onlineAvailTime = doctor.getAvailableOnlineTimes().get(i).getAvailTime();
 
-            serialTime = onlineStartTime * 1.0 + ((onlineCount * AppConstants.perConsultTime) / 60) + (((onlineCount * AppConstants.perConsultTime) % 60) / 100.0);
+            if(doctor.getAvailableOnlineTimes().get(i).getDate().equals(LocalDate.now()))
+            {
+                Double currentTime = timeService.convertTimeToDouble(LocalTime.now());
 
-            if (serialTime > onlineEndTime) {
-                doctor.getAvailableOnlineTimes().get(i).setAvailTime(0.0);
+                if(onlineAvailTime<currentTime)
+                {
+                    onlineAvailTime =currentTime;
+                }
+            }
+            if (onlineAvailTime > onlineEndTime) {
+                doctor.getAvailableOnlineTimes().get(i).setAvailTime(null);
             } else {
-                doctor.getAvailableOnlineTimes().get(i).setAvailTime(serialTime);
+                doctor.getAvailableOnlineTimes().get(i).setAvailTime(onlineAvailTime);
             }
         }
     }
 
+    public Double setNewSerialTime(Double time)
+    {
+        Integer intTime = time.intValue();
 
+        Double fracTime = time - intTime;
+
+        fracTime+=AppConstants.perConsultTime/100.0;
+
+        if(fracTime>=0.6)
+        {
+            intTime++;
+            fracTime-=0.6;
+        }
+
+        return intTime+fracTime;
+    }
 }

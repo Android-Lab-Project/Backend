@@ -57,6 +57,9 @@ public class DoctorController {
     private UserService userService;
 
     @Autowired
+    private DoctorService doctorService;
+
+    @Autowired
     private BkashPaymentService bkashPaymentService;
 
     @Autowired
@@ -80,7 +83,7 @@ public class DoctorController {
         for (int i = 0; i < doctor.getAvailableTimes().size(); i++) {
             doctor.getAvailableTimes().get(i).setId(null);
             doctor.getAvailableTimes().get(i).setCount(0);
-            doctor.getAvailableTimes().get(i).setAvailTime(0.0);
+            doctor.getAvailableTimes().get(i).setAvailTime(doctor.getAvailableTimes().get(i).getStartTime());
             doctor.getAvailableTimes().get(i)
                     .setDate(DoctorService.currentDate(doctor.getAvailableTimes().get(i).getDay()));
 
@@ -89,7 +92,7 @@ public class DoctorController {
 
             doctor.getAvailableOnlineTimes().get(i).setId(null);
             doctor.getAvailableOnlineTimes().get(i).setCount(0);
-            doctor.getAvailableOnlineTimes().get(i).setAvailTime(0.0);
+            doctor.getAvailableOnlineTimes().get(i).setAvailTime(doctor.getAvailableOnlineTimes().get(i).getStartTime());
             doctor.getAvailableOnlineTimes().get(i)
                     .setDate(DoctorService.currentDate(doctor.getAvailableOnlineTimes().get(i).getDay()));
         }
@@ -197,7 +200,7 @@ public class DoctorController {
             }
         }
 
-        DoctorService.setSerialTime(doctor);
+        doctorService.setSerialTime(doctor);
 
         doctorRepository.save(doctor);
 
@@ -229,7 +232,7 @@ public class DoctorController {
     @GetMapping("/doctor/all")
     public ResponseEntity<?> showAllDoctorDetails() {
 
-        List<Doctor> allDoctors = DoctorService.getAllDoctors();
+        List<Doctor> allDoctors = doctorService.getAllDoctors();
 
         if (allDoctors.isEmpty()) {
             return new ResponseEntity<>(ApiResponse.create("error", "No Doctor Found"), HttpStatus.BAD_REQUEST);
@@ -256,7 +259,7 @@ public class DoctorController {
                 }
             }
 
-            DoctorService.setSerialTime(doctor);
+            doctorService.setSerialTime(doctor);
 
             doctorRepository.save(doctor);
 

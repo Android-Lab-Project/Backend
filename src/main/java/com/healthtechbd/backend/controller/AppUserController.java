@@ -3,10 +3,7 @@ package com.healthtechbd.backend.controller;
 import com.healthtechbd.backend.dto.*;
 import com.healthtechbd.backend.entity.*;
 import com.healthtechbd.backend.repo.*;
-import com.healthtechbd.backend.service.BkashPaymentService;
-import com.healthtechbd.backend.service.ReviewService;
-import com.healthtechbd.backend.service.TimeService;
-import com.healthtechbd.backend.service.UserService;
+import com.healthtechbd.backend.service.*;
 import com.healthtechbd.backend.utils.ApiResponse;
 import com.healthtechbd.backend.utils.AppConstants;
 import com.healthtechbd.backend.utils.BkashCreateResponse;
@@ -72,6 +69,9 @@ public class AppUserController {
 
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private DoctorService doctorService;
 
     @Autowired
     private TimeService timeService;
@@ -211,6 +211,7 @@ public class AppUserController {
             for (int i = 0; i < doctor.getAvailableOnlineTimes().size(); i++) {
                 if (doctor.getAvailableOnlineTimes().get(i).getDate().equals(doctorSerialDTO.getAppointmentDate())) {
                     doctor.getAvailableOnlineTimes().get(i).count++;
+                    doctor.getAvailableOnlineTimes().get(i).setAvailTime(doctorService.setNewSerialTime(doctor.getAvailableOnlineTimes().get(i).getAvailTime()));
                 }
             }
         }
@@ -219,6 +220,7 @@ public class AppUserController {
             for (int i = 0; i < doctor.getAvailableTimes().size(); i++) {
                 if (doctor.getAvailableTimes().get(i).getDate().equals(doctorSerialDTO.getAppointmentDate())) {
                     doctor.getAvailableTimes().get(i).count++;
+                    doctor.getAvailableTimes().get(i).setAvailTime(doctorService.setNewSerialTime(doctor.getAvailableTimes().get(i).getAvailTime()));
                 }
             }
         }
