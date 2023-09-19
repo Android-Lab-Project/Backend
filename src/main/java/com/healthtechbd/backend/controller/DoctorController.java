@@ -1,9 +1,6 @@
 package com.healthtechbd.backend.controller;
 
-import com.healthtechbd.backend.dto.DoctorDTO;
-import com.healthtechbd.backend.dto.DoctorSerialViewDTO;
-import com.healthtechbd.backend.dto.DoctorSignUpDTO;
-import com.healthtechbd.backend.dto.SignUpDTO;
+import com.healthtechbd.backend.dto.*;
 import com.healthtechbd.backend.entity.AppUser;
 import com.healthtechbd.backend.entity.Doctor;
 import com.healthtechbd.backend.entity.DoctorSerial;
@@ -292,8 +289,8 @@ public class DoctorController {
     }
 
     @PreAuthorize("hasAuthority('DOCTOR')")
-    @GetMapping("/update/doctor/serial/pres/{id}")
-    public ResponseEntity<?> updateDiagnosisReport(@RequestParam(name = "prescription") String prescription,
+    @PostMapping("/update/doctor/serial/pres/{id}")
+    public ResponseEntity<?> updateDiagnosisReport(@RequestBody PrescriptionDTO prescriptionDTO,
             @PathVariable(name = "id") Long id) {
 
         Optional<DoctorSerial> optionalDoctorSerial = doctorSerialRepository.findById(id);
@@ -302,7 +299,7 @@ public class DoctorController {
             return new ResponseEntity<>(ApiResponse.create("error", "DoctorSerial not Found"), HttpStatus.NOT_FOUND);
         }
         var doctorSerial = optionalDoctorSerial.get();
-        doctorSerial.setPrescription(prescription);
+        doctorSerial.setPrescription(prescriptionDTO.getPrescription());
         doctorSerialRepository.save(doctorSerial);
 
         return new ResponseEntity<>(ApiResponse.create("update", "Prescription added"), HttpStatus.OK);
