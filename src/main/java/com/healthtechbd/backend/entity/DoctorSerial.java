@@ -29,7 +29,7 @@ public class DoctorSerial {
 
     private Integer reviewChecked;
 
-    @Column(length = 10000)
+    @Column
     private String prescription;
 
     private String paymentId;
