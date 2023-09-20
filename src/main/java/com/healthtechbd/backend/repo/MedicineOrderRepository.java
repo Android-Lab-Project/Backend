@@ -64,6 +64,9 @@ public interface MedicineOrderRepository extends JpaRepository<MedicineOrder, Lo
             "WHERE mo.pharmacy.id = :pharmacyId")
     Long sumPriceByPharmacy(@Param("pharmacyId") Long pharmacyId);
 
+    @Query("Select mo From MedicineOrder mo Where mo.pharmacy.id Is NULL")
+    List<MedicineOrder>findByPharmacyIsNull();
+
     @Query("SELECT mo " +
             "FROM MedicineOrder mo " +
             "WHERE mo.user.id = :userId " +

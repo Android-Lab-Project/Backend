@@ -118,7 +118,7 @@ public class MedicineController {
     @GetMapping("/medicine/order/all")
     public ResponseEntity<?> getAllMedicalOrders() {
 
-        List<MedicineOrder> medicineOrders = medicineOrderRepository.findAll();
+        List<MedicineOrder> medicineOrders = medicineOrderRepository.findByPharmacyIsNull();
 
         if (medicineOrders.isEmpty()) {
             return new ResponseEntity<>(ApiResponse.create("empty", "No medicine order found at this moment"), HttpStatus.OK);
