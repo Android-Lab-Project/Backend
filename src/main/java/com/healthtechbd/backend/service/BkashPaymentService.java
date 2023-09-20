@@ -4,6 +4,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.healthtechbd.backend.utils.*;
 import okhttp3.*;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -21,18 +22,21 @@ import static com.healthtechbd.backend.utils.BkashStaticVariable.token;
 @Service
 public class BkashPaymentService {
 
-    private static final String API_BASE_URL = "https://tokenized.sandbox.bka.sh/v1.2.0-beta";
+    private String API_BASE_URL="https://tokenized.sandbox.bka.sh/v1.2.0-beta";
+    @Value("${bkash.payment.app.key}")
+    private  String APP_KEY;
 
-    private static final String APP_KEY = "4f6o0cjiki2rfm34kfdadl1eqq";
+    @Value("${bkash.payment.app.secret}")
+    private String APP_SECRET;
 
-    public static String grantToken() {
+    public  String grantToken() {
 
         OkHttpClient client = new OkHttpClient();
 
         final String CREATE_TOKEN_ENDPOINT = "/tokenized/checkout/token/grant";
 
         MediaType mediaType = MediaType.parse("application/json");
-        RequestBody body = RequestBody.create(mediaType, "{\"app_key\":\"4f6o0cjiki2rfm34kfdadl1eqq\",\"app_secret\":\"2is7hdktrekvrbljjh44ll3d9l1dtjo4pasmjvs5vl5qr3fug4b\"}");
+        RequestBody body = RequestBody.create(mediaType, "{\"app_key\":\""+APP_KEY+"\",\"app_secret\":\""+APP_SECRET+"\"}");
         Request request = new Request.Builder()
                 .url(API_BASE_URL+CREATE_TOKEN_ENDPOINT)
                 .post(body)

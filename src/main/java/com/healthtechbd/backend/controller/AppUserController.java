@@ -86,6 +86,294 @@ public class AppUserController {
     private ModelMapper modelMapper;
 
 
+    @PreAuthorize("hasAnyAuthority('HOSPITAL','AMBULANCE','PHARMACY','USER','ADMIN')")
+    @GetMapping("/profile")
+    public ResponseEntity<?> getProfileDetails(HttpServletRequest request) {
+        AppUser appUser = userService.returnUser(request);
+
+        Object userdetails = null;
+
+        if (appUser.getRoles().get(0).getRoleType().equals("USER")) {
+            UserDTO userDTO = modelMapper.map(appUser, UserDTO.class);
+
+            userdetails = userDTO;
+        } else if (appUser.getRoles().get(0).getRoleType().equals("ADMIN")) {
+            UserDTO userDTO = modelMapper.map(appUser, UserDTO.class);
+            AdminDTO adminDTO = modelMapper.map(userDTO, AdminDTO.class);
+            adminDTO.setBalance(adminRepository.findById(1L).get().getBalance());
+
+            userdetails = adminDTO;
+        } else if (appUser.getRoles().get(0).getRoleType().equals("HOSPITAL")) {
+            Optional<Hospital> optional = hospitalRepository.findByAppUser_Id(appUser.getId());
+
+            HospitalDTO hospitalDTO = modelMapper.map(optional.get(), HospitalDTO.class);
+            hospitalDTO.setId(appUser.getId());
+            hospitalDTO.setFirstName(appUser.getFirstName());
+            hospitalDTO.setLastName(appUser.getLastName());
+            hospitalDTO.setEmail(appUser.getEmail());
+            hospitalDTO.setContactNo(appUser.getContactNo());
+            hospitalDTO.setDp(appUser.getDp());
+            hospitalDTO.setRating(reviewRepository.findAvgRating(appUser.getId()));
+            hospitalDTO.setReviewCount(reviewRepository.findCount(appUser.getId()));
+
+            if (hospitalDTO.getRating() == null) {
+                hospitalDTO.setRating(0.0);
+            }
+
+            if (hospitalDTO.getReviewCount() == null) {
+                hospitalDTO.setReviewCount(0L);
+            }
+
+            userdetails = hospitalDTO;
+        } else if (appUser.getRoles().get(0).getRoleType().equals("PHARMACY")) {
+            Optional<Pharmacy> optional = pharmacyRepository.findByAppUser_Id(appUser.getId());
+
+            PharmacyDTO pharmacyDTO = modelMapper.map(optional.get(), PharmacyDTO.class);
+
+            pharmacyDTO.setId(appUser.getId());
+            pharmacyDTO.setFirstName(appUser.getFirstName());
+            pharmacyDTO.setLastName(appUser.getLastName());
+            pharmacyDTO.setEmail(appUser.getEmail());
+            pharmacyDTO.setContactNo(appUser.getContactNo());
+            pharmacyDTO.setDp(appUser.getDp());
+            pharmacyDTO.setRating(reviewRepository.findAvgRating(appUser.getId()));
+            pharmacyDTO.setReviewCount(reviewRepository.findCount(appUser.getId()));
+
+            if (pharmacyDTO.getRating() == null) {
+                pharmacyDTO.setRating(0.0);
+            }
+
+            if (pharmacyDTO.getReviewCount() == null) {
+                pharmacyDTO.setReviewCount(0L);
+            }
+
+            userdetails = pharmacyDTO;
+        } else if (appUser.getRoles().get(0).getRoleType().equals("AMBULANCE")) {
+            Optional<AmbulanceProvider> optional = ambulanceProviderRepository.findByAppUser_Id(appUser.getId());
+
+            AmbulanceProviderDTO ambulanceProviderDTO = modelMapper.map(optional.get(), AmbulanceProviderDTO.class);
+
+            ambulanceProviderDTO.setId(appUser.getId());
+            ambulanceProviderDTO.setFirstName(appUser.getFirstName());
+            ambulanceProviderDTO.setLastName(appUser.getLastName());
+            ambulanceProviderDTO.setEmail(appUser.getEmail());
+            ambulanceProviderDTO.setContactNo(appUser.getContactNo());
+            ambulanceProviderDTO.setDp(appUser.getDp());
+            ambulanceProviderDTO.setRating(reviewRepository.findAvgRating(appUser.getId()));
+            ambulanceProviderDTO.setReviewCount(reviewRepository.findCount(appUser.getId()));
+
+            if (ambulanceProviderDTO.getRating() == null) {
+                ambulanceProviderDTO.setRating(0.0);
+            }
+
+            if (ambulanceProviderDTO.getReviewCount() == null) {
+                ambulanceProviderDTO.setReviewCount(0L);
+            }
+
+            userdetails = ambulanceProviderDTO;
+        }
+
+        if (userdetails == null) {
+            return new ResponseEntity<>(ApiResponse.create("error", "Profile not found"), HttpStatus.BAD_REQUEST);
+        }
+
+        return new ResponseEntity<>(userdetails, HttpStatus.OK);
+    }
+
+    @PreAuthorize("hasAnyAuthority('DOCTOR','HOSPITAL','AMBULANCE','PHARMACY')")
+    @GetMapping("/statistics")
+    public ResponseEntity<?> getStatistics(HttpServletRequest request) {
+        AppUser user = userService.returnUser(request);
+        if (user == null) {
+            return new ResponseEntity<>(ApiResponse.create("error", "user not found"), HttpStatus.OK);
+        }
+
+        StatisticsDTO statisticsDTO = new StatisticsDTO();
+
+        LocalDate now = LocalDate.now();
+        LocalDate sevenDaysAgo = now.minusDays(7);
+        LocalDate thirtyDaysAgo = now.minusDays(30);
+
+        statisticsDTO.set_7DaysRating(reviewRepository.findAvgRatingByDate(user.getId(), sevenDaysAgo, now));
+        statisticsDTO.set_30DaysRating(reviewRepository.findAvgRatingByDate(user.getId(), thirtyDaysAgo, now));
+        statisticsDTO.setTotalRating(reviewRepository.findAvgRating(user.getId()));
+
+        String roleType = user.getRoles().get(0).getRoleType();
+
+        if ("DOCTOR".equalsIgnoreCase(roleType)) {
+            // Doctor statistics logic
+            statisticsDTO.set_7DaysCount(
+                    doctorSerialRepository.countSerialsByDoctorAndDate(user.getId(), sevenDaysAgo, now));
+            statisticsDTO.set_30DaysCount(
+                    doctorSerialRepository.countSerialsByDoctorAndDate(user.getId(), thirtyDaysAgo, now));
+            statisticsDTO.setTotalCount(doctorSerialRepository.countSerialsByDoctor(user.getId()));
+            statisticsDTO
+                    .set_7DaysIncome(doctorSerialRepository.sumPriceByDoctorAndDate(user.getId(), sevenDaysAgo, now));
+            statisticsDTO
+                    .set_30DaysIncome(doctorSerialRepository.sumPriceByDoctorAndDate(user.getId(), thirtyDaysAgo, now));
+            statisticsDTO.setTotalIncome(doctorSerialRepository.sumPriceByDoctor(user.getId()));
+
+            List<Object[]> incomeList = doctorSerialRepository.sumPriceByDoctorAndDateGroupByDate(user.getId(),
+                    thirtyDaysAgo, now);
+
+            statisticsDTO.setDates(new ArrayList<>());
+            statisticsDTO.setIncomes(new ArrayList<>());
+
+            for (var i : incomeList) {
+                statisticsDTO.getDates().add((LocalDate) i[0]);
+                statisticsDTO.getIncomes().add((Long) i[1]);
+            }
+        } else if ("PHARMACY".equalsIgnoreCase(roleType)) {
+            // Pharmacy statistics logic
+            statisticsDTO.set_7DaysCount(
+                    medicineOrderRepository.countMedicineOrdersByPharmacyAndDate(user.getId(), sevenDaysAgo, now));
+            statisticsDTO.set_30DaysCount(
+                    medicineOrderRepository.countMedicineOrdersByPharmacyAndDate(user.getId(), thirtyDaysAgo, now));
+            statisticsDTO.setTotalCount(medicineOrderRepository.countMedicineOrdersByPharmacy(user.getId()));
+            statisticsDTO.set_7DaysIncome(
+                    medicineOrderRepository.sumPriceByPharmacyAndDate(user.getId(), sevenDaysAgo, now));
+            statisticsDTO.set_30DaysIncome(
+                    medicineOrderRepository.sumPriceByPharmacyAndDate(user.getId(), thirtyDaysAgo, now));
+            statisticsDTO.setTotalIncome(medicineOrderRepository.sumPriceByPharmacy(user.getId()));
+
+            List<Object[]> incomeList = medicineOrderRepository.sumPriceByPharmacyAndDateGroupByDate(user.getId(),
+                    thirtyDaysAgo, now);
+
+            statisticsDTO.setDates(new ArrayList<>());
+            statisticsDTO.setIncomes(new ArrayList<>());
+
+            for (var i : incomeList) {
+                statisticsDTO.getDates().add((LocalDate) i[0]);
+                statisticsDTO.getIncomes().add((Long) i[1]);
+            }
+        } else if ("HOSPITAL".equalsIgnoreCase(roleType)) {
+            // Hospital statistics logic
+            statisticsDTO.set_7DaysCount(
+                    diagnosisOrderRepository.countDiagnosisOrdersByHospitalAndDate(user.getId(), sevenDaysAgo, now));
+            statisticsDTO.set_30DaysCount(
+                    diagnosisOrderRepository.countDiagnosisOrdersByHospitalAndDate(user.getId(), thirtyDaysAgo, now));
+            statisticsDTO.setTotalCount(diagnosisOrderRepository.countDiagnosisOrdersByHospital(user.getId()));
+            statisticsDTO.set_7DaysIncome(
+                    diagnosisOrderRepository.sumPriceByHospitalAndDate(user.getId(), sevenDaysAgo, now));
+            statisticsDTO.set_30DaysIncome(
+                    diagnosisOrderRepository.sumPriceByHospitalAndDate(user.getId(), thirtyDaysAgo, now));
+            statisticsDTO.setTotalIncome(diagnosisOrderRepository.sumPriceByHospital(user.getId()));
+
+            List<Object[]> incomeList = diagnosisOrderRepository.sumPriceByHospitalAndDateGroupByDate(user.getId(),
+                    thirtyDaysAgo, now);
+
+            statisticsDTO.setDates(new ArrayList<>());
+            statisticsDTO.setIncomes(new ArrayList<>());
+
+            for (var i : incomeList) {
+                statisticsDTO.getDates().add((LocalDate) i[0]);
+                statisticsDTO.getIncomes().add((Long) i[1]);
+            }
+        } else if ("AMBULANCE".equalsIgnoreCase(roleType)) {
+            // Ambulance statistics logic
+            statisticsDTO.set_7DaysCount(
+                    ambulanceTripRepository.countTripsByAmbulanceProviderAndDate(user.getId(), sevenDaysAgo, now));
+            statisticsDTO.set_30DaysCount(
+                    ambulanceTripRepository.countTripsByAmbulanceProviderAndDate(user.getId(), thirtyDaysAgo, now));
+            statisticsDTO.setTotalCount(ambulanceTripRepository.countTripsByAmbulanceProvider(user.getId()));
+            statisticsDTO.set_7DaysIncome(
+                    ambulanceTripRepository.sumPriceByAmbulanceProviderAndDate(user.getId(), sevenDaysAgo, now));
+            statisticsDTO.set_30DaysIncome(
+                    ambulanceTripRepository.sumPriceByAmbulanceProviderAndDate(user.getId(), thirtyDaysAgo, now));
+            statisticsDTO.setTotalIncome(ambulanceTripRepository.sumPriceByAmbulanceProvider(user.getId()));
+
+            List<Object[]> incomeList = ambulanceTripRepository
+                    .sumPriceByAmbulanceProviderAndDateGroupByDate(user.getId(), thirtyDaysAgo, now);
+
+            statisticsDTO.setDates(new ArrayList<>());
+            statisticsDTO.setIncomes(new ArrayList<>());
+
+            for (var i : incomeList) {
+                statisticsDTO.getDates().add((LocalDate) i[0]);
+                statisticsDTO.getIncomes().add((Long) i[1]);
+            }
+        } else {
+            return new ResponseEntity<>(ApiResponse.create("error", "invalid role type"), HttpStatus.BAD_REQUEST);
+        }
+
+        statisticsDTO.set_7DaysCount(statisticsDTO.get_7DaysCount() == null ? 0L : statisticsDTO.get_7DaysCount());
+        statisticsDTO.set_30DaysCount(statisticsDTO.get_30DaysCount() == null ? 0L : statisticsDTO.get_30DaysCount());
+        statisticsDTO.setTotalCount(statisticsDTO.getTotalCount() == null ? 0L : statisticsDTO.getTotalCount());
+        statisticsDTO.set_7DaysIncome(statisticsDTO.get_7DaysIncome() == null ? 0L : statisticsDTO.get_7DaysIncome());
+        statisticsDTO.set_30DaysIncome(statisticsDTO.get_30DaysIncome() == null ? 0L : statisticsDTO.get_30DaysIncome());
+        statisticsDTO.setTotalIncome(statisticsDTO.getTotalIncome() == null ? 0L : statisticsDTO.getTotalIncome());
+        statisticsDTO.set_7DaysRating(statisticsDTO.get_7DaysRating() == null ? 0L : statisticsDTO.get_7DaysRating());
+        statisticsDTO.set_30DaysRating(statisticsDTO.get_30DaysRating() == null ? 0L : statisticsDTO.get_30DaysRating());
+        statisticsDTO.setTotalRating(statisticsDTO.getTotalRating() == null ? 0L : statisticsDTO.getTotalRating());
+
+
+        return new ResponseEntity<>(statisticsDTO, HttpStatus.OK);
+    }
+
+    @PreAuthorize("hasAnyAuthority('DOCTOR','HOSPITAL','AMBULANCE','PHARMACY','USER')")
+    @DeleteMapping("/delete/user")
+    public ResponseEntity<?> deleteUser(HttpServletRequest request) {
+
+        AppUser appUser = userService.returnUser(request);
+
+        if (appUser == null) {
+            return new ResponseEntity<>(ApiResponse.create("error", "User does not exist"), HttpStatus.NOT_FOUND);
+        }
+
+        Long id = appUser.getId();
+
+        List<Role> roles = appUser.getRoles();
+
+        for (int i = 0; i < roles.size(); i++) {
+            if (roles.get(i).getRoleType().equals("USER")) {
+                userRepository.delete(appUser);
+            }
+            if (roles.get(i).getRoleType().equals("DOCTOR")) {
+
+                Optional<Doctor> doctor = doctorRepository.findByAppUser_Id(id);
+
+                if (doctor.isEmpty()) {
+                    return new ResponseEntity<>(ApiResponse.create("error", "User does not exist"),
+                            HttpStatus.BAD_REQUEST);
+                }
+                doctorRepository.delete(doctor.get());
+            }
+            if (roles.get(i).getRoleType().equals("HOSPITAL")) {
+                Optional<Hospital> hospital = hospitalRepository.findByAppUser_Id(id);
+
+                if (hospital.isEmpty()) {
+                    return new ResponseEntity<>(ApiResponse.create("error", "User does not exist"),
+                            HttpStatus.BAD_REQUEST);
+                }
+
+                hospitalRepository.delete(hospital.get());
+            }
+            if (roles.get(i).getRoleType().equals("PHARMACY")) {
+                Optional<Pharmacy> pharmacy = pharmacyRepository.findByAppUser_Id(id);
+
+                if (pharmacy.isEmpty()) {
+                    return new ResponseEntity<>(ApiResponse.create("error", "User does not exist"),
+                            HttpStatus.BAD_REQUEST);
+                }
+
+                pharmacyRepository.delete(pharmacy.get());
+            }
+            if (roles.get(i).getRoleType().equals("AMBULANCE")) {
+                Optional<AmbulanceProvider> ambulanceProvider = ambulanceProviderRepository.findByAppUser_Id(id);
+
+                if (ambulanceProvider.isEmpty()) {
+                    return new ResponseEntity<>(ApiResponse.create("error", "User does not exist"),
+                            HttpStatus.BAD_REQUEST);
+                }
+
+                ambulanceProviderRepository.delete(ambulanceProvider.get());
+            }
+        }
+
+        return new ResponseEntity<>(ApiResponse.create("delete", "User is deleted"), HttpStatus.OK);
+    }
+
+
     @GetMapping("bkash/execute/payment")
     public ResponseEntity<?> executePayment(@RequestParam(name = "paymentId") String paymentId,
                                             @RequestParam(name = "status") String status, @RequestParam(name = "type") String type,
@@ -184,14 +472,13 @@ public class AppUserController {
 
     @PostMapping("/add/doctorSerial")
     public ResponseEntity<?> createDoctorSerial(@RequestBody DoctorSerialDTO doctorSerialDTO,
-            HttpServletRequest request) {
+                                                HttpServletRequest request) {
         AppUser user = userService.returnUser(request);
 
         Optional<AppUser> opDoctor = userRepository.findById(doctorSerialDTO.getDoctor_id());
 
-        if(opDoctor.isEmpty())
-        {
-            return new ResponseEntity<>(ApiResponse.create("error","Dcotor not found"),HttpStatus.NOT_FOUND);
+        if (opDoctor.isEmpty()) {
+            return new ResponseEntity<>(ApiResponse.create("error", "Dcotor not found"), HttpStatus.NOT_FOUND);
         }
 
         AppUser doctorUser = opDoctor.get();
@@ -200,9 +487,8 @@ public class AppUserController {
 
         Optional<Doctor> optionalDoctor = doctorRepository.findByAppUser_Id(opDoctor.get().getId());
 
-        if(optionalDoctor.isEmpty())
-        {
-            return new ResponseEntity<>(ApiResponse.create("error","Dcotor not found"),HttpStatus.NOT_FOUND);
+        if (optionalDoctor.isEmpty()) {
+            return new ResponseEntity<>(ApiResponse.create("error", "Dcotor not found"), HttpStatus.NOT_FOUND);
         }
 
         Doctor doctor = optionalDoctor.get();
@@ -259,7 +545,7 @@ public class AppUserController {
 
     @PostMapping("/order/diagnosis")
     public ResponseEntity<?> createDiagnosisOrder(@RequestBody DiagnosisOrderDTO diagnosisOrderDTO,
-            HttpServletRequest request) {
+                                                  HttpServletRequest request) {
         AppUser appUser = userService.returnUser(request);
 
         Optional<AppUser> opHospital = userRepository.findById(diagnosisOrderDTO.getHospitalId());
@@ -272,8 +558,7 @@ public class AppUserController {
 
         Optional<Hospital> optionalHospital = hospitalRepository.findByAppUser_Id(hospitalUser.getId());
 
-        if(optionalHospital.isEmpty())
-        {
+        if (optionalHospital.isEmpty()) {
             return new ResponseEntity<>(ApiResponse.create("error", "Hospital Not Found"), HttpStatus.NOT_FOUND);
         }
 
@@ -354,13 +639,13 @@ public class AppUserController {
 
         ambulanceTripRepository.save(ambulanceTrip);
 
-        return new ResponseEntity<>(ApiResponse.create("create","Trip created"), HttpStatus.OK);
+        return new ResponseEntity<>(ApiResponse.create("create", "Trip created"), HttpStatus.OK);
     }
 
     @PostMapping("/add/review")
     public ResponseEntity<?> saveReview(@RequestParam(name = "review") String reviewStr,
-            @RequestParam(name = "star") Long starCount, @RequestBody ReviewPendingDTO reviewPendingDTO,
-            HttpServletRequest request) {
+                                        @RequestParam(name = "star") Long starCount, @RequestBody ReviewPendingDTO reviewPendingDTO,
+                                        HttpServletRequest request) {
 
         AppUser reviewer = userService.returnUser(request);
         Optional<AppUser> optionalSubject = userRepository.findById(reviewPendingDTO.getSubjectId());
@@ -451,7 +736,7 @@ public class AppUserController {
 
     @PreAuthorize("permitAll()")
     @GetMapping("/add/response")
-    public ResponseEntity<?> addUserResponse(@RequestParam(name="name")String name, @RequestParam(name="email")String email, @RequestParam(name="message") String message) {
+    public ResponseEntity<?> addUserResponse(@RequestParam(name = "name") String name, @RequestParam(name = "email") String email, @RequestParam(name = "message") String message) {
 
         UserResponse userResponse = new UserResponse();
         userResponse.setDate(LocalDate.now());
@@ -616,21 +901,18 @@ public class AppUserController {
 
 
     @GetMapping("/ambulance/trip/pending")
-    public ResponseEntity<?>getAllPendingTrips(HttpServletRequest request)
-    {
+    public ResponseEntity<?> getAllPendingTrips(HttpServletRequest request) {
         AppUser user = userService.returnUser(request);
 
-        List<AmbulanceTrip>ambulanceTrips = ambulanceTripRepository.findTripsByUserProviderNULL(user.getId());
+        List<AmbulanceTrip> ambulanceTrips = ambulanceTripRepository.findTripsByUserProviderNULL(user.getId());
 
-        if(ambulanceTrips.isEmpty())
-        {
-            return  new ResponseEntity<>(ApiResponse.create("empty","No pending  Trip  found"),HttpStatus.OK);
+        if (ambulanceTrips.isEmpty()) {
+            return new ResponseEntity<>(ApiResponse.create("empty", "No pending  Trip  found"), HttpStatus.OK);
         }
 
-        List<AmbulanceTripPendingViewDTO>ambulanceTripPendingViewDTOS = new ArrayList<>();
+        List<AmbulanceTripPendingViewDTO> ambulanceTripPendingViewDTOS = new ArrayList<>();
 
-        for(var i:ambulanceTrips)
-        {
+        for (var i : ambulanceTrips) {
             AmbulanceTripPendingViewDTO ambulanceTripPendingViewDTO = new AmbulanceTripPendingViewDTO();
             ambulanceTripPendingViewDTO.setId(i.getId());
             ambulanceTripPendingViewDTO.setPrice(i.getPrice());
@@ -638,19 +920,17 @@ public class AppUserController {
             ambulanceTripPendingViewDTO.setDestination(i.getDestination());
             ambulanceTripPendingViewDTO.setOrderDate(i.getOrderDate());
 
-            List<BidderDTO>bidderDTOS = new ArrayList<>();
+            List<BidderDTO> bidderDTOS = new ArrayList<>();
 
-            for(var j:i.getBidders())
-            {
+            for (var j : i.getBidders()) {
                 BidderDTO bidderDTO = new BidderDTO();
                 bidderDTO.setId(j.getId());
-                bidderDTO.setName(j.getFirstName()+" "+j.getLastName());
+                bidderDTO.setName(j.getFirstName() + " " + j.getLastName());
                 bidderDTO.setEmail(j.getEmail());
                 bidderDTO.setContactNo(j.getContactNo());
                 bidderDTO.setRating(reviewRepository.findAvgRating(j.getId()));
 
-                if(bidderDTO.getRating()==null)
-                {
+                if (bidderDTO.getRating() == null) {
                     bidderDTO.setRating(0.0);
                 }
                 bidderDTOS.add(bidderDTO);
@@ -661,12 +941,12 @@ public class AppUserController {
             ambulanceTripPendingViewDTOS.add(ambulanceTripPendingViewDTO);
         }
 
-        return new ResponseEntity<>(ambulanceTripPendingViewDTOS,HttpStatus.OK);
+        return new ResponseEntity<>(ambulanceTripPendingViewDTOS, HttpStatus.OK);
     }
 
 
     @PreAuthorize("hasAnyAuthority('PHARMACY','USER')")
-    @GetMapping("/medicineorder/undelivered")
+    @GetMapping("/medicine/order/undelivered")
     public ResponseEntity<?> getAllUndelivered(HttpServletRequest request) {
         AppUser user = userService.returnUser(request);
         if (user == null) {
@@ -708,298 +988,6 @@ public class AppUserController {
 
         return new ResponseEntity<>(medicineOrderViewDTOS, HttpStatus.OK);
     }
-
-    @PreAuthorize("hasAnyAuthority('HOSPITAL','AMBULANCE','PHARMACY','USER','ADMIN')")
-    @GetMapping("/profile")
-    public ResponseEntity<?> getProfileDetails(HttpServletRequest request) {
-        AppUser appUser = userService.returnUser(request);
-
-        Object userdetails = null;
-
-        if (appUser.getRoles().get(0).getRoleType().equals("USER")) {
-            UserDTO userDTO = modelMapper.map(appUser, UserDTO.class);
-
-            userdetails = userDTO;
-        } else if (appUser.getRoles().get(0).getRoleType().equals("ADMIN")) {
-            UserDTO userDTO = modelMapper.map(appUser, UserDTO.class);
-            AdminDTO adminDTO = modelMapper.map(userDTO, AdminDTO.class);
-            adminDTO.setBalance(adminRepository.findById(1L).get().getBalance());
-
-            userdetails = adminDTO;
-        } else if (appUser.getRoles().get(0).getRoleType().equals("HOSPITAL")) {
-            Optional<Hospital> optional = hospitalRepository.findByAppUser_Id(appUser.getId());
-
-            HospitalDTO hospitalDTO = modelMapper.map(optional.get(), HospitalDTO.class);
-            hospitalDTO.setId(appUser.getId());
-            hospitalDTO.setFirstName(appUser.getFirstName());
-            hospitalDTO.setLastName(appUser.getLastName());
-            hospitalDTO.setEmail(appUser.getEmail());
-            hospitalDTO.setContactNo(appUser.getContactNo());
-            hospitalDTO.setDp(appUser.getDp());
-            hospitalDTO.setRating(reviewRepository.findAvgRating(appUser.getId()));
-            hospitalDTO.setReviewCount(reviewRepository.findCount(appUser.getId()));
-
-            if(hospitalDTO.getRating()==null)
-            {
-                hospitalDTO.setRating(0.0);
-            }
-
-            if(hospitalDTO.getReviewCount()==null)
-            {
-                hospitalDTO.setReviewCount(0L);
-            }
-
-            userdetails = hospitalDTO;
-        } else if (appUser.getRoles().get(0).getRoleType().equals("PHARMACY")) {
-            Optional<Pharmacy> optional = pharmacyRepository.findByAppUser_Id(appUser.getId());
-
-            PharmacyDTO pharmacyDTO = modelMapper.map(optional.get(), PharmacyDTO.class);
-
-            pharmacyDTO.setId(appUser.getId());
-            pharmacyDTO.setFirstName(appUser.getFirstName());
-            pharmacyDTO.setLastName(appUser.getLastName());
-            pharmacyDTO.setEmail(appUser.getEmail());
-            pharmacyDTO.setContactNo(appUser.getContactNo());
-            pharmacyDTO.setDp(appUser.getDp());
-            pharmacyDTO.setRating(reviewRepository.findAvgRating(appUser.getId()));
-            pharmacyDTO.setReviewCount(reviewRepository.findCount(appUser.getId()));
-
-            if(pharmacyDTO.getRating()==null)
-            {
-                pharmacyDTO.setRating(0.0);
-            }
-
-            if(pharmacyDTO.getReviewCount()==null)
-            {
-                pharmacyDTO.setReviewCount(0L);
-            }
-
-            userdetails = pharmacyDTO;
-        } else if (appUser.getRoles().get(0).getRoleType().equals("AMBULANCE")) {
-            Optional<AmbulanceProvider> optional = ambulanceProviderRepository.findByAppUser_Id(appUser.getId());
-
-            AmbulanceProviderDTO ambulanceProviderDTO = modelMapper.map(optional.get(), AmbulanceProviderDTO.class);
-
-            ambulanceProviderDTO.setId(appUser.getId());
-            ambulanceProviderDTO.setFirstName(appUser.getFirstName());
-            ambulanceProviderDTO.setLastName(appUser.getLastName());
-            ambulanceProviderDTO.setEmail(appUser.getEmail());
-            ambulanceProviderDTO.setContactNo(appUser.getContactNo());
-            ambulanceProviderDTO.setDp(appUser.getDp());
-            ambulanceProviderDTO.setRating(reviewRepository.findAvgRating(appUser.getId()));
-            ambulanceProviderDTO.setReviewCount(reviewRepository.findCount(appUser.getId()));
-
-            if(ambulanceProviderDTO.getRating()==null)
-            {
-                ambulanceProviderDTO.setRating(0.0);
-            }
-
-            if(ambulanceProviderDTO.getReviewCount()==null)
-            {
-                ambulanceProviderDTO.setReviewCount(0L);
-            }
-
-            userdetails = ambulanceProviderDTO;
-        }
-
-        if (userdetails == null) {
-            return new ResponseEntity<>(ApiResponse.create("error", "Profile not found"), HttpStatus.BAD_REQUEST);
-        }
-
-        return new ResponseEntity<>(userdetails, HttpStatus.OK);
-    }
-    @PreAuthorize("hasAnyAuthority('DOCTOR','HOSPITAL','AMBULANCE','PHARMACY')")
-    @GetMapping("/statistics")
-    public ResponseEntity<?> getStatistics(HttpServletRequest request) {
-        AppUser user = userService.returnUser(request);
-        if (user == null) {
-            return new ResponseEntity<>(ApiResponse.create("error", "user not found"), HttpStatus.OK);
-        }
-
-        StatisticsDTO statisticsDTO = new StatisticsDTO();
-
-        LocalDate now = LocalDate.now();
-        LocalDate sevenDaysAgo = now.minusDays(7);
-        LocalDate thirtyDaysAgo = now.minusDays(30);
-
-        statisticsDTO.set_7DaysRating(reviewRepository.findAvgRatingByDate(user.getId(), sevenDaysAgo, now));
-        statisticsDTO.set_30DaysRating(reviewRepository.findAvgRatingByDate(user.getId(), thirtyDaysAgo, now));
-        statisticsDTO.setTotalRating(reviewRepository.findAvgRating(user.getId()));
-
-        String roleType = user.getRoles().get(0).getRoleType();
-
-        if ("DOCTOR".equalsIgnoreCase(roleType)) {
-            // Doctor statistics logic
-            statisticsDTO.set_7DaysCount(
-                    doctorSerialRepository.countSerialsByDoctorAndDate(user.getId(), sevenDaysAgo, now));
-            statisticsDTO.set_30DaysCount(
-                    doctorSerialRepository.countSerialsByDoctorAndDate(user.getId(), thirtyDaysAgo, now));
-            statisticsDTO.setTotalCount(doctorSerialRepository.countSerialsByDoctor(user.getId()));
-            statisticsDTO
-                    .set_7DaysIncome(doctorSerialRepository.sumPriceByDoctorAndDate(user.getId(), sevenDaysAgo, now));
-            statisticsDTO
-                    .set_30DaysIncome(doctorSerialRepository.sumPriceByDoctorAndDate(user.getId(), thirtyDaysAgo, now));
-            statisticsDTO.setTotalIncome(doctorSerialRepository.sumPriceByDoctor(user.getId()));
-
-            List<Object[]> incomeList = doctorSerialRepository.sumPriceByDoctorAndDateGroupByDate(user.getId(),
-                    thirtyDaysAgo, now);
-
-            statisticsDTO.setDates(new ArrayList<>());
-            statisticsDTO.setIncomes(new ArrayList<>());
-
-            for (var i : incomeList) {
-                statisticsDTO.getDates().add((LocalDate) i[0]);
-                statisticsDTO.getIncomes().add((Long) i[1]);
-            }
-        } else if ("PHARMACY".equalsIgnoreCase(roleType)) {
-            // Pharmacy statistics logic
-            statisticsDTO.set_7DaysCount(
-                    medicineOrderRepository.countMedicineOrdersByPharmacyAndDate(user.getId(), sevenDaysAgo, now));
-            statisticsDTO.set_30DaysCount(
-                    medicineOrderRepository.countMedicineOrdersByPharmacyAndDate(user.getId(), thirtyDaysAgo, now));
-            statisticsDTO.setTotalCount(medicineOrderRepository.countMedicineOrdersByPharmacy(user.getId()));
-            statisticsDTO.set_7DaysIncome(
-                    medicineOrderRepository.sumPriceByPharmacyAndDate(user.getId(), sevenDaysAgo, now));
-            statisticsDTO.set_30DaysIncome(
-                    medicineOrderRepository.sumPriceByPharmacyAndDate(user.getId(), thirtyDaysAgo, now));
-            statisticsDTO.setTotalIncome(medicineOrderRepository.sumPriceByPharmacy(user.getId()));
-
-            List<Object[]> incomeList = medicineOrderRepository.sumPriceByPharmacyAndDateGroupByDate(user.getId(),
-                    thirtyDaysAgo, now);
-
-            statisticsDTO.setDates(new ArrayList<>());
-            statisticsDTO.setIncomes(new ArrayList<>());
-
-            for (var i : incomeList) {
-                statisticsDTO.getDates().add((LocalDate) i[0]);
-                statisticsDTO.getIncomes().add((Long) i[1]);
-            }
-        } else if ("HOSPITAL".equalsIgnoreCase(roleType)) {
-            // Hospital statistics logic
-            statisticsDTO.set_7DaysCount(
-                    diagnosisOrderRepository.countDiagnosisOrdersByHospitalAndDate(user.getId(), sevenDaysAgo, now));
-            statisticsDTO.set_30DaysCount(
-                    diagnosisOrderRepository.countDiagnosisOrdersByHospitalAndDate(user.getId(), thirtyDaysAgo, now));
-            statisticsDTO.setTotalCount(diagnosisOrderRepository.countDiagnosisOrdersByHospital(user.getId()));
-            statisticsDTO.set_7DaysIncome(
-                    diagnosisOrderRepository.sumPriceByHospitalAndDate(user.getId(), sevenDaysAgo, now));
-            statisticsDTO.set_30DaysIncome(
-                    diagnosisOrderRepository.sumPriceByHospitalAndDate(user.getId(), thirtyDaysAgo, now));
-            statisticsDTO.setTotalIncome(diagnosisOrderRepository.sumPriceByHospital(user.getId()));
-
-            List<Object[]> incomeList = diagnosisOrderRepository.sumPriceByHospitalAndDateGroupByDate(user.getId(),
-                    thirtyDaysAgo, now);
-
-            statisticsDTO.setDates(new ArrayList<>());
-            statisticsDTO.setIncomes(new ArrayList<>());
-
-            for (var i : incomeList) {
-                statisticsDTO.getDates().add((LocalDate) i[0]);
-                statisticsDTO.getIncomes().add((Long) i[1]);
-            }
-        } else if ("AMBULANCE".equalsIgnoreCase(roleType)) {
-            // Ambulance statistics logic
-            statisticsDTO.set_7DaysCount(
-                    ambulanceTripRepository.countTripsByAmbulanceProviderAndDate(user.getId(), sevenDaysAgo, now));
-            statisticsDTO.set_30DaysCount(
-                    ambulanceTripRepository.countTripsByAmbulanceProviderAndDate(user.getId(), thirtyDaysAgo, now));
-            statisticsDTO.setTotalCount(ambulanceTripRepository.countTripsByAmbulanceProvider(user.getId()));
-            statisticsDTO.set_7DaysIncome(
-                    ambulanceTripRepository.sumPriceByAmbulanceProviderAndDate(user.getId(), sevenDaysAgo, now));
-            statisticsDTO.set_30DaysIncome(
-                    ambulanceTripRepository.sumPriceByAmbulanceProviderAndDate(user.getId(), thirtyDaysAgo, now));
-            statisticsDTO.setTotalIncome(ambulanceTripRepository.sumPriceByAmbulanceProvider(user.getId()));
-
-            List<Object[]> incomeList = ambulanceTripRepository
-                    .sumPriceByAmbulanceProviderAndDateGroupByDate(user.getId(), thirtyDaysAgo, now);
-
-            statisticsDTO.setDates(new ArrayList<>());
-            statisticsDTO.setIncomes(new ArrayList<>());
-
-            for (var i : incomeList) {
-                statisticsDTO.getDates().add((LocalDate) i[0]);
-                statisticsDTO.getIncomes().add((Long) i[1]);
-            }
-        } else {
-            return new ResponseEntity<>(ApiResponse.create("error", "invalid role type"), HttpStatus.BAD_REQUEST);
-        }
-
-        statisticsDTO.set_7DaysCount(statisticsDTO.get_7DaysCount()==null?0L:statisticsDTO.get_7DaysCount());
-        statisticsDTO.set_30DaysCount(statisticsDTO.get_30DaysCount()==null?0L:statisticsDTO.get_30DaysCount());
-        statisticsDTO.setTotalCount(statisticsDTO.getTotalCount()==null?0L:statisticsDTO.getTotalCount());
-        statisticsDTO.set_7DaysIncome(statisticsDTO.get_7DaysIncome()==null?0L:statisticsDTO.get_7DaysIncome());
-        statisticsDTO.set_30DaysIncome(statisticsDTO.get_30DaysIncome()==null?0L:statisticsDTO.get_30DaysIncome());
-        statisticsDTO.setTotalIncome(statisticsDTO.getTotalIncome()==null?0L:statisticsDTO.getTotalIncome());
-        statisticsDTO.set_7DaysRating(statisticsDTO.get_7DaysRating()==null?0L:statisticsDTO.get_7DaysRating());
-        statisticsDTO.set_30DaysRating(statisticsDTO.get_30DaysRating()==null?0L:statisticsDTO.get_30DaysRating());
-        statisticsDTO.setTotalRating(statisticsDTO.getTotalRating()==null?0L:statisticsDTO.getTotalRating());
-
-
-
-        return new ResponseEntity<>(statisticsDTO, HttpStatus.OK);
-    }
-
-    @PreAuthorize("hasAnyAuthority('DOCTOR','HOSPITAL','AMBULANCE','PHARMACY','USER')")
-    @DeleteMapping("/delete/user")
-    public ResponseEntity<?> deleteUser(HttpServletRequest request) {
-
-        AppUser appUser = userService.returnUser(request);
-
-        if (appUser == null) {
-            return new ResponseEntity<>(ApiResponse.create("error", "User does not exist"), HttpStatus.NOT_FOUND);
-        }
-
-        Long id = appUser.getId();
-
-        List<Role> roles = appUser.getRoles();
-
-        for (int i = 0; i < roles.size(); i++) {
-            if (roles.get(i).getRoleType().equals("USER")) {
-                userRepository.delete(appUser);
-            }
-            if (roles.get(i).getRoleType().equals("DOCTOR")) {
-
-                Optional<Doctor> doctor = doctorRepository.findByAppUser_Id(id);
-
-                if (doctor.isEmpty()) {
-                    return new ResponseEntity<>(ApiResponse.create("error", "User does not exist"),
-                            HttpStatus.BAD_REQUEST);
-                }
-                doctorRepository.delete(doctor.get());
-            }
-            if (roles.get(i).getRoleType().equals("HOSPITAL")) {
-                Optional<Hospital> hospital = hospitalRepository.findByAppUser_Id(id);
-
-                if (hospital.isEmpty()) {
-                    return new ResponseEntity<>(ApiResponse.create("error", "User does not exist"),
-                            HttpStatus.BAD_REQUEST);
-                }
-
-                hospitalRepository.delete(hospital.get());
-            }
-            if (roles.get(i).getRoleType().equals("PHARMACY")) {
-                Optional<Pharmacy> pharmacy = pharmacyRepository.findByAppUser_Id(id);
-
-                if (pharmacy.isEmpty()) {
-                    return new ResponseEntity<>(ApiResponse.create("error", "User does not exist"),
-                            HttpStatus.BAD_REQUEST);
-                }
-
-                pharmacyRepository.delete(pharmacy.get());
-            }
-            if (roles.get(i).getRoleType().equals("AMBULANCE")) {
-                Optional<AmbulanceProvider> ambulanceProvider = ambulanceProviderRepository.findByAppUser_Id(id);
-
-                if (ambulanceProvider.isEmpty()) {
-                    return new ResponseEntity<>(ApiResponse.create("error", "User does not exist"),
-                            HttpStatus.BAD_REQUEST);
-                }
-
-                ambulanceProviderRepository.delete(ambulanceProvider.get());
-            }
-        }
-
-        return new ResponseEntity<>(ApiResponse.create("delete", "User is deleted"), HttpStatus.OK);
-    }
-
 }
+
+

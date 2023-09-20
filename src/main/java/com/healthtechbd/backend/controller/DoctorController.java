@@ -111,6 +111,8 @@ public class DoctorController {
 
         var roles = appUser.getRoles();
 
+        String password = appUser.getPassword();
+
         SignUpDTO signUpDTO = modelMapper.map(doctorSignUpDTO.getAppUser(), SignUpDTO.class);
 
         UpdateUserResponse updateUserResponse = userService.updateUser(signUpDTO);
@@ -120,6 +122,11 @@ public class DoctorController {
         }
 
         appUser = updateUserResponse.getUser();
+
+        if(appUser.getPassword()==null)
+        {
+            appUser.setPassword(password);
+        }
 
         appUser.setId(appUserId);
 

@@ -113,15 +113,18 @@ public class UserService {
         if (signUpDTO.getEmail() == null || signUpDTO.getEmail().trim().length() == 0)
             errorResponse = ApiResponse.create("error", "Email can not be empty");
 
-        if (signUpDTO.getPassword() == null || signUpDTO.getPassword().trim().length() == 0)
-            errorResponse = ApiResponse.create("error", "Password can not be empty");
+
 
         if (!errorResponse.empty()) {
             return new UpdateUserResponse(errorResponse, null);
         }
 
-        String password = bcryptPasswordEncoder.encode(signUpDTO.getPassword());
-        signUpDTO.setPassword(password);
+        if(signUpDTO.getPassword()!=null)
+        {
+            String password = bcryptPasswordEncoder.encode(signUpDTO.getPassword());
+            signUpDTO.setPassword(password);
+        }
+
 
         AppUser user = modelMapper.map(signUpDTO, AppUser.class);
         user.setAccountVerified(true);

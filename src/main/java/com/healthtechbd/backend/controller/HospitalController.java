@@ -84,6 +84,7 @@ public class HospitalController {
         AppUser appUser = userService.returnUser(request);
         Long appUserId = appUser.getId();
         var roles = appUser.getRoles();
+        String password = appUser.getPassword();
 
         SignUpDTO signUpDTO = modelMapper.map(hospital.getAppUser(), SignUpDTO.class);
         UpdateUserResponse updateUserResponse = userService.updateUser(signUpDTO);
@@ -93,6 +94,12 @@ public class HospitalController {
         }
 
         appUser = updateUserResponse.getUser();
+
+        if(appUser.getPassword()==null)
+        {
+            appUser.setPassword(password);
+        }
+
         appUser.setId(appUserId);
         appUser.setRoles(roles);
 

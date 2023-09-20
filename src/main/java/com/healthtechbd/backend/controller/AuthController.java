@@ -1,5 +1,6 @@
 package com.healthtechbd.backend.controller;
 
+import com.healthtechbd.backend.dto.ForgetPasswordDTO;
 import com.healthtechbd.backend.dto.JWTDTO;
 import com.healthtechbd.backend.dto.SignInDTO;
 import com.healthtechbd.backend.dto.SignUpDTO;
@@ -14,6 +15,7 @@ import com.healthtechbd.backend.utils.RegistrationResponse;
 import com.healthtechbd.backend.utils.UpdateUserResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import org.modelmapper.ModelMapper;
+import org.modelmapper.internal.bytebuddy.dynamic.scaffold.MethodRegistry;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
@@ -156,9 +158,16 @@ public class AuthController {
 
         var roles = user.getRoles();
 
+        String password = user.getPassword();
+
         UpdateUserResponse updateUserResponse = userService.updateUser(signUpDTO);
 
         user = updateUserResponse.getUser();
+
+        if(user.getPassword()==null)
+        {
+            user.setPassword(password);
+        }
 
         user.setId(id);
 
@@ -169,6 +178,27 @@ public class AuthController {
         userRepository.save(user);
 
         return new ResponseEntity<>(updateUserResponse.getResponse(), HttpStatus.OK);
+    }
+
+    @PostMapping("/user/forgetPassword")
+    public ResponseEntity<?>getForgetPassword(@RequestBody ForgetPasswordDTO forgetPasswordDTO)
+    {
+        Optional<AppUser>optionalAppUser = userRepository.findByEmail(forgetPasswordDTO.getEmail());
+
+        if(optionalAppUser.isEmpty())
+        {
+            return new ResponseEntity<>(ApiResponse.create("error","No user with this email"),HttpStatus.NOT_FOUND);
+        }
+
+        AppUser user = optionalAppUser.get();
+
+        String newPassword = bcryptPasswordEncoder.encode(forgetPasswordDTO.getPassword());
+
+        user.setPassword(newPassword);
+
+        userRepository.save(user);
+
+        return new ResponseEntity<>(ApiResponse.create("update","Password is updated"), HttpStatus.OK);
 
     }
 }
