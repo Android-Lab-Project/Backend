@@ -982,6 +982,8 @@ public class AppUserController {
                     medicineOrder.getPharmacy().getFirstName() + " " + medicineOrder.getPharmacy().getLastName());
             medicineOrderViewDTO.setDescription(medicineOrder.getDescription());
             medicineOrderViewDTO.setPrice(medicineOrder.getPrice());
+            medicineOrderViewDTO.setUserEmail(medicineOrder.getUser().getEmail());
+            medicineOrderViewDTO.setPharmacyEmail(medicineOrder.getPharmacy().getEmail());
 
             medicineOrderViewDTOS.add(medicineOrderViewDTO);
         }
