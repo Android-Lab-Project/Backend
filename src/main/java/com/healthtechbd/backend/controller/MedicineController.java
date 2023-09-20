@@ -136,6 +136,7 @@ public class MedicineController {
             medicineOrderViewDTO.setDescription(medicineOrder.getDescription());
             medicineOrderViewDTO.setPlace(medicineOrder.getPlace());
             medicineOrderViewDTO.setPrice(medicineOrder.getPrice());
+            medicineOrderViewDTO.setUserEmail(medicineOrder.getUser().getEmail());
 
             medicineOrderViewDTOS.add(medicineOrderViewDTO);
         }

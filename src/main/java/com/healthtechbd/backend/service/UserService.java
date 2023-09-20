@@ -102,6 +102,7 @@ public class UserService {
     }
 
     public UpdateUserResponse updateUser(SignUpDTO signUpDTO) {
+
         ApiResponse errorResponse = new ApiResponse();
 
         if (signUpDTO.getFirstName() == null || signUpDTO.getFirstName().trim().length() == 0)
@@ -112,8 +113,6 @@ public class UserService {
 
         if (signUpDTO.getEmail() == null || signUpDTO.getEmail().trim().length() == 0)
             errorResponse = ApiResponse.create("error", "Email can not be empty");
-
-
 
         if (!errorResponse.empty()) {
             return new UpdateUserResponse(errorResponse, null);
