@@ -152,7 +152,7 @@ public class DoctorController {
         for (int i = 0; i < doctor.getAvailableTimes().size(); i++) {
             doctor.getAvailableTimes().get(i).setId(null);
             doctor.getAvailableTimes().get(i).setCount(0);
-            doctor.getAvailableTimes().get(i).setAvailTime(0.0);
+            doctor.getAvailableTimes().get(i).setAvailTime(doctor.getAvailableTimes().get(i).getStartTime());
             doctor.getAvailableTimes().get(i)
                     .setDate(DoctorService.currentDate(doctor.getAvailableTimes().get(i).getDay()));
 
@@ -161,7 +161,7 @@ public class DoctorController {
 
             doctor.getAvailableOnlineTimes().get(i).setId(null);
             doctor.getAvailableOnlineTimes().get(i).setCount(0);
-            doctor.getAvailableOnlineTimes().get(i).setAvailTime(0.0);
+            doctor.getAvailableOnlineTimes().get(i).setAvailTime(doctor.getAvailableOnlineTimes().get(i).getStartTime());
             doctor.getAvailableOnlineTimes().get(i)
                     .setDate(DoctorService.currentDate(doctor.getAvailableOnlineTimes().get(i).getDay()));
         }

@@ -58,7 +58,7 @@ public class DoctorService {
                 }
             }
             if (availTime > endTime) {
-                doctor.getAvailableTimes().get(i).setAvailTime(null);
+                doctor.getAvailableTimes().get(i).setAvailTime(-1.0);
             } else {
                 doctor.getAvailableTimes().get(i).setAvailTime(availTime);
             }
@@ -82,7 +82,7 @@ public class DoctorService {
                 }
             }
             if (onlineAvailTime > onlineEndTime) {
-                doctor.getAvailableOnlineTimes().get(i).setAvailTime(null);
+                doctor.getAvailableOnlineTimes().get(i).setAvailTime(-1.0);
             } else {
                 doctor.getAvailableOnlineTimes().get(i).setAvailTime(onlineAvailTime);
             }
