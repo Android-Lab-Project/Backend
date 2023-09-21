@@ -52,6 +52,7 @@ public class SecurityConfig {
                 .authorizeRequests()
                 .requestMatchers(HttpMethod.POST, "/signin").permitAll()
                 .requestMatchers(HttpMethod.POST, "/signup").permitAll()
+                .requestMatchers(HttpMethod.POST, "/match/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/profile").permitAll()
                 .requestMatchers(HttpMethod.POST, "/register/*").permitAll()
                 .requestMatchers(HttpMethod.GET, "/user/**").permitAll()

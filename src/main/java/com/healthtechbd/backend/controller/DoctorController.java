@@ -1,13 +1,8 @@
 package com.healthtechbd.backend.controller;
 
 import com.healthtechbd.backend.dto.*;
-import com.healthtechbd.backend.entity.AppUser;
-import com.healthtechbd.backend.entity.Doctor;
-import com.healthtechbd.backend.entity.DoctorSerial;
-import com.healthtechbd.backend.repo.AppUserRepository;
-import com.healthtechbd.backend.repo.DoctorRepository;
-import com.healthtechbd.backend.repo.DoctorSerialRepository;
-import com.healthtechbd.backend.repo.ReviewRepository;
+import com.healthtechbd.backend.entity.*;
+import com.healthtechbd.backend.repo.*;
 import com.healthtechbd.backend.service.BkashPaymentService;
 import com.healthtechbd.backend.service.DoctorService;
 import com.healthtechbd.backend.service.TimeService;
@@ -40,6 +35,12 @@ public class DoctorController {
 
     @Autowired
     private AppUserRepository userRepository;
+
+    @Autowired
+    private DoctorAvailableTimeRepository doctorAvailableTimeRepository;
+
+    @Autowired
+    private DoctorOnlineAvailableTimeRepository doctorOnlineAvailableTimeRepository;
 
     @Autowired
     private DoctorSerialRepository doctorSerialRepository;
@@ -102,8 +103,8 @@ public class DoctorController {
 
         return new ResponseEntity<>(ApiResponse.create("create", "Doctor Sign up successful"), HttpStatus.OK);
     }
-
-    @PostMapping("update/doctor")
+    @PreAuthorize("hasAuthority('DOCTOR')")
+    @PostMapping("update/doctor/profile")
     public ResponseEntity<?> updateDoctor(HttpServletRequest request, @RequestBody DoctorSignUpDTO doctorSignUpDTO) {
         AppUser appUser = userService.returnUser(request);
 
@@ -145,34 +146,87 @@ public class DoctorController {
 
         Long balance = doctor.getBalance();
 
-        doctorRepository.delete(optionalDoctor.get());
+        List<DoctorAvailableTime>doctorAvailableTimes = doctor.getAvailableTimes();
+
+        List<DoctorOnlineAvailableTime>doctorOnlineAvailableTimes = doctor.getAvailableOnlineTimes();
 
         doctor = modelMapper.map(doctorSignUpDTO, Doctor.class);
-
-        for (int i = 0; i < doctor.getAvailableTimes().size(); i++) {
-            doctor.getAvailableTimes().get(i).setId(null);
-            doctor.getAvailableTimes().get(i).setCount(0);
-            doctor.getAvailableTimes().get(i).setAvailTime(doctor.getAvailableTimes().get(i).getStartTime());
-            doctor.getAvailableTimes().get(i)
-                    .setDate(DoctorService.currentDate(doctor.getAvailableTimes().get(i).getDay()));
-
-        }
-        for (int i = 0; i < doctor.getAvailableOnlineTimes().size(); i++) {
-
-            doctor.getAvailableOnlineTimes().get(i).setId(null);
-            doctor.getAvailableOnlineTimes().get(i).setCount(0);
-            doctor.getAvailableOnlineTimes().get(i).setAvailTime(doctor.getAvailableOnlineTimes().get(i).getStartTime());
-            doctor.getAvailableOnlineTimes().get(i)
-                    .setDate(DoctorService.currentDate(doctor.getAvailableOnlineTimes().get(i).getDay()));
-        }
 
         doctor.setId(doctorId);
         doctor.setBalance(balance);
         doctor.setAppUser(appUser);
-
+        doctor.setAvailableTimes(doctorAvailableTimes);
+        doctor.setAvailableOnlineTimes(doctorOnlineAvailableTimes);
         doctorRepository.save(doctor);
 
         return new ResponseEntity<>(updateUserResponse.getResponse(), HttpStatus.OK);
+    }
+    @PreAuthorize("hasAuthority('DOCTOR')")
+    @PostMapping("/update/doctor/offline")
+    public ResponseEntity<?>updateDoctorOffline(HttpServletRequest request, @RequestBody List<DoctorAvailableTime> availableTimes)
+    {
+        AppUser  user  = userService.returnUser(request);
+
+        Optional<Doctor>optionalDoctor = doctorRepository.findByAppUser_Id(user.getId());
+
+        if(optionalDoctor.isEmpty())
+        {
+            return  new ResponseEntity<>(ApiResponse.create("error","Doctor not found"),HttpStatus.NOT_FOUND);
+        }
+
+        Doctor doctor = optionalDoctor.get();
+
+        List<DoctorAvailableTime>oldAvailableTimes = doctor.getAvailableTimes();
+
+        for (int i = 0; i < availableTimes.size(); i++) {
+            availableTimes.get(i).setId(null);
+            availableTimes.get(i).setCount(0);
+            availableTimes.get(i).setAvailTime(availableTimes.get(i).getStartTime());
+            availableTimes.get(i)
+                    .setDate(DoctorService.currentDate(availableTimes.get(i).getDay()));
+        }
+
+        doctor.setAvailableTimes(availableTimes);
+
+        doctorAvailableTimeRepository.deleteAll(oldAvailableTimes);
+
+        doctorRepository.save(doctor);
+
+        return  new ResponseEntity<>(ApiResponse.create("update","Doctor offline time updated"),HttpStatus.OK);
+    }
+
+    @PreAuthorize("hasAuthority('DOCTOR')")
+    @PostMapping("/update/doctor/online")
+    public ResponseEntity<?>updateDoctorOnline(HttpServletRequest request,@RequestBody List<DoctorOnlineAvailableTime> onlineAvailableTimes)
+    {
+        AppUser  user  = userService.returnUser(request);
+
+        Optional<Doctor>optionalDoctor = doctorRepository.findByAppUser_Id(user.getId());
+
+        if(optionalDoctor.isEmpty())
+        {
+            return  new ResponseEntity<>(ApiResponse.create("error","Doctor not found"),HttpStatus.NOT_FOUND);
+        }
+
+        Doctor doctor = optionalDoctor.get();
+
+        List<DoctorOnlineAvailableTime>oldOnlineAvailableTimes = doctor.getAvailableOnlineTimes();
+
+        for (int i = 0; i < onlineAvailableTimes.size(); i++) {
+           onlineAvailableTimes.get(i).setId(null);
+            onlineAvailableTimes.get(i).setCount(0);
+            onlineAvailableTimes.get(i).setAvailTime(onlineAvailableTimes.get(i).getStartTime());
+            onlineAvailableTimes.get(i)
+                    .setDate(DoctorService.currentDate(onlineAvailableTimes.get(i).getDay()));
+        }
+
+        doctor.setAvailableOnlineTimes(onlineAvailableTimes);
+
+        doctorOnlineAvailableTimeRepository.deleteAll(oldOnlineAvailableTimes);
+
+        doctorRepository.save(doctor);
+
+        return  new ResponseEntity<>(ApiResponse.create("update","Doctor offline time updated"),HttpStatus.OK);
     }
 
     @PreAuthorize("hasAnyAuthority('DOCTOR','USER')")

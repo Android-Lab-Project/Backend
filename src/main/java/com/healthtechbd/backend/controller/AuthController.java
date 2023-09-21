@@ -6,6 +6,7 @@ import com.healthtechbd.backend.dto.SignInDTO;
 import com.healthtechbd.backend.dto.SignUpDTO;
 import com.healthtechbd.backend.entity.Admin;
 import com.healthtechbd.backend.entity.AppUser;
+import com.healthtechbd.backend.entity.TwoStepVerificationCode;
 import com.healthtechbd.backend.repo.*;
 import com.healthtechbd.backend.security.AppUserServiceSecurity;
 import com.healthtechbd.backend.security.JWTService;
@@ -62,6 +63,9 @@ public class AuthController {
 
     @Autowired
     private HospitalRepository hospitalRepository;
+
+    @Autowired
+    private TwoStepVerificationCodeRepository twoStepVerificationCodeRepository;
 
     @Autowired
     private PasswordEncoder bcryptPasswordEncoder;
@@ -180,6 +184,45 @@ public class AuthController {
         return new ResponseEntity<>(updateUserResponse.getResponse(), HttpStatus.OK);
     }
 
+    @PostMapping("add/2stepCode")
+    public ResponseEntity<?>addCode(@RequestBody TwoStepVerificationCode twoStepVerificationCode)
+    {
+        Optional<TwoStepVerificationCode> optionalTwoStepVerificationCode = twoStepVerificationCodeRepository.findByEmail(twoStepVerificationCode.getEmail());
+
+        if(optionalTwoStepVerificationCode.isEmpty())
+        {
+            twoStepVerificationCodeRepository.save(twoStepVerificationCode);
+            return new ResponseEntity<>(ApiResponse.create("create", "code is inserted"),HttpStatus.OK);
+        }
+
+        Long id = optionalTwoStepVerificationCode.get().getId();
+
+        twoStepVerificationCode.setId(id);
+
+        twoStepVerificationCodeRepository.save(twoStepVerificationCode);
+
+        return new ResponseEntity<>(ApiResponse.create("update", "code is updated"),HttpStatus.OK);
+    }
+
+    @PostMapping("match/code")
+    public ResponseEntity<?>matchCode(@RequestBody TwoStepVerificationCode twoStepVerificationCode)
+    {
+        Optional<TwoStepVerificationCode> optionalTwoStepVerificationCode = twoStepVerificationCodeRepository.findByEmail(twoStepVerificationCode.getEmail());
+
+        if(optionalTwoStepVerificationCode.isEmpty())
+        {
+            return new ResponseEntity<>(ApiResponse.create("error", "No user found with this email"),HttpStatus.NOT_FOUND);
+        }
+
+        if(optionalTwoStepVerificationCode.get().getCode().equals(twoStepVerificationCode.getCode()))
+        {
+            return new ResponseEntity<>(ApiResponse.create("matched","User code is matched"),HttpStatus.OK);
+        }
+
+        return  new ResponseEntity<>(ApiResponse.create("error","User code is mismatched"),HttpStatus.BAD_REQUEST);
+    }
+
+
     @PostMapping("/user/forgetPassword")
     public ResponseEntity<?>getForgetPassword(@RequestBody ForgetPasswordDTO forgetPasswordDTO)
     {
@@ -199,6 +242,5 @@ public class AuthController {
         userRepository.save(user);
 
         return new ResponseEntity<>(ApiResponse.create("update","Password is updated"), HttpStatus.OK);
-
     }
 }
