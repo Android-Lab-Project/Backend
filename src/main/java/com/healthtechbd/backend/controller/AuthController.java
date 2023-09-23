@@ -85,6 +85,11 @@ public class AuthController {
     @PostMapping("/signin")
     public ResponseEntity<?> authenticateAppUser(@RequestBody SignInDTO signInDTO) {
 
+        if(!userService.checkBan(signInDTO.getEmail()))
+        {
+            return new ResponseEntity<>(ApiResponse.create("ban","Pharmacy is banned"),HttpStatus.BAD_REQUEST);
+        }
+
         try {
             authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(

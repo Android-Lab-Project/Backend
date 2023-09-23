@@ -1,7 +1,9 @@
 package com.healthtechbd.backend.repo;
 
+import com.healthtechbd.backend.entity.AmbulanceTrip;
 import com.healthtechbd.backend.entity.MedicineOrder;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -79,8 +81,15 @@ public interface MedicineOrderRepository extends JpaRepository<MedicineOrder, Lo
             "AND mo.delivered = 0")
     List<MedicineOrder> findUndeliveredOrdersByPharmacy(@Param("pharmacyId") Long pharmacyId);
 
+    @Query("SELECT mo FROM  MedicineOrder mo WHERE mo.user.id = :userId AND mo.reviewChecked = 0")
+    List<MedicineOrder> findMedicineOrderByReviewChecked(@Param("userId") Long userId);
+
 
     List<MedicineOrder>findByPlaceIgnoreCase(String place);
+
+    @Modifying
+    @Query("UPDATE MedicineOrder SET reviewChecked = 1 WHERE id = :o_id AND user.id = :user_id AND pharmacy.id = :subject_id")
+    void updateReviewChecked(@Param("o_id")Long o_id,@Param("user_id") Long user_id, @Param("subject_id")Long subject_id);
 
 
 }

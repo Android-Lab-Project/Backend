@@ -28,8 +28,10 @@ public class MedicineOrder {
     private Integer delivered;
     private String paymentId;
     private LocalDate date;
+    private LocalDate orderDate;
     private String place;
     private String trxId;
+    private Integer reviewChecked;
     private Long price;
 
 

@@ -131,5 +131,29 @@ public class UserService {
         return new UpdateUserResponse(ApiResponse.create("update", "User updated "), user);
     }
 
+    public boolean checkBan(String email)
+    {
+        Optional<AppUser>optionalAppUser = userRepository.findByEmail(email);
+
+        if(optionalAppUser.isEmpty())
+            return true;
+        AppUser user = optionalAppUser.get();
+
+        if(user.isAccountVerified())
+        {
+            return true;
+        }
+        else if(user.getBanRemovalDate().isBefore(LocalDate.now()))
+        {
+            user.setAccountVerified(true);
+            userRepository.save(user);
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
+
 
 }

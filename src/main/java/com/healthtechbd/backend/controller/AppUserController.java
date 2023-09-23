@@ -679,6 +679,10 @@ public class AppUserController {
             reviewService.updateReviewCheckedForAmbulanceTrip(reviewPendingDTO.getOrderId(), reviewer.getId(),
                     subject.getId());
         }
+        else if(reviewPendingDTO.getRole().equalsIgnoreCase("Pharmacy"))
+        {
+            reviewService.updateReviewCheckedForMedicineOrder(reviewPendingDTO.getOrderId(),reviewer.getId(),subject.getId());
+        }
 
         ApiResponse createResponse = ApiResponse.create("create", "Review Saved");
         return new ResponseEntity<>(createResponse, HttpStatus.OK);
@@ -694,6 +698,8 @@ public class AppUserController {
         List<DoctorSerial> doctorSerials = doctorSerialRepository.findDoctorSerialByReviewChecked(user.getId());
 
         List<AmbulanceTrip> ambulanceTrips = ambulanceTripRepository.findTripByReviewChecked(user.getId());
+
+        List<MedicineOrder>medicineOrders = medicineOrderRepository.findMedicineOrderByReviewChecked(user.getId());
 
         List<ReviewPendingDTO> reviewPendingDTOS = new ArrayList<>();
 
@@ -724,6 +730,16 @@ public class AppUserController {
             reviewPendingDTO.setSubjectName(ambulanceTrip.getAmbulanceProvider().getFirstName() + " "
                     + ambulanceTrip.getAmbulanceProvider().getLastName());
             reviewPendingDTO.setSubjectId(ambulanceTrip.getAmbulanceProvider().getId());
+            reviewPendingDTOS.add(reviewPendingDTO);
+        }
+
+        for (var medicineOrder : medicineOrders) {
+            ReviewPendingDTO reviewPendingDTO = new ReviewPendingDTO();
+            reviewPendingDTO.setOrderId(medicineOrder.getId());
+            reviewPendingDTO.setRole("Pharmacy");
+            reviewPendingDTO.setSubjectName(medicineOrder.getPharmacy().getFirstName() + " "
+                    + medicineOrder.getPharmacy().getLastName());
+            reviewPendingDTO.setSubjectId(medicineOrder.getPharmacy().getId());
             reviewPendingDTOS.add(reviewPendingDTO);
         }
 

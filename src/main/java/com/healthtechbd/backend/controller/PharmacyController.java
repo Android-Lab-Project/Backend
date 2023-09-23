@@ -1,11 +1,13 @@
 package com.healthtechbd.backend.controller;
 
+import com.healthtechbd.backend.dto.PharmacyDTO;
 import com.healthtechbd.backend.dto.SignUpDTO;
 import com.healthtechbd.backend.entity.AppUser;
 import com.healthtechbd.backend.entity.Pharmacy;
 import com.healthtechbd.backend.repo.AppUserRepository;
 import com.healthtechbd.backend.repo.MedicineOrderRepository;
 import com.healthtechbd.backend.repo.PharmacyRepository;
+import com.healthtechbd.backend.repo.ReviewRepository;
 import com.healthtechbd.backend.service.UserService;
 import com.healthtechbd.backend.utils.ApiResponse;
 import com.healthtechbd.backend.utils.RegistrationResponse;
@@ -19,6 +21,8 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 @CrossOrigin(origins = "*", allowedHeaders = "*", methods = { RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT,
@@ -35,6 +39,9 @@ public class PharmacyController {
 
     @Autowired
     private PharmacyRepository pharmacyRepository;
+
+    @Autowired
+    private ReviewRepository reviewRepository;
 
     @Autowired
     private UserService userService;
@@ -61,6 +68,45 @@ public class PharmacyController {
 
         return new ResponseEntity<>(ApiResponse.create("create", "Sign up successful"), HttpStatus.OK);
     }
+
+    @PreAuthorize("hasAuthority('ADMIN')")
+    @GetMapping("/pharmacy/all")
+    public ResponseEntity<?>getAllPharmacyDetails()
+    {
+
+        List<Pharmacy> pharmacyList = pharmacyRepository.findAll();
+
+        List<PharmacyDTO>pharmacyDTOS = new ArrayList<>();
+        for(var pharmacy: pharmacyList)
+        {
+            PharmacyDTO pharmacyDTO = modelMapper.map(pharmacy, PharmacyDTO.class);
+
+            AppUser appUser = pharmacy.getAppUser();
+
+            pharmacyDTO.setId(appUser.getId());
+            pharmacyDTO.setFirstName(appUser.getFirstName());
+            pharmacyDTO.setLastName(appUser.getLastName());
+            pharmacyDTO.setEmail(appUser.getEmail());
+            pharmacyDTO.setContactNo(appUser.getContactNo());
+            pharmacyDTO.setDp(appUser.getDp());
+            pharmacyDTO.setRating(reviewRepository.findAvgRating(appUser.getId()));
+            pharmacyDTO.setReviewCount(reviewRepository.findCount(appUser.getId()));
+
+            if (pharmacyDTO.getRating() == null) {
+                pharmacyDTO.setRating(0.0);
+            }
+
+            if (pharmacyDTO.getReviewCount() == null) {
+                pharmacyDTO.setReviewCount(0L);
+            }
+
+            pharmacyDTOS.add(pharmacyDTO);
+        }
+
+        return new ResponseEntity<>(pharmacyDTOS,HttpStatus.OK);
+
+    }
+
 
     @PostMapping("/update/pharmacy")
     public ResponseEntity<?> updatePharmacy(HttpServletRequest request, @RequestBody Pharmacy pharmacy) {

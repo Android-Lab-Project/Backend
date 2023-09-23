@@ -2,8 +2,10 @@ package com.healthtechbd.backend.controller;
 
 import com.healthtechbd.backend.dto.AdminStatisticsDTO;
 import com.healthtechbd.backend.entity.Admin;
+import com.healthtechbd.backend.entity.AppUser;
 import com.healthtechbd.backend.entity.UserResponse;
 import com.healthtechbd.backend.repo.*;
+import com.healthtechbd.backend.service.UserService;
 import com.healthtechbd.backend.utils.ApiResponse;
 import com.healthtechbd.backend.utils.AppConstants;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,6 +28,9 @@ public class AdminController {
 
     @Autowired
     private AdminRepository adminRepository;
+    
+    @Autowired
+    private AppUserRepository userRepository;
 
     @Autowired
     private UserCountStatsRepository userCountStatsRepository;
@@ -207,4 +212,25 @@ public class AdminController {
             return new ResponseEntity<>(userResponses, HttpStatus.OK);
         }
     }
+    
+    @GetMapping("/admin/ban/pharmacy/{id}")
+    public ResponseEntity<?>banPharmacy(@PathVariable(name="id")Long id)
+    {
+       Optional<AppUser>optionalAppUser = userRepository.findById(id);
+       
+       if(optionalAppUser.isEmpty())
+       {
+           return  new ResponseEntity<>(ApiResponse.create("error","Pharmacy not found"),HttpStatus.NOT_FOUND);
+       }
+
+       AppUser pharmacy = optionalAppUser.get();
+
+       pharmacy.setAccountVerified(false);
+
+       pharmacy.setBanRemovalDate(LocalDate.now().plusDays(AppConstants.banDuration));
+
+       userRepository.save(pharmacy);
+
+       return new ResponseEntity<>(ApiResponse.create("ban","Pharmacy is banned"),HttpStatus.OK);
+    }    
 }

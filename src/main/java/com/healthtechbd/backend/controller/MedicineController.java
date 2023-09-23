@@ -2,10 +2,7 @@ package com.healthtechbd.backend.controller;
 
 import com.healthtechbd.backend.dto.MedicineOrderViewDTO;
 import com.healthtechbd.backend.entity.*;
-import com.healthtechbd.backend.repo.AppUserRepository;
-import com.healthtechbd.backend.repo.MedicineOrderRepository;
-import com.healthtechbd.backend.repo.MedicineRepository;
-import com.healthtechbd.backend.repo.PharmacyRepository;
+import com.healthtechbd.backend.repo.*;
 import com.healthtechbd.backend.service.UserService;
 import com.healthtechbd.backend.utils.ApiResponse;
 import jakarta.servlet.http.HttpServletRequest;
@@ -27,6 +24,9 @@ public class MedicineController {
 
     @Autowired
     private MedicineRepository medicineRepository;
+
+    @Autowired
+    private ReviewRepository reviewRepository;
 
     @Autowired
     private PharmacyRepository pharmacyRepository;
@@ -159,6 +159,15 @@ public class MedicineController {
             MedicineOrder medicineOrder = optionalMedicineOrder.get();
 
             medicineOrder.setPharmacy(appUser);
+
+            Long reviewCount = reviewRepository.countByUser(medicineOrder.getUser().getId(),
+                    medicineOrder.getPharmacy().getId());
+
+            if (reviewCount >= 1) {
+                medicineOrder.setReviewChecked(1);
+            } else {
+                medicineOrder.setReviewChecked(0);
+            }
 
             Optional<Pharmacy> optionalPharmacy = pharmacyRepository.findByAppUser_Id(appUser.getId());
 
