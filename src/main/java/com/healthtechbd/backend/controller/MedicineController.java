@@ -1,6 +1,7 @@
 package com.healthtechbd.backend.controller;
 
 import com.healthtechbd.backend.dto.MedicineOrderViewDTO;
+import com.healthtechbd.backend.dto.MedicineReminderDTO;
 import com.healthtechbd.backend.entity.*;
 import com.healthtechbd.backend.repo.*;
 import com.healthtechbd.backend.service.UserService;
@@ -33,6 +34,9 @@ public class MedicineController {
 
     @Autowired
     private MedicineOrderRepository medicineOrderRepository;
+
+    @Autowired
+    private MedicineReminderRepository medicineReminderRepository;
 
     @Autowired
     private AppUserRepository userRepository;
@@ -206,5 +210,89 @@ public class MedicineController {
         return new ResponseEntity<>(ApiResponse.create("update", "medicine order delivered"), HttpStatus.OK);
 
     }
+
+    @PreAuthorize("hasAuthority('USER')")
+    @PostMapping("/add/medicine/reminder")
+    public ResponseEntity<?>addReminder(HttpServletRequest request, @RequestBody MedicineReminderDTO medicineReminderDTO)
+    {
+        AppUser user = userService.returnUser(request);
+
+        MedicineReminder medicineReminder = modelMapper.map(medicineReminderDTO,MedicineReminder.class);
+
+        medicineReminder.setAppUser(user);
+
+        medicineReminderRepository.save(medicineReminder);
+
+        return new ResponseEntity<>(ApiResponse.create("create","Remainder added"),HttpStatus.OK);
+    }
+    @PreAuthorize("hasAuthority('USER')")
+    @PostMapping("/update/medicine/reminder")
+    public ResponseEntity<?>updateReminder(@RequestBody MedicineReminderDTO medicineReminderDTO)
+    {
+        Optional<MedicineReminder>optionalMedicineReminder = medicineReminderRepository.findById(medicineReminderDTO.getId());
+
+        if(optionalMedicineReminder.isEmpty())
+        {
+            return new ResponseEntity<>(ApiResponse.create("error","Reminder not found"),HttpStatus.NOT_FOUND);
+        }
+
+        MedicineReminder medicineReminder = optionalMedicineReminder.get();
+
+        if(medicineReminderDTO.getDescription()!=null)
+        {
+            medicineReminder.setDescription(medicineReminderDTO.getDescription());
+        }
+
+        if(medicineReminderDTO.getTime()!=null)
+        {
+            medicineReminder.setTime(medicineReminderDTO.getTime());
+        }
+
+        medicineReminderRepository.save(medicineReminder);
+
+        return new ResponseEntity<>(ApiResponse.create("update","Reminder updated"),HttpStatus.OK);
+    }
+
+    @PreAuthorize("hasAuthority('USER')")
+    @DeleteMapping("/delete/medicine/reminder/{id}")
+    public ResponseEntity<?>deleteReminder(@PathVariable(name="id")Long id)
+    {
+        try {
+            medicineReminderRepository.deleteById(id);
+            return new ResponseEntity<>(ApiResponse.create("delete","Reminder deleted"),HttpStatus.OK);
+        }
+        catch (Exception e)
+        {
+            return  new ResponseEntity<>(ApiResponse.create("error","Reminder can't be deleted"),HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @PreAuthorize("hasAuthority('USER')")
+    @GetMapping("/medicine/reminder/all")
+    public ResponseEntity<?>getAllReminder(HttpServletRequest request)
+    {
+        AppUser user = userService.returnUser(request);
+
+        List<MedicineReminder>medicineReminders = medicineReminderRepository.findByAppUser_Id(user.getId());
+
+        if(medicineReminders.isEmpty())
+        {
+            return new ResponseEntity<>(ApiResponse.create("empty","No reminder found"),HttpStatus.OK);
+        }
+
+        List<MedicineReminderDTO>medicineReminderDTOS = new ArrayList<>();
+
+        for(var medicineReminder : medicineReminders)
+        {
+            MedicineReminderDTO medicineReminderDTO = modelMapper.map(medicineReminder,MedicineReminderDTO.class);
+            medicineReminderDTOS.add(medicineReminderDTO);
+        }
+        return new ResponseEntity<>(medicineReminderDTOS,HttpStatus.OK);
+    }
+
+
+
+
+
 
 }
