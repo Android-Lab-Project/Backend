@@ -13,7 +13,7 @@ import lombok.NoArgsConstructor;
 public class Ambulance {
     @ManyToOne
     @JoinColumn(name = "ambulanceProvider_id", referencedColumnName = "id")
-    AmbulanceProvider ambulanceProvider;
+    private AmbulanceProvider ambulanceProvider;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

@@ -14,7 +14,7 @@ public class Diagnosis {
 
     @ManyToOne
     @JoinColumn(name = "hospital_id", referencedColumnName = "id")
-    Hospital hospital;
+    private Hospital hospital;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

@@ -16,15 +16,15 @@ import java.util.List;
 public class AmbulanceTrip {
     @ManyToOne
     @JoinColumn(name = "user_id", referencedColumnName = "id")
-    AppUser user;
+    private AppUser user;
     @ManyToMany
     @JoinTable(name = "ambulancetrip_bidder",
             joinColumns = @JoinColumn(name = "trip_id", referencedColumnName = "id"),
             inverseJoinColumns = @JoinColumn(name = "ambulanceProvider_id", referencedColumnName = "id"))
-    List<AppUser> bidders;
+    private List<AppUser> bidders;
     @ManyToOne
     @JoinColumn(name = "ambulanceProvider_id", referencedColumnName = "id")
-    AppUser ambulanceProvider;
+    private AppUser ambulanceProvider;
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

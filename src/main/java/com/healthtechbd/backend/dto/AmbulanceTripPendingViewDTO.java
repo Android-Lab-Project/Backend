@@ -12,7 +12,7 @@ import java.util.List;
 @AllArgsConstructor
 public class AmbulanceTripPendingViewDTO {
     private Long id;
-    List<BidderDTO> bidders;
+    private List<BidderDTO> bidders;
     private String source;
     private String destination;
     private Long price;

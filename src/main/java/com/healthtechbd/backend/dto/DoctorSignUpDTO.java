@@ -14,10 +14,9 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 public class DoctorSignUpDTO {
-    AppUser appUser;
-    List<DoctorAvailableTime> availableTimes;
-    List<DoctorOnlineAvailableTime> availableOnlineTimes;
-    @Column(nullable = false)
+    private AppUser appUser;
+    private List<DoctorAvailableTime> availableTimes;
+    private List<DoctorOnlineAvailableTime> availableOnlineTimes;
     private String bio;
     private String currentHospital;
     private String expertise;

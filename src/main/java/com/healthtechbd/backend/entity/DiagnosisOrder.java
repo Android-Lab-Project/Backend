@@ -16,10 +16,10 @@ public class DiagnosisOrder {
 
     @ManyToOne
     @JoinColumn(name = "user_id", referencedColumnName = "id")
-    AppUser user;
+    private AppUser user;
     @ManyToOne
     @JoinColumn(name = "hospital_id", referencedColumnName = "id")
-    AppUser hospital;
+    private AppUser hospital;
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

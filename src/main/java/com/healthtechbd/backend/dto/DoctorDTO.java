@@ -12,8 +12,8 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class DoctorDTO extends UserDTO {
-    List<DoctorAvailableTime> availableTimes;
-    List<DoctorOnlineAvailableTime> availableOnlineTimes;
+    private List<DoctorAvailableTime> availableTimes;
+    private List<DoctorOnlineAvailableTime> availableOnlineTimes;
     private String expertise;
     private String bio;
     private Long balance;

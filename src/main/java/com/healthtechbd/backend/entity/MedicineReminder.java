@@ -15,7 +15,7 @@ public class MedicineReminder {
     private Long id;
     @ManyToOne
     @JoinColumn(name = "user_id", referencedColumnName = "id")
-    AppUser appUser;
+    private AppUser appUser;
 
     private String description;
 

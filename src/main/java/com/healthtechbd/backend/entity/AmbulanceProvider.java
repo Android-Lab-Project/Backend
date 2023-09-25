@@ -14,7 +14,7 @@ public class AmbulanceProvider {
     public Long balance;
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "appUser_id", referencedColumnName = "id")
-    AppUser appUser;
+    private AppUser appUser;
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
