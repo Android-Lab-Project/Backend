@@ -248,6 +248,11 @@ public class MedicineController {
             medicineReminder.setTime(medicineReminderDTO.getTime());
         }
 
+        if(medicineReminderDTO.getDays()!=null)
+        {
+            medicineReminder.setDays(medicineReminderDTO.getDays());
+        }
+
         medicineReminderRepository.save(medicineReminder);
 
         return new ResponseEntity<>(ApiResponse.create("update","Reminder updated"),HttpStatus.OK);
