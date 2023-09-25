@@ -11,4 +11,5 @@ public class MedicineReminderDTO {
     private Long id;
     private String description;
     private String time;
+    private String days;
 }

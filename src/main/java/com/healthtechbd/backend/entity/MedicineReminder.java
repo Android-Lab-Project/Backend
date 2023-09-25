@@ -20,4 +20,6 @@ public class MedicineReminder {
     private String description;
 
     private String time;
+
+    private String days;
 }
