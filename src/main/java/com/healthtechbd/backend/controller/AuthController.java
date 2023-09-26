@@ -21,6 +21,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -226,7 +227,6 @@ public class AuthController {
 
         return  new ResponseEntity<>(ApiResponse.create("error","User code is mismatched"),HttpStatus.BAD_REQUEST);
     }
-
 
     @PostMapping("/user/forgetPassword")
     public ResponseEntity<?>getForgetPassword(@RequestBody ForgetPasswordDTO forgetPasswordDTO)
