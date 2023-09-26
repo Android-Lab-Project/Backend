@@ -31,7 +31,7 @@ public class DiagnosisOrder {
     private String reportURL;
     private LocalDate date;
     private LocalDate orderDate;
-    private Double time;
+    private String time;
     private Integer reviewChecked;
-
+    private String deptContactNo;
 }

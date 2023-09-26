@@ -16,5 +16,6 @@ public class DiagnosisOrderDTO {
     private String reportURL;
     private Long hospitalId;
     private LocalDate orderDate;
-    private Double time;
+    private String time;
+    private String deptContactNo;
 }

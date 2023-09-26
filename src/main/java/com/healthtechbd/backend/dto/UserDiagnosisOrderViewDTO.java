@@ -14,11 +14,13 @@ public class UserDiagnosisOrderViewDTO {
 
     private String contactNo;
 
+    private String deptContactNo;
+
     private String hospitalName;
 
     private String description;
 
     private String place;
 
-    private Double time;
+    private String time;
 }

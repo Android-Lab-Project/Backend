@@ -189,7 +189,7 @@ public class AuthController {
         return new ResponseEntity<>(updateUserResponse.getResponse(), HttpStatus.OK);
     }
 
-    @PostMapping("add/2stepCode")
+    @PostMapping("add/code")
     public ResponseEntity<?>addCode(@RequestBody TwoStepVerificationCode twoStepVerificationCode)
     {
         Optional<TwoStepVerificationCode> optionalTwoStepVerificationCode = twoStepVerificationCodeRepository.findByEmail(twoStepVerificationCode.getEmail());

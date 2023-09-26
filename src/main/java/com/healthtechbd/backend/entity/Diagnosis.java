@@ -22,5 +22,9 @@ public class Diagnosis {
     private String name;
     private String description;
     private Long price;
+    private String startTime;
+    private String endTime;
+    private String deptContactNo;
+
 
 }

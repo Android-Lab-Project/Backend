@@ -11,4 +11,7 @@ public class AddDiagnosisDTO {
     private String name;
     private String description;
     private Long price;
+    private String startTime;
+    private String endTime;
+    private String deptContactNo;
 }

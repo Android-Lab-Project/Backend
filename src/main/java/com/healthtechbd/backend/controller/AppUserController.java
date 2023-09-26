@@ -642,6 +642,19 @@ public class AppUserController {
         return new ResponseEntity<>(ApiResponse.create("create", "Trip created"), HttpStatus.OK);
     }
 
+    @DeleteMapping("/delete/ambulance/trip/{id}")
+    public ResponseEntity<?>deleteTrip(@PathVariable(name="id")Long id)
+    {
+        try
+        {
+            ambulanceTripRepository.deleteById(id);
+            return new ResponseEntity<>(ApiResponse.create("delete", "Trip is deleted"),HttpStatus.OK);
+        }catch(Exception e)
+        {
+            return new ResponseEntity<>(ApiResponse.create("error","Trip can't be deleted"),HttpStatus.BAD_REQUEST);
+        }
+    }
+
     @PostMapping("/add/review")
     public ResponseEntity<?> saveReview(@RequestParam(name = "review") String reviewStr,
                                         @RequestParam(name = "star") Long starCount, @RequestBody ReviewPendingDTO reviewPendingDTO,
@@ -861,6 +874,7 @@ public class AppUserController {
             userDiagnosisOrderViewDTO.setPlace(diagnosisOrder.getPlace());
             userDiagnosisOrderViewDTO.setHospitalId(diagnosisOrder.getHospital().getId());
             userDiagnosisOrderViewDTO.setContactNo(diagnosisOrder.getHospital().getContactNo());
+            userDiagnosisOrderViewDTO.setDeptContactNo(diagnosisOrder.getDeptContactNo());
             userDiagnosisOrderViewDTO.setHospitalName(
                     hospitalRepository.findByAppUser_Id(diagnosisOrder.getHospital().getId()).get().getHospitalName());
 
