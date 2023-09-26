@@ -42,9 +42,6 @@ public class NotificationService {
     public void sendMedicineReminders()
     {
         logger.info("Sending reminder is running");
-        System.out.println(LocalTime.parse(
-                LocalTime.now().format(DateTimeFormatter.ofPattern("HH:mm")),
-                DateTimeFormatter.ofPattern("HH:mm")));
         List<MedicineReminder>medicineReminders = medicineReminderRepository.findAll();
 
         for(var medicineReminder : medicineReminders )
@@ -59,10 +56,9 @@ public class NotificationService {
     {
         LocalTime time = timeService.convertStringToLocalTime(medicineReminder.getTime());
         ArrayList<String> days = timeService.convertIntToDay(medicineReminder.getDays());
-        LocalTime currentTime = LocalTime.parse(LocalTime.now().toString(), DateTimeFormatter.ofPattern("HH:mm"));
-        System.out.println(time);
-        System.out.println("current: "+currentTime);
-        System.out.println(days);
+        LocalTime currentTime = LocalTime.parse(
+                LocalTime.now().format(DateTimeFormatter.ofPattern("HH:mm")),
+                DateTimeFormatter.ofPattern("HH:mm"));
 
         for(var i:days)
         {
@@ -79,7 +75,7 @@ public class NotificationService {
     public boolean sendMessage( String medicine, String time, String contactNo)
     {
         String message = "You have to take "+medicine+" at "+time+". Kindly take it";
-        String url = MESSAGE_API.replace("{username}","01782267068").replace("{password}","6BNPADM4").replace("{number}",contactNo).replace("{message}",message);
+        String url = MESSAGE_API.replace("{username}",username).replace("{password}",password).replace("{number}",contactNo).replace("{message}",message);
 
         RestTemplate restTemplate = new RestTemplate();
 
@@ -95,8 +91,8 @@ public class NotificationService {
 
     }
 
-    public static void main(String[] args) {
-        NotificationService notificationService = new NotificationService();
-        notificationService.sendMessage("hello","7:88","01988506830");
-    }
+//    public static void main(String[] args) {
+//        NotificationService notificationService = new NotificationService();
+//        notificationService.sendMessage("hello","7:88","01988506830");
+//    }
 }
