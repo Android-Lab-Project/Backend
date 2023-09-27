@@ -826,7 +826,8 @@ public class AppUserController {
 
         Double time = timeService.convertTimeToDouble(LocalTime.now());
 
-        List<DoctorSerial> upcomingDoctorSerials = doctorSerialRepository.findByDateAndTimeAndUserId(LocalDate.now(),
+
+        List<DoctorSerial> upcomingDoctorSerials = doctorSerialRepository.findByDateAndTimeAndUserId(LocalDate.now(),time,
               user.getId());
 
         if (upcomingDoctorSerials.isEmpty()) {
