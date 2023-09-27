@@ -107,6 +107,41 @@ public class PharmacyController {
 
     }
 
+    @PreAuthorize("hasAnyAuthority('USER','ADMIN','PHARMACY')")
+    @GetMapping("/pharmacy/{id}")
+    public ResponseEntity<?>getPharmacyDetails(@PathVariable(name="id")Long id)
+    {
+        Optional<Pharmacy> optionalPharmacy = pharmacyRepository.findByAppUser_Id(id);
+
+        if(optionalPharmacy.isEmpty())
+        {
+            return  new ResponseEntity<>(ApiResponse.create("error","Pharmacy is not found"),HttpStatus.NOT_FOUND);
+        }
+
+        Pharmacy pharmacy = optionalPharmacy.get();
+
+        PharmacyDTO pharmacyDTO = modelMapper.map(pharmacy, PharmacyDTO.class);
+
+        pharmacyDTO.setId(id);
+        pharmacyDTO.setFirstName(pharmacy.getAppUser().getFirstName());
+        pharmacyDTO.setLastName(pharmacy.getAppUser().getLastName());
+        pharmacyDTO.setEmail(pharmacy.getAppUser().getEmail());
+        pharmacyDTO.setContactNo(pharmacy.getAppUser().getContactNo());
+        pharmacyDTO.setDp(pharmacy.getAppUser().getDp());
+        pharmacyDTO.setRating(reviewRepository.findAvgRating(id));
+        pharmacyDTO.setReviewCount(reviewRepository.findCount(id));
+
+        if (pharmacyDTO.getRating() == null) {
+            pharmacyDTO.setRating(0.0);
+        }
+
+        if (pharmacyDTO.getReviewCount() == null) {
+            pharmacyDTO.setReviewCount(0L);
+        }
+
+        return new ResponseEntity<>(pharmacyDTO,HttpStatus.OK);
+    }
+
 
     @PostMapping("/update/pharmacy")
     public ResponseEntity<?> updatePharmacy(HttpServletRequest request, @RequestBody Pharmacy pharmacy) {

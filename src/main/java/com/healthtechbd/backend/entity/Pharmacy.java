@@ -20,6 +20,9 @@ public class Pharmacy {
     private Long id;
     @Column(nullable = false)
     private String bio;
+
+    @Column(nullable = false)
+    private String pharmacyName;
     @Column(nullable = false)
     private String place;
 
