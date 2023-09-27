@@ -827,7 +827,7 @@ public class AppUserController {
         Double time = timeService.convertTimeToDouble(LocalTime.now());
 
         List<DoctorSerial> upcomingDoctorSerials = doctorSerialRepository.findByDateAndTimeAndUserId(LocalDate.now(),
-                time, user.getId());
+              user.getId());
 
         if (upcomingDoctorSerials.isEmpty()) {
             return new ResponseEntity<>(ApiResponse.create("empty", "No upcoming found"), HttpStatus.OK);

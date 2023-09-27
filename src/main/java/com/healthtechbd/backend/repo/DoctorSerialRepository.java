@@ -85,10 +85,9 @@ public interface DoctorSerialRepository extends JpaRepository<DoctorSerial, Long
                                                     @Param("doctorId") Long doctorId);
 
     @Query("SELECT ds FROM DoctorSerial ds " +
-            "WHERE (ds.appointmentDate >= :startDate AND ds.time >= :time) " +
+            "WHERE (ds.appointmentDate >= :startDate  ) " +
             "AND ds.user.id = :userId")
     List<DoctorSerial> findByDateAndTimeAndUserId(@Param("startDate") LocalDate startDate,
-                                                  @Param("time") Double time,
                                                   @Param("userId") Long userId);
 
     @Query("SELECT ds FROM DoctorSerial ds WHERE ds.user.id = :userId AND ds.reviewChecked = 0")
