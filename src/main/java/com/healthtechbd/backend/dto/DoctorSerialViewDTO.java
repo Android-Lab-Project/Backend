@@ -22,5 +22,5 @@ public class DoctorSerialViewDTO {
 
     private Double time;
 
-    private LocalDate appointmentDate;
+    private LocalDate date;
 }

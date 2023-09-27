@@ -23,7 +23,7 @@ public class DiagnosisOrderViewDTO {
 
     private String place;
 
-    private LocalDate orderDate;
+    private LocalDate date;
 
     private String time;
 

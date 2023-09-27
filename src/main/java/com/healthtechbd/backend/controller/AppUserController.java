@@ -840,6 +840,7 @@ public class AppUserController {
             UserDoctorSerialViewDTO userDoctorSerialDTO = new UserDoctorSerialViewDTO();
             userDoctorSerialDTO.setId(doctorSerial.getId());
             userDoctorSerialDTO.setTime(doctorSerial.getTime());
+            userDoctorSerialDTO.setDate(doctorSerial.getAppointmentDate());
             userDoctorSerialDTO.setDoctorName(
                     doctorSerial.getDoctor().getFirstName() + " " + doctorSerial.getDoctor().getLastName());
             userDoctorSerialDTO.setDoctorId(doctorSerial.getDoctor().getId());
@@ -875,6 +876,7 @@ public class AppUserController {
             userDiagnosisOrderViewDTO.setPlace(diagnosisOrder.getPlace());
             userDiagnosisOrderViewDTO.setHospitalId(diagnosisOrder.getHospital().getId());
             userDiagnosisOrderViewDTO.setContactNo(diagnosisOrder.getHospital().getContactNo());
+            userDiagnosisOrderViewDTO.setDate(diagnosisOrder.getOrderDate());
             userDiagnosisOrderViewDTO.setDeptContactNo(diagnosisOrder.getDeptContactNo());
             userDiagnosisOrderViewDTO.setHospitalName(
                     hospitalRepository.findByAppUser_Id(diagnosisOrder.getHospital().getId()).get().getHospitalName());

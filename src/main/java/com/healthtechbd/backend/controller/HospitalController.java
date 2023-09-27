@@ -231,6 +231,7 @@ public class HospitalController {
             diagnosisOrderViewDTO.setId(i.getId());
             diagnosisOrderViewDTO.setDescription(i.getDescription());
             diagnosisOrderViewDTO.setTime(i.getTime());
+            diagnosisOrderViewDTO.setDate(i.getOrderDate());
             diagnosisOrderViewDTO.setPlace(i.getPlace());
             diagnosisOrderViewDTO.setPatientName(i.getUser().getFirstName() + " " + i.getUser().getLastName());
             diagnosisOrderViewDTO.setPatientId(i.getUser().getId());
@@ -262,6 +263,7 @@ public class HospitalController {
             diagnosisOrderViewDTO.setId(i.getId());
             diagnosisOrderViewDTO.setDescription(i.getDescription());
             diagnosisOrderViewDTO.setTime(i.getTime());
+            diagnosisOrderViewDTO.setDate(i.getOrderDate());
             diagnosisOrderViewDTO.setPlace(i.getPlace());
             diagnosisOrderViewDTO.setPatientName(i.getUser().getFirstName() + " " + i.getUser().getLastName());
             diagnosisOrderViewDTO.setPatientId(i.getUser().getId());
