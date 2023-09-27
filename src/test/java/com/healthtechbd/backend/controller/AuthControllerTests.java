@@ -29,7 +29,7 @@ public class AuthControllerTests {
     @Test
     void testauthenticateAppUser() throws Exception {
         SignInDTO signInDTO = new SignInDTO();
-        signInDTO.setEmail("araf4@gmail.com");
+        signInDTO.setEmail("almahmudaraf.com");
         signInDTO.setPassword("12345");
 
         ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders

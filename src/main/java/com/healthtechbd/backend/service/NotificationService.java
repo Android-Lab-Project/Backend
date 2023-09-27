@@ -41,7 +41,7 @@ public class NotificationService {
     @Scheduled(cron = "0 * * * * *")
     public void sendMedicineReminders()
     {
-        logger.info("Sending reminder is running");
+        logger.info("Reminder Schedular started");
         List<MedicineReminder>medicineReminders = medicineReminderRepository.findAll();
 
         for(var medicineReminder : medicineReminders )
@@ -50,6 +50,8 @@ public class NotificationService {
                 sendMedicineReminder(medicineReminder);
             });
         }
+
+        logger.info("Reminder Schedular finished");
     }
 
     public void sendMedicineReminder(MedicineReminder medicineReminder)
@@ -66,7 +68,7 @@ public class NotificationService {
             {
                 if(!sendMessage(medicineReminder.getDescription(),medicineReminder.getTime(),medicineReminder.getAppUser().getContactNo()))
                 {
-                    System.out.println("Error message is not sent");
+                    logger.info("Error sending messages");
                 }
             }
         }
@@ -82,17 +84,12 @@ public class NotificationService {
         ResponseEntity<String> response = restTemplate.getForEntity(url, String.class);
 
         if (response.getStatusCode().is2xxSuccessful()) {
-            System.out.println("Reminder sent successfully!");
+            logger.info("Reminder is successfully sent");
             return true;
         } else {
-            System.err.println("Failed to send reminder. HTTP status code: " + response.getStatusCodeValue());
+            logger.info("Failed to send reminder. HTTP status code: " + response.getStatusCodeValue());
             return false;
         }
 
     }
-
-//    public static void main(String[] args) {
-//        NotificationService notificationService = new NotificationService();
-//        notificationService.sendMessage("hello","7:88","01988506830");
-//    }
 }

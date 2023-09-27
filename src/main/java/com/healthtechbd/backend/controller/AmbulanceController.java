@@ -238,19 +238,5 @@ public class AmbulanceController {
                     HttpStatus.NOT_FOUND);
         }
     }
-    @PreAuthorize("hasAuthority('USER')")
-    @DeleteMapping("/delete/ambulance/trip/{id}")
-    public ResponseEntity<?>deleteTrip(@PathVariable(name="id")Long id)
-    {
-        try
-        {
-            ambulanceTripRepository.deleteById(id);
-        }
-        catch (Exception e)
-        {
-            return new ResponseEntity<>(ApiResponse.create("error","Trip can't be deleted"),HttpStatus.BAD_REQUEST);
-        }
-        return  new ResponseEntity<>(ApiResponse.create("delete","Trip is deleted"),HttpStatus.OK);
-    }
 
 }
