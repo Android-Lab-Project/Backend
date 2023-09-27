@@ -163,7 +163,7 @@ public class DoctorController {
     }
     @PreAuthorize("hasAuthority('DOCTOR')")
     @PostMapping("/update/doctor/offline")
-    public ResponseEntity<?>updateDoctorOffline(HttpServletRequest request, @RequestBody List<DoctorAvailableTime> availableTimes)
+    public ResponseEntity<?>updateDoctorOffline(HttpServletRequest request, @RequestBody DoctorUpdateScheduleDTO doctorUpdateScheduleDTO)
     {
         AppUser  user  = userService.returnUser(request);
 
@@ -178,15 +178,15 @@ public class DoctorController {
 
         List<DoctorAvailableTime>oldAvailableTimes = doctor.getAvailableTimes();
 
-        for (int i = 0; i < availableTimes.size(); i++) {
-            availableTimes.get(i).setId(null);
-            availableTimes.get(i).setCount(0);
-            availableTimes.get(i).setAvailTime(availableTimes.get(i).getStartTime());
-            availableTimes.get(i)
-                    .setDate(DoctorService.currentDate(availableTimes.get(i).getDay()));
+        for (int i = 0; i < doctorUpdateScheduleDTO.getAvailableTimes().size(); i++) {
+            doctorUpdateScheduleDTO.getAvailableTimes().get(i).setId(null);
+            doctorUpdateScheduleDTO.getAvailableTimes().get(i).setCount(0);
+            doctorUpdateScheduleDTO.getAvailableTimes().get(i).setAvailTime(doctorUpdateScheduleDTO.getAvailableTimes().get(i).getStartTime());
+            doctorUpdateScheduleDTO.getAvailableTimes().get(i)
+                    .setDate(DoctorService.currentDate(doctorUpdateScheduleDTO.getAvailableTimes().get(i).getDay()));
         }
 
-        doctor.setAvailableTimes(availableTimes);
+        doctor.setAvailableTimes(doctorUpdateScheduleDTO.getAvailableTimes());
 
         doctorAvailableTimeRepository.deleteAll(oldAvailableTimes);
 
@@ -197,7 +197,7 @@ public class DoctorController {
 
     @PreAuthorize("hasAuthority('DOCTOR')")
     @PostMapping("/update/doctor/online")
-    public ResponseEntity<?>updateDoctorOnline(HttpServletRequest request,@RequestBody List<DoctorOnlineAvailableTime> onlineAvailableTimes)
+    public ResponseEntity<?>updateDoctorOnline(HttpServletRequest request,@RequestBody DoctorUpdateScheduleDTO doctorUpdateScheduleDTO)
     {
         AppUser  user  = userService.returnUser(request);
 
@@ -212,15 +212,15 @@ public class DoctorController {
 
         List<DoctorOnlineAvailableTime>oldOnlineAvailableTimes = doctor.getAvailableOnlineTimes();
 
-        for (int i = 0; i < onlineAvailableTimes.size(); i++) {
-           onlineAvailableTimes.get(i).setId(null);
-            onlineAvailableTimes.get(i).setCount(0);
-            onlineAvailableTimes.get(i).setAvailTime(onlineAvailableTimes.get(i).getStartTime());
-            onlineAvailableTimes.get(i)
-                    .setDate(DoctorService.currentDate(onlineAvailableTimes.get(i).getDay()));
+        for (int i = 0; i < doctorUpdateScheduleDTO.getAvailableOnlineTimes().size(); i++) {
+            doctorUpdateScheduleDTO.getAvailableOnlineTimes().get(i).setId(null);
+            doctorUpdateScheduleDTO.getAvailableOnlineTimes().get(i).setCount(0);
+            doctorUpdateScheduleDTO.getAvailableOnlineTimes().get(i).setAvailTime(doctorUpdateScheduleDTO.getAvailableOnlineTimes().get(i).getStartTime());
+            doctorUpdateScheduleDTO.getAvailableOnlineTimes().get(i)
+                    .setDate(DoctorService.currentDate(doctorUpdateScheduleDTO.getAvailableOnlineTimes().get(i).getDay()));
         }
 
-        doctor.setAvailableOnlineTimes(onlineAvailableTimes);
+        doctor.setAvailableOnlineTimes(doctorUpdateScheduleDTO.getAvailableOnlineTimes());
 
         doctorOnlineAvailableTimeRepository.deleteAll(oldOnlineAvailableTimes);
 
