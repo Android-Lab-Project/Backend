@@ -25,6 +25,6 @@ public class DiagnosisOrderViewDTO {
 
     private LocalDate date;
 
-    private String time;
+    private Double time;
 
 }

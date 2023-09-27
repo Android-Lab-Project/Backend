@@ -26,5 +26,5 @@ public class UserDiagnosisOrderViewDTO {
 
     private String place;
 
-    private String time;
+    private Double time;
 }
