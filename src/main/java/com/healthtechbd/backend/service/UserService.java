@@ -118,8 +118,7 @@ public class UserService {
             return new UpdateUserResponse(errorResponse, null);
         }
 
-        if(signUpDTO.getPassword()!=null)
-        {
+        if (signUpDTO.getPassword() != null) {
             String password = bcryptPasswordEncoder.encode(signUpDTO.getPassword());
             signUpDTO.setPassword(password);
         }
@@ -131,26 +130,20 @@ public class UserService {
         return new UpdateUserResponse(ApiResponse.create("update", "User updated "), user);
     }
 
-    public boolean checkBan(String email)
-    {
-        Optional<AppUser>optionalAppUser = userRepository.findByEmail(email);
+    public boolean checkBan(String email) {
+        Optional<AppUser> optionalAppUser = userRepository.findByEmail(email);
 
-        if(optionalAppUser.isEmpty())
+        if (optionalAppUser.isEmpty())
             return true;
         AppUser user = optionalAppUser.get();
 
-        if(user.isAccountVerified())
-        {
+        if (user.isAccountVerified()) {
             return true;
-        }
-        else if(user.getBanRemovalDate().isBefore(LocalDate.now()))
-        {
+        } else if (user.getBanRemovalDate().isBefore(LocalDate.now())) {
             user.setAccountVerified(true);
             userRepository.save(user);
             return true;
-        }
-        else
-        {
+        } else {
             return false;
         }
     }

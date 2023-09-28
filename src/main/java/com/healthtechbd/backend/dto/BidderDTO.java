@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 public class BidderDTO {
     private Long id;
     private String name;
-    private String  email;
+    private String email;
     private Double rating;
     private String contactNo;
 }

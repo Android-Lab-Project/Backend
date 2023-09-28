@@ -16,7 +16,7 @@ import java.util.List;
 public class DoctorService {
 
     @Autowired
-    private  DoctorRepository doctorRepository;
+    private DoctorRepository doctorRepository;
 
     @Autowired
     private TimeService timeService;
@@ -36,25 +36,23 @@ public class DoctorService {
         return nextWeekDate;
     }
 
-    public  List<Doctor> getAllDoctors() {
+    public List<Doctor> getAllDoctors() {
         return doctorRepository.findAll();
     }
 
-    public  void setSerialTime(Doctor doctor) {
+    public void setSerialTime(Doctor doctor) {
 
 
         for (int i = 0; i < doctor.getAvailableTimes().size(); i++) {
 
             Double endTime = doctor.getAvailableTimes().get(i).getEndTime();
 
-            Double  availTime = doctor.getAvailableTimes().get(i).getAvailTime();
+            Double availTime = doctor.getAvailableTimes().get(i).getAvailTime();
 
-            if(doctor.getAvailableTimes().get(i).getDate().equals(LocalDate.now()))
-            {
+            if (doctor.getAvailableTimes().get(i).getDate().equals(LocalDate.now())) {
                 Double currentTime = timeService.convertTimeToDouble(LocalTime.now());
-                if(availTime<currentTime)
-                {
-                    availTime =currentTime;
+                if (availTime < currentTime) {
+                    availTime = currentTime;
                 }
             }
             if (availTime > endTime) {
@@ -72,13 +70,11 @@ public class DoctorService {
 
             Double onlineAvailTime = doctor.getAvailableOnlineTimes().get(i).getAvailTime();
 
-            if(doctor.getAvailableOnlineTimes().get(i).getDate().equals(LocalDate.now()))
-            {
+            if (doctor.getAvailableOnlineTimes().get(i).getDate().equals(LocalDate.now())) {
                 Double currentTime = timeService.convertTimeToDouble(LocalTime.now());
 
-                if(onlineAvailTime<currentTime)
-                {
-                    onlineAvailTime =currentTime;
+                if (onlineAvailTime < currentTime) {
+                    onlineAvailTime = currentTime;
                 }
             }
             if (onlineAvailTime > onlineEndTime) {
@@ -89,20 +85,18 @@ public class DoctorService {
         }
     }
 
-    public Double setNewSerialTime(Double time)
-    {
+    public Double setNewSerialTime(Double time) {
         Integer intTime = time.intValue();
 
         Double fracTime = time - intTime;
 
-        fracTime+=AppConstants.perConsultTime/100.0;
+        fracTime += AppConstants.perConsultTime / 100.0;
 
-        if(fracTime>=0.6)
-        {
+        if (fracTime >= 0.6) {
             intTime++;
-            fracTime-=0.6;
+            fracTime -= 0.6;
         }
 
-        return intTime+fracTime;
+        return intTime + fracTime;
     }
 }

@@ -22,23 +22,23 @@ import static com.healthtechbd.backend.utils.BkashStaticVariable.token;
 @Service
 public class BkashPaymentService {
 
-    private String API_BASE_URL="https://tokenized.sandbox.bka.sh/v1.2.0-beta";
+    private final String API_BASE_URL = "https://tokenized.sandbox.bka.sh/v1.2.0-beta";
     @Value("${bkash.payment.app.key}")
-    private  String APP_KEY;
+    private String APP_KEY;
 
     @Value("${bkash.payment.app.secret}")
     private String APP_SECRET;
 
-    public  String grantToken() {
+    public String grantToken() {
 
         OkHttpClient client = new OkHttpClient();
 
         final String CREATE_TOKEN_ENDPOINT = "/tokenized/checkout/token/grant";
 
         MediaType mediaType = MediaType.parse("application/json");
-        RequestBody body = RequestBody.create(mediaType, "{\"app_key\":\""+APP_KEY+"\",\"app_secret\":\""+APP_SECRET+"\"}");
+        RequestBody body = RequestBody.create(mediaType, "{\"app_key\":\"" + APP_KEY + "\",\"app_secret\":\"" + APP_SECRET + "\"}");
         Request request = new Request.Builder()
-                .url(API_BASE_URL+CREATE_TOKEN_ENDPOINT)
+                .url(API_BASE_URL + CREATE_TOKEN_ENDPOINT)
                 .post(body)
                 .addHeader("accept", "application/json")
                 .addHeader("username", "sandboxTokenizedUser02")

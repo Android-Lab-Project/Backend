@@ -21,8 +21,8 @@ import org.springframework.web.bind.annotation.*;
 import java.time.LocalDate;
 import java.util.Optional;
 
-@CrossOrigin(origins = "*", allowedHeaders = "*", methods = { RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT,
-        RequestMethod.DELETE })
+@CrossOrigin(origins = "*", allowedHeaders = "*", methods = {RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT,
+        RequestMethod.DELETE})
 @RestController
 @PreAuthorize("hasAuthority('AMBULANCE')")
 public class AmbulanceProviderController {
@@ -38,6 +38,7 @@ public class AmbulanceProviderController {
 
     @Autowired
     private ModelMapper modelMapper;
+
     @PreAuthorize("permitAll()")
     @PostMapping("/register/ambulanceProvider")
     public ResponseEntity<ApiResponse> registerAmbulanceProvider(@RequestBody AmbulanceProvider ambulanceProvider) {
@@ -74,8 +75,7 @@ public class AmbulanceProviderController {
         }
 
         appUser = updateUserResponse.getUser();
-        if(appUser.getPassword()==null)
-        {
+        if (appUser.getPassword() == null) {
             appUser.setPassword(password);
         }
         appUser.setId(appUserId);
@@ -97,15 +97,14 @@ public class AmbulanceProviderController {
                     HttpStatus.NOT_FOUND);
         }
     }
+
     @PreAuthorize("hasAnyAuthority('AMBULANCE','USER')")
     @GetMapping("/ambulanceProvider/{id}")
-    public ResponseEntity<?>getProviderInfo(@PathVariable(name="id")Long id)
-    {
+    public ResponseEntity<?> getProviderInfo(@PathVariable(name = "id") Long id) {
         Optional<AmbulanceProvider> optional = ambulanceProviderRepository.findByAppUser_Id(id);
 
-        if(optional.isEmpty())
-        {
-            return  new ResponseEntity<>(ApiResponse.create("error","Provider not found"),HttpStatus.NOT_FOUND);
+        if (optional.isEmpty()) {
+            return new ResponseEntity<>(ApiResponse.create("error", "Provider not found"), HttpStatus.NOT_FOUND);
         }
 
         AmbulanceProvider provider = optional.get();
@@ -121,17 +120,15 @@ public class AmbulanceProviderController {
         ambulanceProviderDTO.setRating(reviewRepository.findAvgRating(provider.getAppUser().getId()));
         ambulanceProviderDTO.setReviewCount(reviewRepository.findCount(provider.getAppUser().getId()));
 
-        if(ambulanceProviderDTO.getRating()==null)
-        {
+        if (ambulanceProviderDTO.getRating() == null) {
             ambulanceProviderDTO.setRating(0.0);
         }
 
-        if(ambulanceProviderDTO.getReviewCount()==null)
-        {
+        if (ambulanceProviderDTO.getReviewCount() == null) {
             ambulanceProviderDTO.setReviewCount(0L);
         }
 
-        return new ResponseEntity<>(ambulanceProviderDTO,HttpStatus.OK);
+        return new ResponseEntity<>(ambulanceProviderDTO, HttpStatus.OK);
     }
 
 

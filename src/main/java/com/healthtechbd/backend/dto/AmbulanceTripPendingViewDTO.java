@@ -15,6 +15,8 @@ public class AmbulanceTripPendingViewDTO {
     private List<BidderDTO> bidders;
     private String source;
     private String destination;
+    private String location;
+    private String currentAddress;
     private Long price;
     private LocalDate orderDate;
 }

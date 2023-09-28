@@ -25,8 +25,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-@CrossOrigin(origins = "*", allowedHeaders = "*", methods = { RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT,
-        RequestMethod.DELETE })
+@CrossOrigin(origins = "*", allowedHeaders = "*", methods = {RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT,
+        RequestMethod.DELETE})
 @RestController
 @PreAuthorize("hasAuthority('PHARMACY')")
 public class PharmacyController {
@@ -71,14 +71,12 @@ public class PharmacyController {
 
     @PreAuthorize("hasAuthority('ADMIN')")
     @GetMapping("/pharmacy/all")
-    public ResponseEntity<?>getAllPharmacyDetails()
-    {
+    public ResponseEntity<?> getAllPharmacyDetails() {
 
         List<Pharmacy> pharmacyList = pharmacyRepository.findAll();
 
-        List<PharmacyDTO>pharmacyDTOS = new ArrayList<>();
-        for(var pharmacy: pharmacyList)
-        {
+        List<PharmacyDTO> pharmacyDTOS = new ArrayList<>();
+        for (var pharmacy : pharmacyList) {
             PharmacyDTO pharmacyDTO = modelMapper.map(pharmacy, PharmacyDTO.class);
 
             AppUser appUser = pharmacy.getAppUser();
@@ -103,19 +101,17 @@ public class PharmacyController {
             pharmacyDTOS.add(pharmacyDTO);
         }
 
-        return new ResponseEntity<>(pharmacyDTOS,HttpStatus.OK);
+        return new ResponseEntity<>(pharmacyDTOS, HttpStatus.OK);
 
     }
 
     @PreAuthorize("hasAnyAuthority('USER','ADMIN','PHARMACY')")
     @GetMapping("/pharmacy/{id}")
-    public ResponseEntity<?>getPharmacyDetails(@PathVariable(name="id")Long id)
-    {
+    public ResponseEntity<?> getPharmacyDetails(@PathVariable(name = "id") Long id) {
         Optional<Pharmacy> optionalPharmacy = pharmacyRepository.findByAppUser_Id(id);
 
-        if(optionalPharmacy.isEmpty())
-        {
-            return  new ResponseEntity<>(ApiResponse.create("error","Pharmacy is not found"),HttpStatus.NOT_FOUND);
+        if (optionalPharmacy.isEmpty()) {
+            return new ResponseEntity<>(ApiResponse.create("error", "Pharmacy is not found"), HttpStatus.NOT_FOUND);
         }
 
         Pharmacy pharmacy = optionalPharmacy.get();
@@ -139,7 +135,7 @@ public class PharmacyController {
             pharmacyDTO.setReviewCount(0L);
         }
 
-        return new ResponseEntity<>(pharmacyDTO,HttpStatus.OK);
+        return new ResponseEntity<>(pharmacyDTO, HttpStatus.OK);
     }
 
 
@@ -158,8 +154,7 @@ public class PharmacyController {
         }
 
         appUser = updateUserResponse.getUser();
-        if(appUser.getPassword()==null)
-        {
+        if (appUser.getPassword() == null) {
             appUser.setPassword(password);
         }
         appUser.setId(appUserId);

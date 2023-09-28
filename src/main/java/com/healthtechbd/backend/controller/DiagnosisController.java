@@ -20,8 +20,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-@CrossOrigin(origins = "*", allowedHeaders = "*", methods = { RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT,
-        RequestMethod.DELETE })
+@CrossOrigin(origins = "*", allowedHeaders = "*", methods = {RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT,
+        RequestMethod.DELETE})
 @RestController
 public class DiagnosisController {
 
@@ -61,18 +61,15 @@ public class DiagnosisController {
         if (addDiagnosisDTO.getPrice() == null || addDiagnosisDTO.getPrice() <= 0) {
             return new ResponseEntity<>(ApiResponse.create("error", "Invalid Cost"), HttpStatus.BAD_REQUEST);
         }
-        if(addDiagnosisDTO.getStartTime() ==null ||addDiagnosisDTO.getStartTime().trim().length()==0)
-        {
+        if (addDiagnosisDTO.getStartTime() == null || addDiagnosisDTO.getStartTime().trim().length() == 0) {
             return new ResponseEntity<>(ApiResponse.create("error", "StartTime can't be empty"),
                     HttpStatus.BAD_REQUEST);
         }
-        if(addDiagnosisDTO.getEndTime() ==null ||addDiagnosisDTO.getEndTime().trim().length()==0)
-        {
+        if (addDiagnosisDTO.getEndTime() == null || addDiagnosisDTO.getEndTime().trim().length() == 0) {
             return new ResponseEntity<>(ApiResponse.create("error", "EndTime can't be empty"),
                     HttpStatus.BAD_REQUEST);
         }
-        if(addDiagnosisDTO.getDeptContactNo() ==null ||addDiagnosisDTO.getDeptContactNo().trim().length()==0)
-        {
+        if (addDiagnosisDTO.getDeptContactNo() == null || addDiagnosisDTO.getDeptContactNo().trim().length() == 0) {
             return new ResponseEntity<>(ApiResponse.create("error", "Contact can't be empty"),
                     HttpStatus.BAD_REQUEST);
         }
@@ -100,9 +97,10 @@ public class DiagnosisController {
 
         return new ResponseEntity<>(ApiResponse.create("create", "Diagnosis added"), HttpStatus.OK);
     }
+
     @PreAuthorize("hasAuthority('HOSPITAL')")
     @PostMapping("/update/diagnosis/{id}")
-    public ResponseEntity<?> updateDiagnosis(@RequestBody AddDiagnosisDTO addDiagnosisDTO,@PathVariable(name="id")Long id) {
+    public ResponseEntity<?> updateDiagnosis(@RequestBody AddDiagnosisDTO addDiagnosisDTO, @PathVariable(name = "id") Long id) {
 
         if (addDiagnosisDTO.getName() == null || addDiagnosisDTO.getName().trim().length() == 0) {
             return new ResponseEntity<>(ApiResponse.create("error", "Name can't be empty"), HttpStatus.BAD_REQUEST);
@@ -133,12 +131,10 @@ public class DiagnosisController {
         }
 
 
-
         Optional<Diagnosis> optionalDiagnosis = diagnosisRepository.findById(id);
 
-        if(optionalDiagnosis.isEmpty())
-        {
-            return new ResponseEntity<>(ApiResponse.create("error","Diagnosis not found"),HttpStatus.NOT_FOUND);
+        if (optionalDiagnosis.isEmpty()) {
+            return new ResponseEntity<>(ApiResponse.create("error", "Diagnosis not found"), HttpStatus.NOT_FOUND);
         }
 
         Diagnosis diagnosis = optionalDiagnosis.get();
@@ -154,6 +150,7 @@ public class DiagnosisController {
 
         return new ResponseEntity<>(ApiResponse.create("update", "Diagnosis updated"), HttpStatus.OK);
     }
+
     @PreAuthorize("hasAnyAuthority('HOSPITAL','USER')")
     @GetMapping("/diagnosis/all")
     public ResponseEntity<?> showAllDiagnosisDetails() {

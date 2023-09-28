@@ -25,8 +25,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-@CrossOrigin(origins = "*", allowedHeaders = "*", methods = { RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT,
-        RequestMethod.DELETE })
+@CrossOrigin(origins = "*", allowedHeaders = "*", methods = {RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT,
+        RequestMethod.DELETE})
 @RestController
 public class DoctorController {
 
@@ -62,6 +62,7 @@ public class DoctorController {
 
     @Autowired
     private TimeService timeService;
+
     @PreAuthorize("permitAll()")
     @PostMapping("/register/doctor")
     public ResponseEntity<?> registerDoctor(@RequestBody DoctorSignUpDTO doctorSignUpDTO) {
@@ -103,6 +104,7 @@ public class DoctorController {
 
         return new ResponseEntity<>(ApiResponse.create("create", "Doctor Sign up successful"), HttpStatus.OK);
     }
+
     @PreAuthorize("hasAuthority('DOCTOR')")
     @PostMapping("update/doctor/profile")
     public ResponseEntity<?> updateDoctor(HttpServletRequest request, @RequestBody DoctorSignUpDTO doctorSignUpDTO) {
@@ -124,8 +126,7 @@ public class DoctorController {
 
         appUser = updateUserResponse.getUser();
 
-        if(appUser.getPassword()==null)
-        {
+        if (appUser.getPassword() == null) {
             appUser.setPassword(password);
         }
 
@@ -135,9 +136,8 @@ public class DoctorController {
 
         Optional<Doctor> optionalDoctor = doctorRepository.findByAppUser_Id(appUserId);
 
-        if(optionalDoctor.isEmpty())
-        {
-            return new ResponseEntity<>(ApiResponse.create("error","Doctor not found"),HttpStatus.NOT_FOUND);
+        if (optionalDoctor.isEmpty()) {
+            return new ResponseEntity<>(ApiResponse.create("error", "Doctor not found"), HttpStatus.NOT_FOUND);
         }
 
         Doctor doctor = optionalDoctor.get();
@@ -146,9 +146,9 @@ public class DoctorController {
 
         Long balance = doctor.getBalance();
 
-        List<DoctorAvailableTime>doctorAvailableTimes = doctor.getAvailableTimes();
+        List<DoctorAvailableTime> doctorAvailableTimes = doctor.getAvailableTimes();
 
-        List<DoctorOnlineAvailableTime>doctorOnlineAvailableTimes = doctor.getAvailableOnlineTimes();
+        List<DoctorOnlineAvailableTime> doctorOnlineAvailableTimes = doctor.getAvailableOnlineTimes();
 
         doctor = modelMapper.map(doctorSignUpDTO, Doctor.class);
 
@@ -161,22 +161,21 @@ public class DoctorController {
 
         return new ResponseEntity<>(updateUserResponse.getResponse(), HttpStatus.OK);
     }
+
     @PreAuthorize("hasAuthority('DOCTOR')")
     @PostMapping("/update/doctor/offline")
-    public ResponseEntity<?>updateDoctorOffline(HttpServletRequest request, @RequestBody DoctorUpdateScheduleDTO doctorUpdateScheduleDTO)
-    {
-        AppUser  user  = userService.returnUser(request);
+    public ResponseEntity<?> updateDoctorOffline(HttpServletRequest request, @RequestBody DoctorUpdateScheduleDTO doctorUpdateScheduleDTO) {
+        AppUser user = userService.returnUser(request);
 
-        Optional<Doctor>optionalDoctor = doctorRepository.findByAppUser_Id(user.getId());
+        Optional<Doctor> optionalDoctor = doctorRepository.findByAppUser_Id(user.getId());
 
-        if(optionalDoctor.isEmpty())
-        {
-            return  new ResponseEntity<>(ApiResponse.create("error","Doctor not found"),HttpStatus.NOT_FOUND);
+        if (optionalDoctor.isEmpty()) {
+            return new ResponseEntity<>(ApiResponse.create("error", "Doctor not found"), HttpStatus.NOT_FOUND);
         }
 
         Doctor doctor = optionalDoctor.get();
 
-        List<DoctorAvailableTime>oldAvailableTimes = doctor.getAvailableTimes();
+        List<DoctorAvailableTime> oldAvailableTimes = doctor.getAvailableTimes();
 
         for (int i = 0; i < doctorUpdateScheduleDTO.getAvailableTimes().size(); i++) {
             doctorUpdateScheduleDTO.getAvailableTimes().get(i).setId(null);
@@ -192,25 +191,23 @@ public class DoctorController {
 
         doctorRepository.save(doctor);
 
-        return  new ResponseEntity<>(ApiResponse.create("update","Doctor offline time updated"),HttpStatus.OK);
+        return new ResponseEntity<>(ApiResponse.create("update", "Doctor offline time updated"), HttpStatus.OK);
     }
 
     @PreAuthorize("hasAuthority('DOCTOR')")
     @PostMapping("/update/doctor/online")
-    public ResponseEntity<?>updateDoctorOnline(HttpServletRequest request,@RequestBody DoctorUpdateScheduleDTO doctorUpdateScheduleDTO)
-    {
-        AppUser  user  = userService.returnUser(request);
+    public ResponseEntity<?> updateDoctorOnline(HttpServletRequest request, @RequestBody DoctorUpdateScheduleDTO doctorUpdateScheduleDTO) {
+        AppUser user = userService.returnUser(request);
 
-        Optional<Doctor>optionalDoctor = doctorRepository.findByAppUser_Id(user.getId());
+        Optional<Doctor> optionalDoctor = doctorRepository.findByAppUser_Id(user.getId());
 
-        if(optionalDoctor.isEmpty())
-        {
-            return  new ResponseEntity<>(ApiResponse.create("error","Doctor not found"),HttpStatus.NOT_FOUND);
+        if (optionalDoctor.isEmpty()) {
+            return new ResponseEntity<>(ApiResponse.create("error", "Doctor not found"), HttpStatus.NOT_FOUND);
         }
 
         Doctor doctor = optionalDoctor.get();
 
-        List<DoctorOnlineAvailableTime>oldOnlineAvailableTimes = doctor.getAvailableOnlineTimes();
+        List<DoctorOnlineAvailableTime> oldOnlineAvailableTimes = doctor.getAvailableOnlineTimes();
 
         for (int i = 0; i < doctorUpdateScheduleDTO.getAvailableOnlineTimes().size(); i++) {
             doctorUpdateScheduleDTO.getAvailableOnlineTimes().get(i).setId(null);
@@ -226,7 +223,7 @@ public class DoctorController {
 
         doctorRepository.save(doctor);
 
-        return  new ResponseEntity<>(ApiResponse.create("update","Doctor offline time updated"),HttpStatus.OK);
+        return new ResponseEntity<>(ApiResponse.create("update", "Doctor offline time updated"), HttpStatus.OK);
     }
 
     @PreAuthorize("hasAnyAuthority('DOCTOR','USER')")
@@ -274,13 +271,11 @@ public class DoctorController {
 
         doctorDTO.setReviewCount(reviewRepository.findCount(id));
 
-        if(doctorDTO.getRating()==null)
-        {
+        if (doctorDTO.getRating() == null) {
             doctorDTO.setRating(0.0);
         }
 
-        if(doctorDTO.getReviewCount()==null)
-        {
+        if (doctorDTO.getReviewCount() == null) {
             doctorDTO.setReviewCount(0L);
         }
         return new ResponseEntity<>(doctorDTO, HttpStatus.OK);
@@ -335,13 +330,11 @@ public class DoctorController {
             allDoctorsDTO.get(i).setDp(allDoctors.get(i).getAppUser().getDp());
             allDoctorsDTO.get(i).setRating(reviewRepository.findAvgRating(allDoctors.get(i).getAppUser().getId()));
             allDoctorsDTO.get(i).setReviewCount(reviewRepository.findCount(allDoctors.get(i).getAppUser().getId()));
-            if(allDoctorsDTO.get(i).getRating()==null)
-            {
+            if (allDoctorsDTO.get(i).getRating() == null) {
                 allDoctorsDTO.get(i).setRating(0.0);
             }
 
-            if(allDoctorsDTO.get(i).getReviewCount()==null)
-            {
+            if (allDoctorsDTO.get(i).getReviewCount() == null) {
                 allDoctorsDTO.get(i).setReviewCount(0L);
             }
         }
@@ -352,11 +345,10 @@ public class DoctorController {
     @PreAuthorize("hasAuthority('DOCTOR')")
     @PostMapping("/update/doctor/serial/pres/{id}")
     public ResponseEntity<?> updateDiagnosisReport(@RequestBody PrescriptionDTO prescriptionDTO,
-            @PathVariable(name = "id") Long id) {
+                                                   @PathVariable(name = "id") Long id) {
 
         Optional<DoctorSerial> optionalDoctorSerial = doctorSerialRepository.findById(id);
-        if(optionalDoctorSerial.isEmpty())
-        {
+        if (optionalDoctorSerial.isEmpty()) {
             return new ResponseEntity<>(ApiResponse.create("error", "DoctorSerial not Found"), HttpStatus.NOT_FOUND);
         }
         var doctorSerial = optionalDoctorSerial.get();

@@ -35,5 +35,7 @@ public class AmbulanceTrip {
     private Long price;
     private LocalDate orderDate;
     private LocalDate date;
+    private String location;
+    private String currentAddress;
     private Integer reviewChecked;
 }

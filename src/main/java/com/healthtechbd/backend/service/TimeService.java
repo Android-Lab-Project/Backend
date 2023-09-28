@@ -32,7 +32,7 @@ public class TimeService {
         return timeInDouble;
     }
 
-    public  LocalTime convertStringToLocalTime(String timeString) {
+    public LocalTime convertStringToLocalTime(String timeString) {
 
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm");
 
@@ -41,44 +41,29 @@ public class TimeService {
         return localTime;
     }
 
-    public ArrayList<String>convertIntToDay(String days)
-    {
-       String part[]=days.split(",");
+    public ArrayList<String> convertIntToDay(String days) {
+        String[] part = days.split(",");
 
-       ArrayList<String>dayList = new ArrayList<>();
+        ArrayList<String> dayList = new ArrayList<>();
 
-       for(var i: part)
-       {
-           if(i.equals("0"))
-           {
-               dayList.add("Sunday");
-           }
-           else if(i.equals("1"))
-           {
-               dayList.add("Monday");
-           }
-           else if(i.equals("2"))
-           {
-               dayList.add("Tuesday");
-           }
-           else if(i.equals("3"))
-           {
-               dayList.add("Wednesday");
-           }
-           else if(i.equals("4"))
-           {
-               dayList.add("Thursday");
-           }
-           else if(i.equals("5"))
-           {
-               dayList.add("Friday");
-           }
-           else if(i.equals("6"))
-           {
-               dayList.add("Saturday");
-           }
-       }
-       return dayList;
+        for (var i : part) {
+            if (i.equals("0")) {
+                dayList.add("Sunday");
+            } else if (i.equals("1")) {
+                dayList.add("Monday");
+            } else if (i.equals("2")) {
+                dayList.add("Tuesday");
+            } else if (i.equals("3")) {
+                dayList.add("Wednesday");
+            } else if (i.equals("4")) {
+                dayList.add("Thursday");
+            } else if (i.equals("5")) {
+                dayList.add("Friday");
+            } else if (i.equals("6")) {
+                dayList.add("Saturday");
+            }
+        }
+        return dayList;
     }
 
 }

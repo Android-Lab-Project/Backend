@@ -22,9 +22,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-@SuppressWarnings({ "OptionalGetWithoutIsPresent", "Unused" })
-@CrossOrigin(origins = "*", allowedHeaders = "*", methods = { RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT,
-        RequestMethod.DELETE })
+@SuppressWarnings({"OptionalGetWithoutIsPresent", "Unused"})
+@CrossOrigin(origins = "*", allowedHeaders = "*", methods = {RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT,
+        RequestMethod.DELETE})
 @RestController
 @PreAuthorize("hasAuthority('USER')")
 public class AppUserController {
@@ -643,15 +643,12 @@ public class AppUserController {
     }
 
     @DeleteMapping("/delete/ambulance/trip/{id}")
-    public ResponseEntity<?>deleteTrip(@PathVariable(name="id")Long id)
-    {
-        try
-        {
+    public ResponseEntity<?> deleteTrip(@PathVariable(name = "id") Long id) {
+        try {
             ambulanceTripRepository.deleteById(id);
-            return new ResponseEntity<>(ApiResponse.create("delete", "Trip is deleted"),HttpStatus.OK);
-        }catch(Exception e)
-        {
-            return new ResponseEntity<>(ApiResponse.create("error","Trip can't be deleted"),HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(ApiResponse.create("delete", "Trip is deleted"), HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(ApiResponse.create("error", "Trip can't be deleted"), HttpStatus.BAD_REQUEST);
         }
     }
 
@@ -691,10 +688,8 @@ public class AppUserController {
         } else if (reviewPendingDTO.getRole().equalsIgnoreCase("Ambulance")) {
             reviewService.updateReviewCheckedForAmbulanceTrip(reviewPendingDTO.getOrderId(), reviewer.getId(),
                     subject.getId());
-        }
-        else if(reviewPendingDTO.getRole().equalsIgnoreCase("Pharmacy"))
-        {
-            reviewService.updateReviewCheckedForMedicineOrder(reviewPendingDTO.getOrderId(),reviewer.getId(),subject.getId());
+        } else if (reviewPendingDTO.getRole().equalsIgnoreCase("Pharmacy")) {
+            reviewService.updateReviewCheckedForMedicineOrder(reviewPendingDTO.getOrderId(), reviewer.getId(), subject.getId());
         }
 
         ApiResponse createResponse = ApiResponse.create("create", "Review Saved");
@@ -712,7 +707,7 @@ public class AppUserController {
 
         List<AmbulanceTrip> ambulanceTrips = ambulanceTripRepository.findTripByReviewChecked(user.getId());
 
-        List<MedicineOrder>medicineOrders = medicineOrderRepository.findMedicineOrderByReviewChecked(user.getId());
+        List<MedicineOrder> medicineOrders = medicineOrderRepository.findMedicineOrderByReviewChecked(user.getId());
 
         List<ReviewPendingDTO> reviewPendingDTOS = new ArrayList<>();
 
@@ -827,8 +822,8 @@ public class AppUserController {
         Double time = timeService.convertTimeToDouble(LocalTime.now());
 
 
-        List<DoctorSerial> upcomingDoctorSerials = doctorSerialRepository.findByDateAndTimeAndUserId(LocalDate.now(),time,
-              user.getId());
+        List<DoctorSerial> upcomingDoctorSerials = doctorSerialRepository.findByDateAndTimeAndUserId(LocalDate.now(), time,
+                user.getId());
 
         if (upcomingDoctorSerials.isEmpty()) {
             return new ResponseEntity<>(ApiResponse.create("empty", "No upcoming found"), HttpStatus.OK);
@@ -923,6 +918,8 @@ public class AppUserController {
                     + ambulanceTrip.getAmbulanceProvider().getLastName());
             ambulanceTripViewDTO.setSource(ambulanceTrip.getSource());
             ambulanceTripViewDTO.setDestination(ambulanceTrip.getDestination());
+            ambulanceTripViewDTO.setLocation(ambulanceTrip.getLocation());
+            ambulanceTripViewDTO.setCurrentAddress(ambulanceTrip.getCurrentAddress());
             ambulanceTripViewDTO.setPrice(ambulanceTrip.getPrice());
             ambulanceTripViewDTO.setOrderDate(ambulanceTrip.getOrderDate());
 
@@ -951,6 +948,8 @@ public class AppUserController {
             ambulanceTripPendingViewDTO.setPrice(i.getPrice());
             ambulanceTripPendingViewDTO.setSource(i.getSource());
             ambulanceTripPendingViewDTO.setDestination(i.getDestination());
+            ambulanceTripPendingViewDTO.setLocation(i.getLocation());
+            ambulanceTripPendingViewDTO.setCurrentAddress(i.getCurrentAddress());
             ambulanceTripPendingViewDTO.setOrderDate(i.getOrderDate());
 
             List<BidderDTO> bidderDTOS = new ArrayList<>();

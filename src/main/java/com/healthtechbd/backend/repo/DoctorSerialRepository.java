@@ -1,6 +1,5 @@
 package com.healthtechbd.backend.repo;
 
-import com.healthtechbd.backend.entity.DiagnosisOrder;
 import com.healthtechbd.backend.entity.DoctorSerial;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -88,7 +87,7 @@ public interface DoctorSerialRepository extends JpaRepository<DoctorSerial, Long
             "WHERE (ds.appointmentDate = :startDate AND ds.time>= :time ) OR ds.appointmentDate > :startDate " +
             "AND ds.user.id = :userId")
     List<DoctorSerial> findByDateAndTimeAndUserId(@Param("startDate") LocalDate startDate,
-                                                  @Param("time")Double time,
+                                                  @Param("time") Double time,
                                                   @Param("userId") Long userId);
 
     @Query("SELECT ds FROM DoctorSerial ds WHERE ds.user.id = :userId AND ds.reviewChecked = 0")
@@ -96,5 +95,5 @@ public interface DoctorSerialRepository extends JpaRepository<DoctorSerial, Long
 
     @Modifying
     @Query("UPDATE DoctorSerial SET reviewChecked = 1 WHERE id =:o_id AND user.id = :user_id AND doctor.id = :subject_id")
-    void updateReviewChecked(@Param("o_id")Long o_id,@Param("user_id") Long user_id, @Param("subject_id")Long subject_id);
+    void updateReviewChecked(@Param("o_id") Long o_id, @Param("user_id") Long user_id, @Param("subject_id") Long subject_id);
 }

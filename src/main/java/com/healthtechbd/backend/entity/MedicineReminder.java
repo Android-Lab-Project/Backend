@@ -1,4 +1,5 @@
 package com.healthtechbd.backend.entity;
+
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -8,7 +9,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name="medicine_remainders")
+@Table(name = "medicine_reminders")
 public class MedicineReminder {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

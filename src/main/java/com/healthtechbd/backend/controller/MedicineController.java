@@ -18,8 +18,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-@CrossOrigin(origins = "*", allowedHeaders = "*", methods = { RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT,
-        RequestMethod.DELETE })
+@CrossOrigin(origins = "*", allowedHeaders = "*", methods = {RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT,
+        RequestMethod.DELETE})
 @RestController
 public class MedicineController {
 
@@ -88,22 +88,20 @@ public class MedicineController {
 
     @PreAuthorize("hasAuthority('ADMIN')")
     @GetMapping("/update/medicine/{id}")
-    public ResponseEntity<?>updateMedicine(@PathVariable(name="id")Long id, @RequestParam(name="new_price")Long new_price)
-    {
-        Optional<Medicine>optionalMedicine = medicineRepository.findById(id);
+    public ResponseEntity<?> updateMedicine(@PathVariable(name = "id") Long id, @RequestParam(name = "new_price") Long new_price) {
+        Optional<Medicine> optionalMedicine = medicineRepository.findById(id);
 
-        if(optionalMedicine.isEmpty())
-        {
-            return new ResponseEntity<>(ApiResponse.create("error","Medicine not found"),HttpStatus.NOT_FOUND);
+        if (optionalMedicine.isEmpty()) {
+            return new ResponseEntity<>(ApiResponse.create("error", "Medicine not found"), HttpStatus.NOT_FOUND);
         }
 
-        Medicine medicine =optionalMedicine.get();
+        Medicine medicine = optionalMedicine.get();
 
-        medicine.setPrice(new_price*1.0);
+        medicine.setPrice(new_price * 1.0);
 
         medicineRepository.save(medicine);
 
-        return new ResponseEntity<>(ApiResponse.create("update", "Medicine Price updated"),HttpStatus.OK);
+        return new ResponseEntity<>(ApiResponse.create("update", "Medicine Price updated"), HttpStatus.OK);
     }
 
     @PreAuthorize("hasAuthority('ADMIN')")
@@ -213,91 +211,76 @@ public class MedicineController {
 
     @PreAuthorize("hasAuthority('USER')")
     @PostMapping("/add/medicine/reminder")
-    public ResponseEntity<?>addReminder(HttpServletRequest request, @RequestBody MedicineReminderDTO medicineReminderDTO)
-    {
+    public ResponseEntity<?> addReminder(HttpServletRequest request, @RequestBody MedicineReminderDTO medicineReminderDTO) {
         AppUser user = userService.returnUser(request);
 
-        MedicineReminder medicineReminder = modelMapper.map(medicineReminderDTO,MedicineReminder.class);
+        MedicineReminder medicineReminder = modelMapper.map(medicineReminderDTO, MedicineReminder.class);
 
         medicineReminder.setAppUser(user);
 
         medicineReminderRepository.save(medicineReminder);
 
-        return new ResponseEntity<>(ApiResponse.create("create","Remainder added"),HttpStatus.OK);
+        return new ResponseEntity<>(ApiResponse.create("create", "Remainder added"), HttpStatus.OK);
     }
+
     @PreAuthorize("hasAuthority('USER')")
     @PostMapping("/update/medicine/reminder")
-    public ResponseEntity<?>updateReminder(@RequestBody MedicineReminderDTO medicineReminderDTO)
-    {
-        Optional<MedicineReminder>optionalMedicineReminder = medicineReminderRepository.findById(medicineReminderDTO.getId());
+    public ResponseEntity<?> updateReminder(@RequestBody MedicineReminderDTO medicineReminderDTO) {
+        Optional<MedicineReminder> optionalMedicineReminder = medicineReminderRepository.findById(medicineReminderDTO.getId());
 
-        if(optionalMedicineReminder.isEmpty())
-        {
-            return new ResponseEntity<>(ApiResponse.create("error","Reminder not found"),HttpStatus.NOT_FOUND);
+        if (optionalMedicineReminder.isEmpty()) {
+            return new ResponseEntity<>(ApiResponse.create("error", "Reminder not found"), HttpStatus.NOT_FOUND);
         }
 
         MedicineReminder medicineReminder = optionalMedicineReminder.get();
 
-        if(medicineReminderDTO.getDescription()!=null)
-        {
+        if (medicineReminderDTO.getDescription() != null) {
             medicineReminder.setDescription(medicineReminderDTO.getDescription());
         }
 
-        if(medicineReminderDTO.getTime()!=null)
-        {
+        if (medicineReminderDTO.getTime() != null) {
             medicineReminder.setTime(medicineReminderDTO.getTime());
         }
 
-        if(medicineReminderDTO.getDays()!=null)
-        {
+        if (medicineReminderDTO.getDays() != null) {
             medicineReminder.setDays(medicineReminderDTO.getDays());
         }
 
         medicineReminderRepository.save(medicineReminder);
 
-        return new ResponseEntity<>(ApiResponse.create("update","Reminder updated"),HttpStatus.OK);
+        return new ResponseEntity<>(ApiResponse.create("update", "Reminder updated"), HttpStatus.OK);
     }
 
     @PreAuthorize("hasAuthority('USER')")
     @DeleteMapping("/delete/medicine/reminder/{id}")
-    public ResponseEntity<?>deleteReminder(@PathVariable(name="id")Long id)
-    {
+    public ResponseEntity<?> deleteReminder(@PathVariable(name = "id") Long id) {
         try {
             medicineReminderRepository.deleteById(id);
-            return new ResponseEntity<>(ApiResponse.create("delete","Reminder deleted"),HttpStatus.OK);
-        }
-        catch (Exception e)
-        {
-            return  new ResponseEntity<>(ApiResponse.create("error","Reminder can't be deleted"),HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(ApiResponse.create("delete", "Reminder deleted"), HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(ApiResponse.create("error", "Reminder can't be deleted"), HttpStatus.BAD_REQUEST);
         }
     }
 
     @PreAuthorize("hasAuthority('USER')")
     @GetMapping("/medicine/reminder/all")
-    public ResponseEntity<?>getAllReminder(HttpServletRequest request)
-    {
+    public ResponseEntity<?> getAllReminder(HttpServletRequest request) {
         AppUser user = userService.returnUser(request);
 
-        List<MedicineReminder>medicineReminders = medicineReminderRepository.findByAppUser_Id(user.getId());
+        List<MedicineReminder> medicineReminders = medicineReminderRepository.findByAppUser_Id(user.getId());
 
-        if(medicineReminders.isEmpty())
-        {
-            return new ResponseEntity<>(ApiResponse.create("empty","No reminder found"),HttpStatus.OK);
+        if (medicineReminders.isEmpty()) {
+            return new ResponseEntity<>(ApiResponse.create("empty", "No reminder found"), HttpStatus.OK);
         }
 
-        List<MedicineReminderDTO>medicineReminderDTOS = new ArrayList<>();
+        List<MedicineReminderDTO> medicineReminderDTOS = new ArrayList<>();
 
-        for(var medicineReminder : medicineReminders)
-        {
-            MedicineReminderDTO medicineReminderDTO = modelMapper.map(medicineReminder,MedicineReminderDTO.class);
+        for (var medicineReminder : medicineReminders) {
+            MedicineReminderDTO medicineReminderDTO = modelMapper.map(medicineReminder, MedicineReminderDTO.class);
             medicineReminderDTOS.add(medicineReminderDTO);
         }
-        return new ResponseEntity<>(medicineReminderDTOS,HttpStatus.OK);
+        return new ResponseEntity<>(medicineReminderDTOS, HttpStatus.OK);
     }
-
-
-
-
 
 
 }

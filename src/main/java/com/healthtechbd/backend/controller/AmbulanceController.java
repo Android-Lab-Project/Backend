@@ -1,7 +1,6 @@
 package com.healthtechbd.backend.controller;
 
 import com.healthtechbd.backend.dto.AmbulanceDTO;
-import com.healthtechbd.backend.dto.AmbulanceTripViewDTO;
 import com.healthtechbd.backend.dto.ProviderTripViewDTO;
 import com.healthtechbd.backend.entity.Ambulance;
 import com.healthtechbd.backend.entity.AmbulanceProvider;
@@ -25,34 +24,27 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-@CrossOrigin(origins = "*", allowedHeaders = "*", methods = { RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT,
-        RequestMethod.DELETE })
+@CrossOrigin(origins = "*", allowedHeaders = "*", methods = {RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT,
+        RequestMethod.DELETE})
 @RestController
 public class AmbulanceController {
 
     @Autowired
+    BkashPaymentService bkashPaymentService;
+    @Autowired
     private AppUserRepository userRepository;
-
     @Autowired
     private AmbulanceRepository ambulanceRepository;
-
     @Autowired
     private AmbulanceProviderRepository ambulanceProviderRepository;
-
     @Autowired
     private AmbulanceTripRepository ambulanceTripRepository;
-
     @Autowired
     private ReviewRepository reviewRepository;
-
     @Autowired
     private ModelMapper modelMapper;
-
     @Autowired
     private UserService userService;
-
-    @Autowired
-    BkashPaymentService bkashPaymentService;
 
     @PreAuthorize("hasAuthority('AMBULANCE')")
     @PostMapping("/add/ambulance")
@@ -104,6 +96,7 @@ public class AmbulanceController {
 
         return new ResponseEntity<>(ambulanceDTOS, HttpStatus.OK);
     }
+
     @PreAuthorize("hasAuthority('AMBULANCE')")
     @DeleteMapping("/delete/ambulance/{id}")
     public ResponseEntity<?> deleteDiagnosis(@PathVariable(name = "id") Long id) {
@@ -115,6 +108,7 @@ public class AmbulanceController {
         }
         return new ResponseEntity<>(ApiResponse.create("delete", "Ambulance deleted"), HttpStatus.OK);
     }
+
     @PreAuthorize("hasAuthority('AMBULANCE')")
     @GetMapping("/ambulance/trip/all")
     public ResponseEntity<?> getAllTrips(HttpServletRequest request) {
@@ -135,6 +129,8 @@ public class AmbulanceController {
                     .setUserName(ambulanceTrip.getUser().getFirstName() + " " + ambulanceTrip.getUser().getLastName());
             ambulanceTripViewDTO.setSource(ambulanceTrip.getSource());
             ambulanceTripViewDTO.setDestination(ambulanceTrip.getDestination());
+            ambulanceTripViewDTO.setLocation(ambulanceTrip.getLocation());
+            ambulanceTripViewDTO.setCurrentAddress(ambulanceTrip.getCurrentAddress());
             ambulanceTripViewDTO.setPrice(ambulanceTrip.getPrice());
             ambulanceTripViewDTO.setOrderDate(ambulanceTrip.getOrderDate());
 
@@ -143,6 +139,7 @@ public class AmbulanceController {
 
         return new ResponseEntity<>(ambulanceTripViewDTOS, HttpStatus.OK);
     }
+
     @PreAuthorize("hasAuthority('AMBULANCE')")
     @GetMapping("/ambulance/trip/bid/{id}")
     public ResponseEntity<?> addBidderToTrip(HttpServletRequest request, @PathVariable(name = "id") Long id) {
@@ -156,7 +153,7 @@ public class AmbulanceController {
 
         AmbulanceTrip ambulanceTrip = optionalAmbulanceTrip.get();
 
-        List<AppUser>bidders = ambulanceTrip.getBidders()==null?new ArrayList<>():ambulanceTrip.getBidders();
+        List<AppUser> bidders = ambulanceTrip.getBidders() == null ? new ArrayList<>() : ambulanceTrip.getBidders();
 
         bidders.add(bidder);
 
@@ -169,7 +166,7 @@ public class AmbulanceController {
 
     @PreAuthorize("hasAuthority('USER')")
     @GetMapping("/ambulance/trip/reject/{id1}/{id2}")
-    public ResponseEntity<?> deleteBidderFromTrip( @PathVariable(name = "id1") Long id1, @PathVariable(name = "id2") Long id2) {
+    public ResponseEntity<?> deleteBidderFromTrip(@PathVariable(name = "id1") Long id1, @PathVariable(name = "id2") Long id2) {
 
         Optional<AmbulanceTrip> optionalAmbulanceTrip = ambulanceTripRepository.findById(id1);
 
@@ -177,10 +174,9 @@ public class AmbulanceController {
             return new ResponseEntity<>(ApiResponse.create("error", "Trip not found"), HttpStatus.NOT_FOUND);
         }
 
-        Optional<AppUser>optionalProvider = userRepository.findById(id2);
+        Optional<AppUser> optionalProvider = userRepository.findById(id2);
 
-        if(optionalProvider.isEmpty())
-        {
+        if (optionalProvider.isEmpty()) {
             return new ResponseEntity<>(ApiResponse.create("error", "Provider not found"), HttpStatus.NOT_FOUND);
         }
 
@@ -188,7 +184,7 @@ public class AmbulanceController {
 
         AmbulanceTrip ambulanceTrip = optionalAmbulanceTrip.get();
 
-        List<AppUser>bidders = ambulanceTrip.getBidders();
+        List<AppUser> bidders = ambulanceTrip.getBidders();
 
         bidders.remove(bidder);
 
@@ -198,6 +194,7 @@ public class AmbulanceController {
 
         return new ResponseEntity<>(ApiResponse.create("delete", "Bidder Rejected"), HttpStatus.OK);
     }
+
     @PreAuthorize("hasAnyAuthority('AMBULANCE','USER')")
     @GetMapping("update/ambulancetrip/{id1}/{id2}")
     public ResponseEntity<?> updateAmbulanceTrip(HttpServletRequest request, @PathVariable(name = "id1") Long id1,
@@ -220,7 +217,7 @@ public class AmbulanceController {
                 ambulanceTrip.setReviewChecked(0);
             }
 
-            provider.balance += ambulanceTrip.getPrice()- AppConstants.perUserCharge;
+            provider.balance += ambulanceTrip.getPrice() - AppConstants.perUserCharge;
             ambulanceProviderRepository.save(provider);
 
             BkashCreateResponse bkashCreateResponse = bkashPaymentService

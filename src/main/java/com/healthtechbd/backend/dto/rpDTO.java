@@ -11,7 +11,7 @@ import java.util.List;
 @NoArgsConstructor
 public class rpDTO {
 
-   private List<DiagnosisReportDTO> allReports;
+    private List<DiagnosisReportDTO> allReports;
 
-   private List<DoctorPrescriptionDTO> allPrescriptions;
+    private List<DoctorPrescriptionDTO> allPrescriptions;
 }

@@ -5,7 +5,6 @@ import com.healthtechbd.backend.entity.Admin;
 import com.healthtechbd.backend.entity.AppUser;
 import com.healthtechbd.backend.entity.UserResponse;
 import com.healthtechbd.backend.repo.*;
-import com.healthtechbd.backend.service.UserService;
 import com.healthtechbd.backend.utils.ApiResponse;
 import com.healthtechbd.backend.utils.AppConstants;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,14 +20,14 @@ import java.util.List;
 import java.util.Optional;
 
 @RestController
-@CrossOrigin(origins = "*", allowedHeaders = "*", methods = { RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT,
-        RequestMethod.DELETE })
+@CrossOrigin(origins = "*", allowedHeaders = "*", methods = {RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT,
+        RequestMethod.DELETE})
 @PreAuthorize("hasAuthority('ADMIN')")
 public class AdminController {
 
     @Autowired
     private AdminRepository adminRepository;
-    
+
     @Autowired
     private AppUserRepository userRepository;
 
@@ -212,25 +211,23 @@ public class AdminController {
             return new ResponseEntity<>(userResponses, HttpStatus.OK);
         }
     }
-    
+
     @GetMapping("/admin/ban/pharmacy/{id}")
-    public ResponseEntity<?>banPharmacy(@PathVariable(name="id")Long id)
-    {
-       Optional<AppUser>optionalAppUser = userRepository.findById(id);
-       
-       if(optionalAppUser.isEmpty())
-       {
-           return  new ResponseEntity<>(ApiResponse.create("error","Pharmacy not found"),HttpStatus.NOT_FOUND);
-       }
+    public ResponseEntity<?> banPharmacy(@PathVariable(name = "id") Long id) {
+        Optional<AppUser> optionalAppUser = userRepository.findById(id);
 
-       AppUser pharmacy = optionalAppUser.get();
+        if (optionalAppUser.isEmpty()) {
+            return new ResponseEntity<>(ApiResponse.create("error", "Pharmacy not found"), HttpStatus.NOT_FOUND);
+        }
 
-       pharmacy.setAccountVerified(false);
+        AppUser pharmacy = optionalAppUser.get();
 
-       pharmacy.setBanRemovalDate(LocalDate.now().plusDays(AppConstants.banDuration));
+        pharmacy.setAccountVerified(false);
 
-       userRepository.save(pharmacy);
+        pharmacy.setBanRemovalDate(LocalDate.now().plusDays(AppConstants.banDuration));
 
-       return new ResponseEntity<>(ApiResponse.create("ban","Pharmacy is banned"),HttpStatus.OK);
-    }    
+        userRepository.save(pharmacy);
+
+        return new ResponseEntity<>(ApiResponse.create("ban", "Pharmacy is banned"), HttpStatus.OK);
+    }
 }

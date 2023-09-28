@@ -16,12 +16,10 @@ import com.healthtechbd.backend.utils.RegistrationResponse;
 import com.healthtechbd.backend.utils.UpdateUserResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import org.modelmapper.ModelMapper;
-import org.modelmapper.internal.bytebuddy.dynamic.scaffold.MethodRegistry;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -31,8 +29,8 @@ import org.springframework.web.bind.annotation.*;
 import java.time.LocalDate;
 import java.util.Optional;
 
-@CrossOrigin(origins = "*", allowedHeaders = "*", methods = { RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT,
-        RequestMethod.DELETE })
+@CrossOrigin(origins = "*", allowedHeaders = "*", methods = {RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT,
+        RequestMethod.DELETE})
 @RestController
 public class AuthController {
 
@@ -86,9 +84,8 @@ public class AuthController {
     @PostMapping("/signin")
     public ResponseEntity<?> authenticateAppUser(@RequestBody SignInDTO signInDTO) {
 
-        if(!userService.checkBan(signInDTO.getEmail()))
-        {
-            return new ResponseEntity<>(ApiResponse.create("ban","Pharmacy is banned"),HttpStatus.BAD_REQUEST);
+        if (!userService.checkBan(signInDTO.getEmail())) {
+            return new ResponseEntity<>(ApiResponse.create("ban", "Pharmacy is banned"), HttpStatus.BAD_REQUEST);
         }
 
         try {
@@ -107,10 +104,8 @@ public class AuthController {
 
         if (optionalAppUser.isPresent()) {
             appUser = optionalAppUser.get();
-        }
-        else
-        {
-            return new ResponseEntity<>(ApiResponse.create("error","User not found"), HttpStatus.NOT_FOUND);
+        } else {
+            return new ResponseEntity<>(ApiResponse.create("error", "User not found"), HttpStatus.NOT_FOUND);
         }
         String token = jwtService.generateToken(userDetails);
         JWTDTO jwtdto = new JWTDTO();
@@ -174,8 +169,7 @@ public class AuthController {
 
         user = updateUserResponse.getUser();
 
-        if(user.getPassword()==null)
-        {
+        if (user.getPassword() == null) {
             user.setPassword(password);
         }
 
@@ -191,14 +185,12 @@ public class AuthController {
     }
 
     @PostMapping("add/code")
-    public ResponseEntity<?>addCode(@RequestBody TwoStepVerificationCode twoStepVerificationCode)
-    {
+    public ResponseEntity<?> addCode(@RequestBody TwoStepVerificationCode twoStepVerificationCode) {
         Optional<TwoStepVerificationCode> optionalTwoStepVerificationCode = twoStepVerificationCodeRepository.findByEmail(twoStepVerificationCode.getEmail());
 
-        if(optionalTwoStepVerificationCode.isEmpty())
-        {
+        if (optionalTwoStepVerificationCode.isEmpty()) {
             twoStepVerificationCodeRepository.save(twoStepVerificationCode);
-            return new ResponseEntity<>(ApiResponse.create("create", "code is inserted"),HttpStatus.OK);
+            return new ResponseEntity<>(ApiResponse.create("create", "code is inserted"), HttpStatus.OK);
         }
 
         Long id = optionalTwoStepVerificationCode.get().getId();
@@ -207,35 +199,30 @@ public class AuthController {
 
         twoStepVerificationCodeRepository.save(twoStepVerificationCode);
 
-        return new ResponseEntity<>(ApiResponse.create("update", "code is updated"),HttpStatus.OK);
+        return new ResponseEntity<>(ApiResponse.create("update", "code is updated"), HttpStatus.OK);
     }
 
     @PostMapping("match/code")
-    public ResponseEntity<?>matchCode(@RequestBody TwoStepVerificationCode twoStepVerificationCode)
-    {
+    public ResponseEntity<?> matchCode(@RequestBody TwoStepVerificationCode twoStepVerificationCode) {
         Optional<TwoStepVerificationCode> optionalTwoStepVerificationCode = twoStepVerificationCodeRepository.findByEmail(twoStepVerificationCode.getEmail());
 
-        if(optionalTwoStepVerificationCode.isEmpty())
-        {
-            return new ResponseEntity<>(ApiResponse.create("error", "No user found with this email"),HttpStatus.NOT_FOUND);
+        if (optionalTwoStepVerificationCode.isEmpty()) {
+            return new ResponseEntity<>(ApiResponse.create("error", "No user found with this email"), HttpStatus.NOT_FOUND);
         }
 
-        if(optionalTwoStepVerificationCode.get().getCode().equals(twoStepVerificationCode.getCode()))
-        {
-            return new ResponseEntity<>(ApiResponse.create("matched","User code is matched"),HttpStatus.OK);
+        if (optionalTwoStepVerificationCode.get().getCode().equals(twoStepVerificationCode.getCode())) {
+            return new ResponseEntity<>(ApiResponse.create("matched", "User code is matched"), HttpStatus.OK);
         }
 
-        return  new ResponseEntity<>(ApiResponse.create("error","User code is mismatched"),HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>(ApiResponse.create("error", "User code is mismatched"), HttpStatus.BAD_REQUEST);
     }
 
     @PostMapping("/user/forgetPassword")
-    public ResponseEntity<?>getForgetPassword(@RequestBody ForgetPasswordDTO forgetPasswordDTO)
-    {
-        Optional<AppUser>optionalAppUser = userRepository.findByEmail(forgetPasswordDTO.getEmail());
+    public ResponseEntity<?> getForgetPassword(@RequestBody ForgetPasswordDTO forgetPasswordDTO) {
+        Optional<AppUser> optionalAppUser = userRepository.findByEmail(forgetPasswordDTO.getEmail());
 
-        if(optionalAppUser.isEmpty())
-        {
-            return new ResponseEntity<>(ApiResponse.create("error","No user with this email"),HttpStatus.NOT_FOUND);
+        if (optionalAppUser.isEmpty()) {
+            return new ResponseEntity<>(ApiResponse.create("error", "No user with this email"), HttpStatus.NOT_FOUND);
         }
 
         AppUser user = optionalAppUser.get();
@@ -246,6 +233,6 @@ public class AuthController {
 
         userRepository.save(user);
 
-        return new ResponseEntity<>(ApiResponse.create("update","Password is updated"), HttpStatus.OK);
+        return new ResponseEntity<>(ApiResponse.create("update", "Password is updated"), HttpStatus.OK);
     }
 }

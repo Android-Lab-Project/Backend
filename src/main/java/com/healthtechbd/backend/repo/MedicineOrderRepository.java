@@ -1,6 +1,5 @@
 package com.healthtechbd.backend.repo;
 
-import com.healthtechbd.backend.entity.AmbulanceTrip;
 import com.healthtechbd.backend.entity.MedicineOrder;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -67,7 +66,7 @@ public interface MedicineOrderRepository extends JpaRepository<MedicineOrder, Lo
     Long sumPriceByPharmacy(@Param("pharmacyId") Long pharmacyId);
 
     @Query("Select mo From MedicineOrder mo Where mo.pharmacy.id Is NULL")
-    List<MedicineOrder>findByPharmacyIsNull();
+    List<MedicineOrder> findByPharmacyIsNull();
 
     @Query("SELECT mo " +
             "FROM MedicineOrder mo " +
@@ -85,11 +84,11 @@ public interface MedicineOrderRepository extends JpaRepository<MedicineOrder, Lo
     List<MedicineOrder> findMedicineOrderByReviewChecked(@Param("userId") Long userId);
 
 
-    List<MedicineOrder>findByPlaceIgnoreCase(String place);
+    List<MedicineOrder> findByPlaceIgnoreCase(String place);
 
     @Modifying
     @Query("UPDATE MedicineOrder SET reviewChecked = 1 WHERE id = :o_id AND user.id = :user_id AND pharmacy.id = :subject_id")
-    void updateReviewChecked(@Param("o_id")Long o_id,@Param("user_id") Long user_id, @Param("subject_id")Long subject_id);
+    void updateReviewChecked(@Param("o_id") Long o_id, @Param("user_id") Long user_id, @Param("subject_id") Long subject_id);
 
 
 }

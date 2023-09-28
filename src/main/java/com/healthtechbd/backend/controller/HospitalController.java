@@ -1,6 +1,9 @@
 package com.healthtechbd.backend.controller;
 
-import com.healthtechbd.backend.dto.*;
+import com.healthtechbd.backend.dto.DiagnosisDTO;
+import com.healthtechbd.backend.dto.DiagnosisOrderViewDTO;
+import com.healthtechbd.backend.dto.HospitalDTO;
+import com.healthtechbd.backend.dto.SignUpDTO;
 import com.healthtechbd.backend.entity.AppUser;
 import com.healthtechbd.backend.entity.Diagnosis;
 import com.healthtechbd.backend.entity.DiagnosisOrder;
@@ -25,8 +28,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-@CrossOrigin(origins = "*", allowedHeaders = "*", methods = { RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT,
-        RequestMethod.DELETE })
+@CrossOrigin(origins = "*", allowedHeaders = "*", methods = {RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT,
+        RequestMethod.DELETE})
 @RestController
 @PreAuthorize("hasAuthority('HOSPITAL')")
 public class HospitalController {
@@ -95,8 +98,7 @@ public class HospitalController {
 
         appUser = updateUserResponse.getUser();
 
-        if(appUser.getPassword()==null)
-        {
+        if (appUser.getPassword() == null) {
             appUser.setPassword(password);
         }
 
@@ -121,13 +123,11 @@ public class HospitalController {
 
     @PreAuthorize("hasAnyAuthority('HOSPITAL','USER')")
     @GetMapping("/hospital/{id}")
-    public ResponseEntity<?>getHospitalInfo(@PathVariable(name="id")Long id)
-    {
+    public ResponseEntity<?> getHospitalInfo(@PathVariable(name = "id") Long id) {
         Optional<Hospital> optionalHospital = hospitalRepository.findByAppUser_Id(id);
 
-        if(optionalHospital.isEmpty())
-        {
-            return new ResponseEntity<>(ApiResponse.create("error","Hospital not found"),HttpStatus.NOT_FOUND);
+        if (optionalHospital.isEmpty()) {
+            return new ResponseEntity<>(ApiResponse.create("error", "Hospital not found"), HttpStatus.NOT_FOUND);
         }
 
         Hospital hospital = optionalHospital.get();
@@ -142,19 +142,16 @@ public class HospitalController {
         hospitalDTO.setRating(reviewRepository.findAvgRating(hospital.getAppUser().getId()));
         hospitalDTO.setReviewCount(reviewRepository.findCount(hospital.getAppUser().getId()));
 
-        if(hospitalDTO.getRating()==null)
-        {
+        if (hospitalDTO.getRating() == null) {
             hospitalDTO.setRating(0.0);
         }
 
-        if(hospitalDTO.getReviewCount()==null)
-        {
+        if (hospitalDTO.getReviewCount() == null) {
             hospitalDTO.setReviewCount(0L);
         }
 
-        return new ResponseEntity<>(hospitalDTO,HttpStatus.OK);
+        return new ResponseEntity<>(hospitalDTO, HttpStatus.OK);
     }
-
 
 
     @PreAuthorize("hasAnyAuthority('HOSPITAL','USER')")

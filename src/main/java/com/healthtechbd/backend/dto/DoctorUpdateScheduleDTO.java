@@ -13,5 +13,5 @@ import java.util.List;
 @AllArgsConstructor
 public class DoctorUpdateScheduleDTO {
     private List<DoctorAvailableTime> availableTimes;
-    private List<DoctorOnlineAvailableTime>availableOnlineTimes;
+    private List<DoctorOnlineAvailableTime> availableOnlineTimes;
 }

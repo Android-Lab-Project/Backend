@@ -1,11 +1,11 @@
 package com.healthtechbd.backend.dto;
 
-import jakarta.annotation.Nonnull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -17,5 +17,7 @@ public class ProviderTripViewDTO {
     private String source;
     private String destination;
     private Long price;
+    private String location;
+    private String currentAddress;
     private LocalDate orderDate;
 }
