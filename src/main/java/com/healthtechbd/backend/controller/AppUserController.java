@@ -65,6 +65,9 @@ public class AppUserController {
     private UserResponseRepository userResponseRepository;
 
     @Autowired
+    private AppUserNotificationRepository appUserNotificationRepository;
+
+    @Autowired
     private ReviewRepository reviewRepository;
 
     @Autowired
@@ -771,6 +774,43 @@ public class AppUserController {
         userResponseRepository.save(userResponse);
 
         return new ResponseEntity<>(ApiResponse.create("create", "Response created"), HttpStatus.OK);
+    }
+
+    @PreAuthorize("hasAuthority('USER')")
+    @PostMapping("/add/notification")
+    public ResponseEntity<?>addNotification(HttpServletRequest request, @RequestBody AppUserNotification userNotification)
+    {
+        userNotification.setChecked(false);
+
+        appUserNotificationRepository.save(userNotification);
+
+        return new ResponseEntity<>(ApiResponse.create("create", "Notification is created"),HttpStatus.OK);
+    }
+
+    @PreAuthorize("permitAll()")
+    @GetMapping("/user/notification/unchecked")
+    public ResponseEntity<?>getUncheckedNotifications(HttpServletRequest request)
+    {
+        AppUser user = userService.returnUser(request);
+
+        List<AppUserNotification>userNotifications = appUserNotificationRepository.findByCheckedFalseAndUserId(user.getId());
+
+        if(userNotifications.isEmpty())
+        {
+            return new ResponseEntity<>(ApiResponse.create("empty","No unchecked found"),HttpStatus.OK);
+        }
+
+        List<AppUserNotificationDTO>notificationDTOS = new ArrayList<>();
+
+        for(var notification:userNotifications)
+        {
+            AppUserNotificationDTO userNotificationDTO = modelMapper.map(notification, AppUserNotificationDTO.class);
+            notification.setChecked(true);
+            appUserNotificationRepository.save(notification);
+            notificationDTOS.add(userNotificationDTO);
+        }
+
+        return new ResponseEntity<>(notificationDTOS, HttpStatus.OK);
     }
 
     @GetMapping("/dashboard/reports&prescriptions")
