@@ -919,7 +919,6 @@ public class AppUserController {
             ambulanceTripViewDTO.setSource(ambulanceTrip.getSource());
             ambulanceTripViewDTO.setDestination(ambulanceTrip.getDestination());
             ambulanceTripViewDTO.setLocation(ambulanceTrip.getLocation());
-            ambulanceTripViewDTO.setCurrentAddress(ambulanceTrip.getCurrentAddress());
             ambulanceTripViewDTO.setPrice(ambulanceTrip.getPrice());
             ambulanceTripViewDTO.setOrderDate(ambulanceTrip.getOrderDate());
 
@@ -949,7 +948,6 @@ public class AppUserController {
             ambulanceTripPendingViewDTO.setSource(i.getSource());
             ambulanceTripPendingViewDTO.setDestination(i.getDestination());
             ambulanceTripPendingViewDTO.setLocation(i.getLocation());
-            ambulanceTripPendingViewDTO.setCurrentAddress(i.getCurrentAddress());
             ambulanceTripPendingViewDTO.setOrderDate(i.getOrderDate());
 
             List<BidderDTO> bidderDTOS = new ArrayList<>();

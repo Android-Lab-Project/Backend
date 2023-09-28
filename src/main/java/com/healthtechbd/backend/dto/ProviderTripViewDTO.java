@@ -18,6 +18,5 @@ public class ProviderTripViewDTO {
     private String destination;
     private Long price;
     private String location;
-    private String currentAddress;
     private LocalDate orderDate;
 }

@@ -130,7 +130,6 @@ public class AmbulanceController {
             ambulanceTripViewDTO.setSource(ambulanceTrip.getSource());
             ambulanceTripViewDTO.setDestination(ambulanceTrip.getDestination());
             ambulanceTripViewDTO.setLocation(ambulanceTrip.getLocation());
-            ambulanceTripViewDTO.setCurrentAddress(ambulanceTrip.getCurrentAddress());
             ambulanceTripViewDTO.setPrice(ambulanceTrip.getPrice());
             ambulanceTripViewDTO.setOrderDate(ambulanceTrip.getOrderDate());
 
