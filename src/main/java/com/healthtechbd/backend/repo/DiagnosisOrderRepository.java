@@ -85,7 +85,7 @@ public interface DiagnosisOrderRepository extends JpaRepository<DiagnosisOrder, 
 
     @Query("SELECT do FROM DiagnosisOrder do " +
             "WHERE (do.orderDate = :startDate AND do.time >= :time) OR do.orderDate > :startDate " +
-            "AND do.user.id = :userId do.checked = 0 ")
+            "AND do.user.id = :userId AND do.checked = 0 ")
     List<DiagnosisOrder> findByDateAndTimeAndUserId(
             @Param("startDate") LocalDate startDate,
             @Param("time") Double time,
