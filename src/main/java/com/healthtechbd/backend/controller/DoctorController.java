@@ -442,12 +442,12 @@ public class DoctorController {
 
                 doctorRepository.save(doctor);
 
-                BkashRefundResponse bkashRefundResponse = bkashPaymentService.refundPayment(doctorSerial.getPaymentId(),
-                        doctorSerial.getTrxId(), doctorSerial.getPrice().toString());
+//                BkashRefundResponse bkashRefundResponse = bkashPaymentService.refundPayment(doctorSerial.getPaymentId(),
+//                        doctorSerial.getTrxId(), doctorSerial.getPrice().toString());
 
                 doctorSerialRepository.delete(doctorSerial);
 
-                return new ResponseEntity<>(bkashRefundResponse, HttpStatus.OK);
+                return new ResponseEntity<>(ApiResponse.create("delete","Doctor Serial is deleted"), HttpStatus.OK);
             } else {
                 return new ResponseEntity<>(ApiResponse.create("error", "Doctor Serial not found"), HttpStatus.NOT_FOUND);
             }
