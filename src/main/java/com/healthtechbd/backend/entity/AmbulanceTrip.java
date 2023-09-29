@@ -37,4 +37,6 @@ public class AmbulanceTrip {
     private LocalDate date;
     private String location;
     private Integer reviewChecked;
+    private Integer checked;
+
 }

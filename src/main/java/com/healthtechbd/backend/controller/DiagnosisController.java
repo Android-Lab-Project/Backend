@@ -2,9 +2,7 @@ package com.healthtechbd.backend.controller;
 
 import com.healthtechbd.backend.dto.AddDiagnosisDTO;
 import com.healthtechbd.backend.dto.DiagnosisDTO;
-import com.healthtechbd.backend.entity.AppUser;
-import com.healthtechbd.backend.entity.Diagnosis;
-import com.healthtechbd.backend.entity.Hospital;
+import com.healthtechbd.backend.entity.*;
 import com.healthtechbd.backend.repo.*;
 import com.healthtechbd.backend.service.UserService;
 import com.healthtechbd.backend.utils.ApiResponse;
@@ -173,6 +171,24 @@ public class DiagnosisController {
         }
 
         return new ResponseEntity<>(diagnosisDTOS, HttpStatus.OK);
+    }
+
+    @PreAuthorize("hasAnyAuthority('USER','HOSPITAL')")
+    @GetMapping("/diagnosis/order/check/{id}")
+    public  ResponseEntity<?>makeChecked(@PathVariable(name="id")Long id)
+    {
+        Optional<DiagnosisOrder>optionalDiagnosisOrder = diagnosisOrderRepository.findById(id);
+
+        if(optionalDiagnosisOrder.isEmpty())
+        {
+            return  new ResponseEntity<>(ApiResponse.create("error", "Not found"),HttpStatus.NOT_FOUND);
+        }
+
+        DiagnosisOrder diagnosisOrder = optionalDiagnosisOrder.get();
+        diagnosisOrder.setChecked(1);
+        diagnosisOrderRepository.save(diagnosisOrder);
+
+        return new ResponseEntity<>(ApiResponse.create("checked","Diagnosis Order is now checked"),HttpStatus.OK);
     }
 
     @PreAuthorize("hasAuthority('HOSPITAL')")

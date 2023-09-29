@@ -34,4 +34,5 @@ public class DiagnosisOrder {
     private Double time;
     private Integer reviewChecked;
     private String deptContactNo;
+    private Integer checked;
 }

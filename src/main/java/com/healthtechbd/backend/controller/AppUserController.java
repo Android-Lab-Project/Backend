@@ -522,6 +522,7 @@ public class AppUserController {
 
         doctorSerial.setUser(user);
         doctorSerial.setDoctor(doctorUser);
+        doctorSerial.setChecked(0);
 
         Long reviewCount = reviewRepository.countByUser(user.getId(), opDoctor.get().getId());
 
@@ -576,6 +577,7 @@ public class AppUserController {
         diagnosisOrder.setHospital(hospitalUser);
         diagnosisOrder.setOrderDate(diagnosisOrderDTO.getOrderDate());
         diagnosisOrder.setDate(LocalDate.now());
+        diagnosisOrder.setChecked(0);
 
         Long reviewCount = reviewRepository.countByUser(appUser.getId(), hospitalUser.getId());
 
@@ -639,6 +641,7 @@ public class AppUserController {
         ambulanceTrip.setUser(user);
 
         ambulanceTrip.setDate(LocalDate.now());
+        ambulanceTrip.setChecked(0);
 
         ambulanceTripRepository.save(ambulanceTrip);
 

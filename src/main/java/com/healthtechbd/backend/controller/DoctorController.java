@@ -19,6 +19,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import javax.print.Doc;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.ArrayList;
@@ -453,6 +454,24 @@ public class DoctorController {
         } else {
             return new ResponseEntity<>(ApiResponse.create("error", "Doctor not found"), HttpStatus.NOT_FOUND);
         }
+    }
+
+    @PreAuthorize("hasAnyAuthority('USER','DOCTOR')")
+    @GetMapping("/doctor/serial/check/{id}")
+    public  ResponseEntity<?>makeChecked(@PathVariable(name="id")Long id)
+    {
+        Optional<DoctorSerial>optionalDoctorSerial = doctorSerialRepository.findById(id);
+
+        if(optionalDoctorSerial.isEmpty())
+        {
+            return  new ResponseEntity<>(ApiResponse.create("error", "Not found"),HttpStatus.NOT_FOUND);
+        }
+
+        DoctorSerial doctorSerial = optionalDoctorSerial.get();
+        doctorSerial.setChecked(1);
+        doctorSerialRepository.save(doctorSerial);
+
+        return new ResponseEntity<>(ApiResponse.create("checked","DoctorSerial is now checked"),HttpStatus.OK);
     }
 
 }

@@ -29,6 +29,9 @@ public class DoctorSerial {
 
     private Integer reviewChecked;
 
+    private Integer checked;
+
+
     @Column
     private String prescription;
 
