@@ -204,4 +204,37 @@ public class DiagnosisController {
         return new ResponseEntity<>(ApiResponse.create("delete", "Diagnosis deleted"), HttpStatus.OK);
     }
 
+    @PreAuthorize("hasAuthority('HOSPITAL')")
+    @DeleteMapping("/delete/diagnosis/order/{id}")
+    public ResponseEntity<?> deleteUpcomingSerial(@PathVariable(name = "id") Long id, HttpServletRequest request) {
+        AppUser hospitalUser = userService.returnUser(request);
+
+        Optional<Hospital> optionalHospital = hospitalRepository.findByAppUser_Id(hospitalUser.getId());
+
+        if (optionalHospital.isPresent()) {
+            Optional<DiagnosisOrder> optionalDiagnosisOrder = diagnosisOrderRepository.findById(id);
+
+            if (optionalDiagnosisOrder.isPresent()) {
+                DiagnosisOrder diagnosisOrder = optionalDiagnosisOrder.get();
+                Hospital hospital = optionalHospital.get();
+
+                hospital.balance -= (diagnosisOrder.getPrice() - 10);
+                diagnosisOrder.setPrice(diagnosisOrder.getPrice() - 10);
+
+                hospitalRepository.save(hospital);
+
+//                BkashRefundResponse bkashRefundResponse = bkashPaymentService.refundPayment(diagnosisOrder.getPaymentId(),
+//                        diagnosisOrder.getTrxId(), diagnosisOrder.getPrice().toString());
+
+                diagnosisOrderRepository.delete(diagnosisOrder);
+
+                return new ResponseEntity<>(ApiResponse.create("delete","Diagnosis Order is deleted"), HttpStatus.OK);
+            } else {
+                return new ResponseEntity<>(ApiResponse.create("error", "Diagnosis Order not found"), HttpStatus.NOT_FOUND);
+            }
+        } else {
+            return new ResponseEntity<>(ApiResponse.create("error", "Hospital not found"), HttpStatus.NOT_FOUND);
+        }
+    }
+
 }
