@@ -4,10 +4,7 @@ import com.healthtechbd.backend.dto.DiagnosisDTO;
 import com.healthtechbd.backend.dto.DiagnosisOrderViewDTO;
 import com.healthtechbd.backend.dto.HospitalDTO;
 import com.healthtechbd.backend.dto.SignUpDTO;
-import com.healthtechbd.backend.entity.AppUser;
-import com.healthtechbd.backend.entity.Diagnosis;
-import com.healthtechbd.backend.entity.DiagnosisOrder;
-import com.healthtechbd.backend.entity.Hospital;
+import com.healthtechbd.backend.entity.*;
 import com.healthtechbd.backend.repo.*;
 import com.healthtechbd.backend.service.TimeService;
 import com.healthtechbd.backend.service.UserService;
@@ -270,6 +267,39 @@ public class HospitalController {
         }
 
         return new ResponseEntity<>(diagnosisOrderViewDTOS, HttpStatus.OK);
+    }
+
+    @PreAuthorize("hasAuthority('HOSPITAL')")
+    @DeleteMapping("/delete/diagnosis/order/{id}")
+    public ResponseEntity<?> deleteUpcomingSerial(@PathVariable(name = "id") Long id, HttpServletRequest request) {
+        AppUser hospitalUser = userService.returnUser(request);
+
+        Optional<Hospital> optionalHospital = hospitalRepository.findByAppUser_Id(hospitalUser.getId());
+
+        if (optionalHospital.isPresent()) {
+            Optional<DiagnosisOrder> optionalDiagnosisOrder = diagnosisOrderRepository.findById(id);
+
+            if (optionalDiagnosisOrder.isPresent()) {
+               DiagnosisOrder diagnosisOrder = optionalDiagnosisOrder.get();
+               Hospital hospital = optionalHospital.get();
+
+                hospital.balance -= (diagnosisOrder.getPrice() - 10);
+                diagnosisOrder.setPrice(diagnosisOrder.getPrice() - 10);
+
+                hospitalRepository.save(hospital);
+
+//                BkashRefundResponse bkashRefundResponse = bkashPaymentService.refundPayment(diagnosisOrder.getPaymentId(),
+//                        diagnosisOrder.getTrxId(), diagnosisOrder.getPrice().toString());
+
+                diagnosisOrderRepository.delete(diagnosisOrder);
+
+                return new ResponseEntity<>(ApiResponse.create("delete","Diagnosis Order is deleted"), HttpStatus.OK);
+            } else {
+                return new ResponseEntity<>(ApiResponse.create("error", "Diagnosis Order not found"), HttpStatus.NOT_FOUND);
+            }
+        } else {
+            return new ResponseEntity<>(ApiResponse.create("error", "Hospital not found"), HttpStatus.NOT_FOUND);
+        }
     }
 
 }
