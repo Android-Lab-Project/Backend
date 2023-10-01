@@ -682,6 +682,7 @@ public class AppUserController {
         review.setStarCount(starCount);
         review.setReviewer(reviewer);
         review.setSubject(subject);
+        review.setDate(LocalDate.now());
 
         reviewRepository.save(review);
 
