@@ -77,14 +77,14 @@ public interface DoctorSerialRepository extends JpaRepository<DoctorSerial, Long
     List<DoctorSerial> findByUser_IdAndPrescriptionIsNotNull(Long user_id);
 
     @Query("SELECT ds FROM DoctorSerial ds " +
-            "WHERE (ds.appointmentDate = :startDate AND ds.time >= :time) OR ds.appointmentDate > :startDate " +
+            "WHERE (ds.appointmentDate = :startDate AND ds.time >= :time+10.0) OR ds.appointmentDate >= :startDate " +
             "AND ds.doctor.id = :doctorId AND ds.checked = 0")
     List<DoctorSerial> findByDateAndTimeAndDoctorId(@Param("startDate") LocalDate startDate,
                                                     @Param("time") Double time,
                                                     @Param("doctorId") Long doctorId);
 
     @Query("SELECT ds FROM DoctorSerial ds " +
-            "WHERE (ds.appointmentDate = :startDate AND ds.time>= :time ) OR ds.appointmentDate > :startDate " +
+            "WHERE (ds.appointmentDate = :startDate AND ds.time>= :time+10.0 ) OR ds.appointmentDate >= :startDate " +
             "AND ds.user.id = :userId AND ds.checked = 0")
     List<DoctorSerial> findByDateAndTimeAndUserId(@Param("startDate") LocalDate startDate,
                                                   @Param("time") Double time,

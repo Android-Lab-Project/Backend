@@ -19,7 +19,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-import javax.print.Doc;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.ArrayList;
@@ -308,7 +307,7 @@ public class DoctorController {
 
                 if (doctor.getAvailableOnlineTimes().get(i).getDate().isBefore(LocalDate.now())) {
                     doctor.getAvailableOnlineTimes().get(i)
-                            .setDate(DoctorService.nextDate(doctor.getAvailableTimes().get(i).getDay()));
+                            .setDate(DoctorService.nextDate(doctor.getAvailableOnlineTimes().get(i).getDay()));
                     doctor.getAvailableOnlineTimes().get(i).setCount(0);
                 }
             }
