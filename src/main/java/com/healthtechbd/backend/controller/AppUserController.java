@@ -862,7 +862,7 @@ public class AppUserController {
     public ResponseEntity<?> getAllUpcomingForUser(HttpServletRequest request) {
         AppUser user = userService.returnUser(request);
 
-        Double time = timeService.convertTimeToDouble(LocalTime.now());
+        Double time = timeService.convertTimeToDouble(LocalTime.now().minusMinutes(30));
 
 
         List<DoctorSerial> upcomingDoctorSerials = doctorSerialRepository.findByDateAndTimeAndUserId(LocalDate.now(), time,
@@ -895,7 +895,7 @@ public class AppUserController {
     public ResponseEntity<?> getAllUpcoming(HttpServletRequest request) {
         AppUser user = userService.returnUser(request);
 
-        Double time = timeService.convertTimeToDouble(LocalTime.now());
+        Double time = timeService.convertTimeToDouble(LocalTime.now().minusMinutes(30));
 
         List<DiagnosisOrder> upcomingDiagnosisOrders = diagnosisOrderRepository
                 .findByDateAndTimeAndUserId(LocalDate.now(), time, user.getId());

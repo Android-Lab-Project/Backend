@@ -244,7 +244,7 @@ public class HospitalController {
     public ResponseEntity<?> getAllUpcoming(HttpServletRequest request) {
         AppUser hospital = userService.returnUser(request);
 
-        Double time = timeService.convertTimeToDouble(LocalTime.now());
+        Double time = timeService.convertTimeToDouble(LocalTime.now().minusMinutes(30));
 
         List<DiagnosisOrder> diagnosisOrders = diagnosisOrderRepository.findByDateAndTimeAndHospitalId(LocalDate.now(),
                 time, hospital.getId());

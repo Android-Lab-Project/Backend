@@ -394,7 +394,7 @@ public class DoctorController {
     public ResponseEntity<?> getAllUpcoming(HttpServletRequest request) {
         AppUser doctor = userService.returnUser(request);
 
-        Double time = timeService.convertTimeToDouble(LocalTime.now());
+        Double time = timeService.convertTimeToDouble(LocalTime.now().minusMinutes(30));
 
         List<DoctorSerial> upcomingDoctorSerials = doctorSerialRepository.findByDateAndTimeAndDoctorId(LocalDate.now(),
                 time, doctor.getId());
