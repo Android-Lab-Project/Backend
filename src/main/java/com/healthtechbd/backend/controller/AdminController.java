@@ -83,11 +83,6 @@ public class AdminController {
                 * AppConstants.perUserCharge;
         Long totalDOIncome = diagnosisOrderRepository.countDiagnosisOrders() * AppConstants.perUserCharge;
 
-        Long _7daysMOIncome = medicineOrderRepository.countMedicineOrdersByDate(sevenDaysAgo, today)
-                * AppConstants.perUserCharge;
-        Long _30daysMOIncome = medicineOrderRepository.countMedicineOrdersByDate(thirtyDaysAgo, today)
-                * AppConstants.perUserCharge;
-        Long totalMOIncome = medicineOrderRepository.countMedicineOrders() * AppConstants.perUserCharge;
 
         Long _7daysATIncome = ambulanceTripRepository.countAmbulanceTripsByDate(sevenDaysAgo, today)
                 * AppConstants.perUserCharge;
@@ -103,20 +98,19 @@ public class AdminController {
         adminStatisticsDTO.setTotalMedicineOrderCount(adminStatisticsDTO.getTotalMedicineOrderCount() != null ? adminStatisticsDTO.getTotalMedicineOrderCount() : 0L);
         adminStatisticsDTO.setTotalAmbulanceTripCount(adminStatisticsDTO.getTotalAmbulanceTripCount() != null ? adminStatisticsDTO.getTotalAmbulanceTripCount() : 0L);
 
-        adminStatisticsDTO.set_7DaysIncome(_7daysDSIncome + _7daysDOIncome + _7daysMOIncome + _7daysATIncome);
-        adminStatisticsDTO.set_30DaysIncome(_30daysDSIncome + _30daysDOIncome + _30daysMOIncome + _30daysATIncome);
-        adminStatisticsDTO.setTotalIncome(totalDSIncome + totalDOIncome + totalMOIncome + totalATIncome);
+        adminStatisticsDTO.set_7DaysIncome(_7daysDSIncome + _7daysDOIncome + _7daysATIncome);
+        adminStatisticsDTO.set_30DaysIncome(_30daysDSIncome + _30daysDOIncome + _30daysATIncome);
+        adminStatisticsDTO.setTotalIncome(totalDSIncome + totalDOIncome + totalATIncome);
 
         Optional<Admin> optionalAdmin = adminRepository.findById(1L);
 
         optionalAdmin
-                .ifPresent(admin -> admin.setBalance(totalDSIncome + totalDOIncome + totalMOIncome + totalATIncome));
+                .ifPresent(admin -> admin.setBalance(totalDSIncome + totalDOIncome + totalATIncome));
 
         adminRepository.save(optionalAdmin.orElse(null));
 
         List<Object[]> doctorserials = doctorSerialRepository.countDoctorSerialsGroupByDate(thirtyDaysAgo, today);
         List<Object[]> diagnosisOrders = diagnosisOrderRepository.countDiagnosisOrdersGroupByDate(thirtyDaysAgo, today);
-        List<Object[]> medicineOrders = medicineOrderRepository.countMedicineOrdersGroupByDate(thirtyDaysAgo, today);
         List<Object[]> ambulanceTrips = ambulanceTripRepository.countAmbulanceTripsGroupByDate(thirtyDaysAgo, today);
 
         List<LocalDate> dates = new ArrayList<>();
@@ -147,17 +141,6 @@ public class AdminController {
             if (objects != null && date.equals(objects[0])) {
                 count += (Long) objects[1];
                 dos++;
-            }
-
-            objects = null;
-
-            if (mo < medicineOrders.size()) {
-                objects = medicineOrders.get(mo);
-            }
-
-            if (objects != null && date.equals(objects[0])) {
-                count += (Long) objects[1];
-                mo++;
             }
 
             objects = null;

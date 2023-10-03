@@ -45,6 +45,7 @@ public class DoctorService {
 
         for (int i = 0; i < doctor.getAvailableTimes().size(); i++) {
 
+            Double startTime = doctor.getAvailableTimes().get(i).getStartTime();
             Double endTime = doctor.getAvailableTimes().get(i).getEndTime();
 
             Double availTime = doctor.getAvailableTimes().get(i).getAvailTime();
@@ -55,7 +56,7 @@ public class DoctorService {
                     availTime = currentTime;
                 }
             }
-            if (availTime > endTime) {
+            if ((startTime<endTime && availTime>endTime)||(startTime>endTime && availTime>endTime && availTime<startTime)) {
                 doctor.getAvailableTimes().get(i).setAvailTime(-1.0);
             } else {
                 doctor.getAvailableTimes().get(i).setAvailTime(availTime);
@@ -66,6 +67,7 @@ public class DoctorService {
 
         for (int i = 0; i < doctor.getAvailableOnlineTimes().size(); i++) {
 
+            Double onlineStartTime = doctor.getAvailableOnlineTimes().get(i).getStartTime();
             Double onlineEndTime = doctor.getAvailableOnlineTimes().get(i).getEndTime();
 
             Double onlineAvailTime = doctor.getAvailableOnlineTimes().get(i).getAvailTime();
@@ -77,7 +79,7 @@ public class DoctorService {
                     onlineAvailTime = currentTime;
                 }
             }
-            if (onlineAvailTime > onlineEndTime) {
+            if ((onlineStartTime<onlineEndTime && onlineAvailTime>onlineEndTime)||(onlineStartTime>onlineEndTime && onlineAvailTime>onlineEndTime && onlineAvailTime<onlineStartTime)) {
                 doctor.getAvailableOnlineTimes().get(i).setAvailTime(-1.0);
             } else {
                 doctor.getAvailableOnlineTimes().get(i).setAvailTime(onlineAvailTime);
