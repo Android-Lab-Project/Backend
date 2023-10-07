@@ -162,14 +162,7 @@ public class MedicineController {
 
             medicineOrder.setPharmacy(appUser);
 
-            Long reviewCount = reviewRepository.countByUser(medicineOrder.getUser().getId(),
-                    medicineOrder.getPharmacy().getId());
-
-            if (reviewCount >= 1) {
-                medicineOrder.setReviewChecked(1);
-            } else {
-                medicineOrder.setReviewChecked(0);
-            }
+            medicineOrder.setReviewChecked(0);
 
             Optional<Pharmacy> optionalPharmacy = pharmacyRepository.findByAppUser_Id(appUser.getId());
 

@@ -468,6 +468,7 @@ public class DoctorController {
 
         DoctorSerial doctorSerial = optionalDoctorSerial.get();
         doctorSerial.setChecked(1);
+        doctorSerial.setReviewChecked(0);
         doctorSerialRepository.save(doctorSerial);
 
         return new ResponseEntity<>(ApiResponse.create("checked","DoctorSerial is now checked"),HttpStatus.OK);

@@ -524,14 +524,6 @@ public class AppUserController {
         doctorSerial.setDoctor(doctorUser);
         doctorSerial.setChecked(0);
 
-        Long reviewCount = reviewRepository.countByUser(user.getId(), opDoctor.get().getId());
-
-        if (reviewCount >= 1) {
-            doctorSerial.setReviewChecked(1);
-        } else {
-            doctorSerial.setReviewChecked(0);
-        }
-
         BkashCreateResponse bkashCreateResponse = bkashPaymentService.createPayment(doctorSerial.getPrice().toString());
 
         bkashCreateResponse.setType("DoctorSerial");
@@ -578,14 +570,6 @@ public class AppUserController {
         diagnosisOrder.setOrderDate(diagnosisOrderDTO.getOrderDate());
         diagnosisOrder.setDate(LocalDate.now());
         diagnosisOrder.setChecked(0);
-
-        Long reviewCount = reviewRepository.countByUser(appUser.getId(), hospitalUser.getId());
-
-        if (reviewCount >= 1) {
-            diagnosisOrder.setReviewChecked(1);
-        } else {
-            diagnosisOrder.setReviewChecked(0);
-        }
 
         hospital.balance += diagnosisOrder.getPrice() - AppConstants.perUserCharge;
 

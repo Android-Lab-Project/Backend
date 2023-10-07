@@ -186,6 +186,7 @@ public class DiagnosisController {
 
         DiagnosisOrder diagnosisOrder = optionalDiagnosisOrder.get();
         diagnosisOrder.setChecked(1);
+        diagnosisOrder.setReviewChecked(0);
         diagnosisOrderRepository.save(diagnosisOrder);
 
         return new ResponseEntity<>(ApiResponse.create("checked","Diagnosis Order is now checked"),HttpStatus.OK);

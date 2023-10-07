@@ -207,14 +207,7 @@ public class AmbulanceController {
 
             ambulanceTrip.setAmbulanceProvider(provider.getAppUser());
 
-            Long reviewCount = reviewRepository.countByUser(ambulanceTrip.getUser().getId(),
-                    ambulanceTrip.getAmbulanceProvider().getId());
-
-            if (reviewCount >= 1) {
-                ambulanceTrip.setReviewChecked(1);
-            } else {
-                ambulanceTrip.setReviewChecked(0);
-            }
+            ambulanceTrip.setReviewChecked(0);
 
             provider.balance += ambulanceTrip.getPrice() - AppConstants.perUserCharge;
             ambulanceProviderRepository.save(provider);
