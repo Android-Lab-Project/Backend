@@ -250,7 +250,7 @@ public class DoctorController {
 
             if (doctor.getAvailableOnlineTimes().get(i).getDate().isBefore(LocalDate.now())) {
                 doctor.getAvailableOnlineTimes().get(i)
-                        .setDate(DoctorService.nextDate(doctor.getAvailableTimes().get(i).getDay()));
+                        .setDate(DoctorService.nextDate(doctor.getAvailableOnlineTimes().get(i).getDay()));
                 doctor.getAvailableOnlineTimes().get(i).setCount(0);
             }
         }
