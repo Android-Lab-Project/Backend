@@ -112,6 +112,7 @@ public class AuthController {
         jwtdto.setAccessToken(token);
         jwtdto.setId(appUser.getId());
         jwtdto.setEmail(appUser.getEmail());
+        jwtdto.setContactNo(appUser.getContactNo());
         jwtdto.setTokenType("Bearer");
         jwtdto.setRole(appUser.getRoles().get(0).getRoleType());
 

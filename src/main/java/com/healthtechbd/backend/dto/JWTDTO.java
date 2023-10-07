@@ -10,6 +10,7 @@ import lombok.NoArgsConstructor;
 public class JWTDTO {
     private String accessToken;
     private String email;
+    private String contactNo;
     private String tokenType;
     private Long id;
     private String role;
