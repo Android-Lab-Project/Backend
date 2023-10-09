@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -241,9 +242,9 @@ public class HospitalController {
     public ResponseEntity<?> getAllUpcoming(HttpServletRequest request) {
         AppUser hospital = userService.returnUser(request);
 
-        Double time = timeService.convertTimeToDouble(LocalTime.now().minusMinutes(30));
+        Double time = timeService.convertTimeToDouble(LocalTime.now(ZoneId.of("Asia/Dhaka")).minusMinutes(30));
 
-        List<DiagnosisOrder> diagnosisOrders = diagnosisOrderRepository.findByDateAndTimeAndHospitalId(LocalDate.now(),
+        List<DiagnosisOrder> diagnosisOrders = diagnosisOrderRepository.findByDateAndTimeAndHospitalId(LocalDate.now(ZoneId.of("Asia/Dhaka")),
                 time, hospital.getId());
 
         if (diagnosisOrders.isEmpty()) {

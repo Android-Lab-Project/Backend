@@ -885,10 +885,10 @@ public class AppUserController {
     public ResponseEntity<?> getAllUpcoming(HttpServletRequest request) {
         AppUser user = userService.returnUser(request);
 
-        Double time = timeService.convertTimeToDouble(LocalTime.now().minusMinutes(30));
+        Double time = timeService.convertTimeToDouble(LocalTime.now(ZoneId.of("Asia/Dhaka")).minusMinutes(30));
 
         List<DiagnosisOrder> upcomingDiagnosisOrders = diagnosisOrderRepository
-                .findByDateAndTimeAndUserId(LocalDate.now(), time, user.getId());
+                .findByDateAndTimeAndUserId(LocalDate.now(ZoneId.of("Asia/Dhaka")), time, user.getId());
 
         if (upcomingDiagnosisOrders.isEmpty()) {
             return new ResponseEntity<>(ApiResponse.create("empty", "No upcoming found"), HttpStatus.OK);

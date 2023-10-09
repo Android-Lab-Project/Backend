@@ -395,9 +395,9 @@ public class DoctorController {
     public ResponseEntity<?> getAllUpcoming(HttpServletRequest request) {
         AppUser doctor = userService.returnUser(request);
 
-//        Double time = timeService.convertTimeToDouble(LocalTime.now(ZoneId.of("Asia/Dhaka")).minusMinutes(30));
+        Double time = timeService.convertTimeToDouble(LocalTime.now(ZoneId.of("Asia/Dhaka")).minusMinutes(30));
 
-        List<DoctorSerial> upcomingDoctorSerials = doctorSerialRepository.findByDateAndTimeAndDoctorId(LocalDate.now(ZoneId.of("Asia/Dhaka")),
+        List<DoctorSerial> upcomingDoctorSerials = doctorSerialRepository.findByDateAndTimeAndDoctorId(LocalDate.now(ZoneId.of("Asia/Dhaka")), time,
                  doctor.getId());
 
         if (upcomingDoctorSerials.isEmpty()) {
