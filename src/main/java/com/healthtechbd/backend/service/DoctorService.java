@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.time.ZoneId;
 import java.time.temporal.TemporalAdjusters;
 import java.util.List;
 
@@ -51,7 +52,7 @@ public class DoctorService {
             Double availTime = doctor.getAvailableTimes().get(i).getAvailTime();
 
             if (doctor.getAvailableTimes().get(i).getDate().equals(LocalDate.now())) {
-                Double currentTime = timeService.convertTimeToDouble(LocalTime.now());
+                Double currentTime = timeService.convertTimeToDouble(LocalTime.now(ZoneId.of("Asia/Dhaka")));
                 if (availTime < currentTime) {
                     availTime = currentTime;
                 }
@@ -73,7 +74,7 @@ public class DoctorService {
             Double onlineAvailTime = doctor.getAvailableOnlineTimes().get(i).getAvailTime();
 
             if (doctor.getAvailableOnlineTimes().get(i).getDate().equals(LocalDate.now())) {
-                Double currentTime = timeService.convertTimeToDouble(LocalTime.now());
+                Double currentTime = timeService.convertTimeToDouble(LocalTime.now(ZoneId.of("Asia/Dhaka")));
 
                 if (onlineAvailTime < currentTime) {
                     onlineAvailTime = currentTime;

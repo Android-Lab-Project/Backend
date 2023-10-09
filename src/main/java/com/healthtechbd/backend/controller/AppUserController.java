@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -851,7 +852,7 @@ public class AppUserController {
     public ResponseEntity<?> getAllUpcomingForUser(HttpServletRequest request) {
         AppUser user = userService.returnUser(request);
 
-        Double time = timeService.convertTimeToDouble(LocalTime.now().minusMinutes(30));
+        Double time = timeService.convertTimeToDouble(LocalTime.now(ZoneId.of("Asia/Dhaka")).minusMinutes(30));
 
 
         List<DoctorSerial> upcomingDoctorSerials = doctorSerialRepository.findByDateAndTimeAndUserId(LocalDate.now(), time,
