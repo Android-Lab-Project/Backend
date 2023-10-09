@@ -635,7 +635,7 @@ public class AppUserController {
 
         return new ResponseEntity<>(ApiResponse.create("create", "Trip created"), HttpStatus.OK);
     }
-
+    @PreAuthorize("hasAnyAuthority('USER','AMBULANCE')")
     @DeleteMapping("/delete/ambulance/trip/{id}")
     public ResponseEntity<?> deleteTrip(@PathVariable(name = "id") Long id) {
         try {
@@ -960,7 +960,7 @@ public class AppUserController {
         return new ResponseEntity<>(ambulanceTripViewDTOS, HttpStatus.OK);
     }
 
-
+    @PreAuthorize("hasAnyAuthority('USER','AMBULANCE')")
     @GetMapping("/ambulance/trip/pending")
     public ResponseEntity<?> getAllPendingTrips(HttpServletRequest request) {
         AppUser user = userService.returnUser(request);
