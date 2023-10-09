@@ -2,10 +2,7 @@ package com.healthtechbd.backend.controller;
 
 import com.healthtechbd.backend.dto.AmbulanceDTO;
 import com.healthtechbd.backend.dto.ProviderTripViewDTO;
-import com.healthtechbd.backend.entity.Ambulance;
-import com.healthtechbd.backend.entity.AmbulanceProvider;
-import com.healthtechbd.backend.entity.AmbulanceTrip;
-import com.healthtechbd.backend.entity.AppUser;
+import com.healthtechbd.backend.entity.*;
 import com.healthtechbd.backend.repo.*;
 import com.healthtechbd.backend.service.BkashPaymentService;
 import com.healthtechbd.backend.service.UserService;
@@ -228,6 +225,25 @@ public class AmbulanceController {
             return new ResponseEntity<>(ApiResponse.create("error", "Ambulance provider or trip not found"),
                     HttpStatus.NOT_FOUND);
         }
+    }
+
+    @PreAuthorize("hasAnyAuthority('USER','AMBULANCE')")
+    @GetMapping("/ambulance/trip/check/{id}")
+    public  ResponseEntity<?>makeChecked(@PathVariable(name="id")Long id)
+    {
+        Optional<AmbulanceTrip>optionalAmbulanceTrip = ambulanceTripRepository.findById(id);
+
+        if(optionalAmbulanceTrip.isEmpty())
+        {
+            return  new ResponseEntity<>(ApiResponse.create("error", "Not found"),HttpStatus.NOT_FOUND);
+        }
+
+        AmbulanceTrip ambulanceTrip = optionalAmbulanceTrip.get();
+        ambulanceTrip.setChecked(1);
+        ambulanceTrip.setReviewChecked(0);
+        ambulanceTripRepository.save(ambulanceTrip);
+
+        return new ResponseEntity<>(ApiResponse.create("checked","Trip is now checked"),HttpStatus.OK);
     }
 
 }
