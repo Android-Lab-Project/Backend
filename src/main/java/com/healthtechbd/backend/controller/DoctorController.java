@@ -395,10 +395,10 @@ public class DoctorController {
     public ResponseEntity<?> getAllUpcoming(HttpServletRequest request) {
         AppUser doctor = userService.returnUser(request);
 
-        Double time = timeService.convertTimeToDouble(LocalTime.now(ZoneId.of("Asia/Dhaka")).minusMinutes(30));
+//        Double time = timeService.convertTimeToDouble(LocalTime.now(ZoneId.of("Asia/Dhaka")).minusMinutes(30));
 
         List<DoctorSerial> upcomingDoctorSerials = doctorSerialRepository.findByDateAndTimeAndDoctorId(LocalDate.now(),
-                time, doctor.getId());
+                 doctor.getId());
 
         if (upcomingDoctorSerials.isEmpty()) {
             return new ResponseEntity<>(ApiResponse.create("empty", "No upcoming found"), HttpStatus.OK);
