@@ -22,7 +22,9 @@ import java.util.concurrent.Executors;
 @Service
 public class NotificationService {
     private static final Logger logger = LoggerFactory.getLogger(NotificationService.class);
-    private final String MESSAGE_API = "http://66.45.237.70/api.php?username={username}&password={password}&number={number}&message={message}";
+//    private final String MESSAGE_API = "http://66.45.237.70/api.php?username={username}&password={password}&number={number}&message={message}";
+
+    private final String MESSAGE_API = "http://bulksmsbd.net/api/smsapi?api_key=${password}&type=text&number=${number}&senderid={user}&message=${message}";
     @Autowired
     MedicineReminderRepository medicineReminderRepository;
     @Autowired
