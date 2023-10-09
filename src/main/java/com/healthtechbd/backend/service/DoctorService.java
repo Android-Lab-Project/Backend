@@ -51,12 +51,13 @@ public class DoctorService {
 
             Double availTime = doctor.getAvailableTimes().get(i).getAvailTime();
 
-            if (doctor.getAvailableTimes().get(i).getDate().equals(LocalDate.now())) {
+            if (doctor.getAvailableTimes().get(i).getDate().equals(LocalDate.now(ZoneId.of("Asia/Dhaka")))) {
                 Double currentTime = timeService.convertTimeToDouble(LocalTime.now(ZoneId.of("Asia/Dhaka")));
                 if (availTime < currentTime) {
                     availTime = currentTime;
                 }
             }
+
             if ((startTime<endTime && availTime>endTime)||(startTime>endTime && availTime>endTime && availTime<startTime)) {
                 doctor.getAvailableTimes().get(i).setAvailTime(-1.0);
             } else {
@@ -73,7 +74,7 @@ public class DoctorService {
 
             Double onlineAvailTime = doctor.getAvailableOnlineTimes().get(i).getAvailTime();
 
-            if (doctor.getAvailableOnlineTimes().get(i).getDate().equals(LocalDate.now())) {
+            if (doctor.getAvailableOnlineTimes().get(i).getDate().equals(LocalDate.now(ZoneId.of("Asia/Dhaka")))) {
                 Double currentTime = timeService.convertTimeToDouble(LocalTime.now(ZoneId.of("Asia/Dhaka")));
 
                 if (onlineAvailTime < currentTime) {

@@ -240,19 +240,21 @@ public class DoctorController {
 
         for (int i = 0; i < doctor.getAvailableTimes().size(); i++) {
 
-            if (doctor.getAvailableTimes().get(i).getDate().isBefore(LocalDate.now())) {
+            if (doctor.getAvailableTimes().get(i).getDate().isBefore(LocalDate.now(ZoneId.of("Asia/Dhaka")))) {
                 doctor.getAvailableTimes().get(i)
                         .setDate(DoctorService.nextDate(doctor.getAvailableTimes().get(i).getDay()));
                 doctor.getAvailableTimes().get(i).setCount(0);
+                doctor.getAvailableTimes().get(i).setAvailTime(doctor.getAvailableTimes().get(i).getStartTime());
             }
         }
 
         for (int i = 0; i < doctor.getAvailableOnlineTimes().size(); i++) {
 
-            if (doctor.getAvailableOnlineTimes().get(i).getDate().isBefore(LocalDate.now())) {
+            if (doctor.getAvailableOnlineTimes().get(i).getDate().isBefore(LocalDate.now(ZoneId.of("Asia/Dhaka")))) {
                 doctor.getAvailableOnlineTimes().get(i)
                         .setDate(DoctorService.nextDate(doctor.getAvailableOnlineTimes().get(i).getDay()));
                 doctor.getAvailableOnlineTimes().get(i).setCount(0);
+                doctor.getAvailableOnlineTimes().get(i).setAvailTime(doctor.getAvailableOnlineTimes().get(i).getStartTime());
             }
         }
 
@@ -297,19 +299,22 @@ public class DoctorController {
 
             for (int i = 0; i < doctor.getAvailableTimes().size(); i++) {
 
-                if (doctor.getAvailableTimes().get(i).getDate().isBefore(LocalDate.now())) {
+                if (doctor.getAvailableTimes().get(i).getDate().isBefore(LocalDate.now(ZoneId.of("Asia/Dhaka")))) {
                     doctor.getAvailableTimes().get(i)
                             .setDate(DoctorService.nextDate(doctor.getAvailableTimes().get(i).getDay()));
                     doctor.getAvailableTimes().get(i).setCount(0);
+                    doctor.getAvailableTimes().get(i).setAvailTime(doctor.getAvailableTimes().get(i).getStartTime());
+
                 }
             }
 
             for (int i = 0; i < doctor.getAvailableOnlineTimes().size(); i++) {
 
-                if (doctor.getAvailableOnlineTimes().get(i).getDate().isBefore(LocalDate.now())) {
+                if (doctor.getAvailableOnlineTimes().get(i).getDate().isBefore(LocalDate.now(ZoneId.of("Asia/Dhaka")))) {
                     doctor.getAvailableOnlineTimes().get(i)
                             .setDate(DoctorService.nextDate(doctor.getAvailableOnlineTimes().get(i).getDay()));
                     doctor.getAvailableOnlineTimes().get(i).setCount(0);
+                    doctor.getAvailableOnlineTimes().get(i).setAvailTime(doctor.getAvailableOnlineTimes().get(i).getStartTime());
                 }
             }
 
