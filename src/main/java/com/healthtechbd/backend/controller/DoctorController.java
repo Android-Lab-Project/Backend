@@ -397,7 +397,7 @@ public class DoctorController {
 
 //        Double time = timeService.convertTimeToDouble(LocalTime.now(ZoneId.of("Asia/Dhaka")).minusMinutes(30));
 
-        List<DoctorSerial> upcomingDoctorSerials = doctorSerialRepository.findByDateAndTimeAndDoctorId(LocalDate.now(),
+        List<DoctorSerial> upcomingDoctorSerials = doctorSerialRepository.findByDateAndTimeAndDoctorId(LocalDate.now(ZoneId.of("Asia/Dhaka")),
                  doctor.getId());
 
         if (upcomingDoctorSerials.isEmpty()) {
