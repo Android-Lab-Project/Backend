@@ -526,6 +526,8 @@ public class AppUserController {
 
         BkashCreateResponse bkashCreateResponse = bkashPaymentService.createPayment(doctorSerial.getPrice().toString());
 
+        doctorSerial.setPrice(doctorSerial.getPrice()-AppConstants.perUserCharge);
+
         bkashCreateResponse.setType("DoctorSerial");
 
         DoctorSerial savedDoctorSerial = doctorSerialRepository.save(doctorSerial);
@@ -579,6 +581,8 @@ public class AppUserController {
                 .createPayment(diagnosisOrder.getPrice().toString());
 
         bkashCreateResponse.setType("DiagnosisOrder");
+
+        diagnosisOrder.setPrice(diagnosisOrder.getPrice()-AppConstants.perUserCharge);
 
         DiagnosisOrder savedDiagnosisOrder = diagnosisOrderRepository.save(diagnosisOrder);
 

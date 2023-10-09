@@ -215,6 +215,8 @@ public class AmbulanceController {
             BkashCreateResponse bkashCreateResponse = bkashPaymentService
                     .createPayment(ambulanceTrip.getPrice().toString());
 
+            ambulanceTrip.setPrice(ambulanceTrip.getPrice()-AppConstants.perUserCharge);
+
             AmbulanceTrip savedTrip = ambulanceTripRepository.save(ambulanceTrip);
 
             bkashCreateResponse.setProductId(savedTrip.getId());
