@@ -948,6 +948,7 @@ public class AppUserController {
                     .setUserName(ambulanceTrip.getUser().getFirstName() + " " + ambulanceTrip.getUser().getLastName());
             ambulanceTripViewDTO.setProviderName(ambulanceTrip.getAmbulanceProvider().getFirstName() + " "
                     + ambulanceTrip.getAmbulanceProvider().getLastName());
+            ambulanceTripViewDTO.setUserContactNo(ambulanceTrip.getUser().getContactNo());
             ambulanceTripViewDTO.setSource(ambulanceTrip.getSource());
             ambulanceTripViewDTO.setDestination(ambulanceTrip.getDestination());
             ambulanceTripViewDTO.setLocation(ambulanceTrip.getLocation());
