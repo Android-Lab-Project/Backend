@@ -1,5 +1,4 @@
-package com.healthtechbd.backend.entity;
-
+package com.healthtechbd.backend.dto;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -7,7 +6,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class ReviewPendingDTO {
+public  class ReviewPendingDTO {
     private Long subjectId;
     private String subjectName;
     private Long orderId;
