@@ -23,6 +23,7 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 
@@ -284,7 +285,7 @@ public class DoctorController {
         return new ResponseEntity<>(doctorDTO, HttpStatus.OK);
     }
 
-    @PreAuthorize("hasAnyAuthority('DOCTOR','USER')")
+    @PreAuthorize("permitAll()")
     @GetMapping("/doctor/all")
     public ResponseEntity<?> showAllDoctorDetails() {
 
@@ -344,7 +345,9 @@ public class DoctorController {
                 allDoctorsDTO.get(i).setReviewCount(0L);
             }
         }
-        return new ResponseEntity<>(allDoctorsDTO, HttpStatus.OK);
+        HashMap<String,List<DoctorDTO>>doctors = new HashMap<>();
+        doctors.put("doctors",allDoctorsDTO);
+        return new ResponseEntity<>(doctors, HttpStatus.OK);
 
     }
 
