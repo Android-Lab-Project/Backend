@@ -228,10 +228,10 @@ public class DoctorController {
         return new ResponseEntity<>(ApiResponse.create("update", "Doctor offline time updated"), HttpStatus.OK);
     }
 
-    @PreAuthorize("hasAnyAuthority('DOCTOR','USER')")
+    @PreAuthorize("permitAll()")
     @GetMapping("/doctor/{id}")
     public ResponseEntity<?> showDoctorDetails(@PathVariable Long id) {
-        Optional<Doctor> optionalDoctor = doctorRepository.findByAppUser_Id(id);
+        Optional<Doctor> optionalDoctor = doctorRepository.findById(id);
         Doctor doctor = new Doctor();
         if (optionalDoctor.isPresent()) {
             doctor = optionalDoctor.get();
@@ -483,4 +483,43 @@ public class DoctorController {
         return new ResponseEntity<>(ApiResponse.create("checked","DoctorSerial is now checked"),HttpStatus.OK);
     }
 
+    @Autowired
+    private AppointmentRepository appointmentRepository;
+
+    @PreAuthorize("permitAll()")
+    @PostMapping("/add/appointment")
+    public ResponseEntity<?>createAppointment(@RequestBody Appointment appointment)
+    {
+        System.out.println(appointment.getDoctorId()+" "+appointment.getEmail());
+
+        appointmentRepository.save(appointment);
+
+        return new ResponseEntity<>(ApiResponse.create("create","appointment created"),HttpStatus.OK);
+    }
+
+    @PreAuthorize("permitAll()")
+    @PostMapping("/doctor/appointment")
+    public ResponseEntity<?>getAppointment(@RequestBody Appointment appointment)
+    {
+        System.out.println(appointment.getDoctorId()+" "+appointment.getEmail());
+        List<Appointment>appointments = appointmentRepository.findByEmail(appointment.getEmail());
+
+        List<Doctor>appointedDoctors = new ArrayList<>();
+
+        for(var i : appointments)
+        {
+            Doctor doctor = doctorRepository.findById(i.getDoctorId()).get();
+
+            appointedDoctors.add(doctor);
+        }
+
+        return new ResponseEntity<>(appointedDoctors,HttpStatus.OK);
+    }
+
+
+
+
+
 }
+
+
