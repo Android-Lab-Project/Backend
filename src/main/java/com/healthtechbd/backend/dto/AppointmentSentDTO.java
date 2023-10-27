@@ -1,6 +1,5 @@
-package com.healthtechbd.backend.entity;
+package com.healthtechbd.backend.dto;
 
-import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -8,11 +7,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Entity
-@Table(name="appointments")
-public class Appointment {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+public class AppointmentSentDTO {
     private Long id;
 
     private String email;
@@ -21,4 +16,7 @@ public class Appointment {
 
     private String date;
 
+    private String doctorName;
+
+    private String doctorPic;
 }

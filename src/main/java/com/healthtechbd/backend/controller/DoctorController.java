@@ -490,7 +490,7 @@ public class DoctorController {
     @PostMapping("/add/appointment")
     public ResponseEntity<?>createAppointment(@RequestBody Appointment appointment)
     {
-        System.out.println(appointment.getDoctorId()+" "+appointment.getEmail());
+        System.out.println(appointment.getDoctorId()+" "+appointment.getEmail()+" "+appointment.getDate());
 
         appointmentRepository.save(appointment);
 
@@ -498,22 +498,42 @@ public class DoctorController {
     }
 
     @PreAuthorize("permitAll()")
-    @PostMapping("/doctor/appointment")
-    public ResponseEntity<?>getAppointment(@RequestBody Appointment appointment)
+    @GetMapping("/doctor/appointment")
+    public ResponseEntity<?>getAppointment(@RequestParam(name ="email") String email)
     {
-        System.out.println(appointment.getDoctorId()+" "+appointment.getEmail());
-        List<Appointment>appointments = appointmentRepository.findByEmail(appointment.getEmail());
+        System.out.println(email);
 
-        List<Doctor>appointedDoctors = new ArrayList<>();
+        List<Appointment>appointments = appointmentRepository.findByEmail(email);
+
+        List<AppointmentSentDTO>appointmentSentDTOS = new ArrayList<>();
 
         for(var i : appointments)
         {
-            Doctor doctor = doctorRepository.findById(i.getDoctorId()).get();
+            AppointmentSentDTO appointmentSentDTO = new AppointmentSentDTO();
+            appointmentSentDTO.setDoctorId(i.getDoctorId());
+            appointmentSentDTO.setDate(i.getDate());
+            Optional<Doctor>optionalDoctor = doctorRepository.findByAppUser_Id(i.getDoctorId());
 
-            appointedDoctors.add(doctor);
+            if(optionalDoctor.isEmpty())
+            {
+
+                continue;
+            }
+
+            Doctor doctor = optionalDoctor.get();
+
+            appointmentSentDTO.setDoctorId(doctor.getId());
+            appointmentSentDTO.setDoctorName(doctor.getAppUser().getFirstName()+" "+doctor.getAppUser().getLastName());
+            appointmentSentDTO.setDoctorPic(doctor.getAppUser().getDp());
+            appointmentSentDTOS.add(appointmentSentDTO);
+
         }
 
-        return new ResponseEntity<>(appointedDoctors,HttpStatus.OK);
+        HashMap<String, List<AppointmentSentDTO>>data = new HashMap<>();
+
+        data.put("appointments",appointmentSentDTOS);
+
+        return new ResponseEntity<>(data,HttpStatus.OK);
     }
 
 
