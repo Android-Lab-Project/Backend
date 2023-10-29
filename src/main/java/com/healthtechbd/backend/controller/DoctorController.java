@@ -14,6 +14,7 @@ import com.healthtechbd.backend.utils.UpdateUserResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cglib.core.Local;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -22,6 +23,7 @@ import org.springframework.web.bind.annotation.*;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -67,9 +69,16 @@ public class DoctorController {
 
     @PreAuthorize("permitAll()")
     @PostMapping("/register/doctor")
-    public ResponseEntity<?> registerDoctor(@RequestBody DoctorSignUpDTO doctorSignUpDTO) {
+    public ResponseEntity<?> registerDoctor(@RequestBody DoctorSignUp2DTO doctorSignUpDTO) {
 
-        SignUpDTO signUpDTO = modelMapper.map(doctorSignUpDTO.getAppUser(), SignUpDTO.class);
+        AppUser appUser = new AppUser();
+
+        appUser.setEmail(doctorSignUpDTO.getEmail());
+        appUser.setFirstName(doctorSignUpDTO.getFirstName());
+        appUser.setContactNo(doctorSignUpDTO.getContactNo());
+        appUser.setPassword(doctorSignUpDTO.getPassword());
+
+        SignUpDTO signUpDTO = modelMapper.map(appUser, SignUpDTO.class);
 
         RegistrationResponse response = userService.registerUser(signUpDTO, "DOCTOR");
 
@@ -77,26 +86,12 @@ public class DoctorController {
             return ResponseEntity.badRequest().body(response.getResponse());
         }
 
-        doctorSignUpDTO.setAppUser(response.getUser());
 
         Doctor doctor = modelMapper.map(doctorSignUpDTO, Doctor.class);
 
-        for (int i = 0; i < doctor.getAvailableTimes().size(); i++) {
-            doctor.getAvailableTimes().get(i).setId(null);
-            doctor.getAvailableTimes().get(i).setCount(0);
-            doctor.getAvailableTimes().get(i).setAvailTime(doctor.getAvailableTimes().get(i).getStartTime());
-            doctor.getAvailableTimes().get(i)
-                    .setDate(DoctorService.currentDate(doctor.getAvailableTimes().get(i).getDay()));
+        doctor.setBio("good Doctor");
 
-        }
-        for (int i = 0; i < doctor.getAvailableOnlineTimes().size(); i++) {
-
-            doctor.getAvailableOnlineTimes().get(i).setId(null);
-            doctor.getAvailableOnlineTimes().get(i).setCount(0);
-            doctor.getAvailableOnlineTimes().get(i).setAvailTime(doctor.getAvailableOnlineTimes().get(i).getStartTime());
-            doctor.getAvailableOnlineTimes().get(i)
-                    .setDate(DoctorService.currentDate(doctor.getAvailableOnlineTimes().get(i).getDay()));
-        }
+        doctor.setAppUser(response.getUser());
 
         doctor.setBalance(0L);
 
@@ -521,10 +516,11 @@ public class DoctorController {
             }
 
             Doctor doctor = optionalDoctor.get();
-
+            appointmentSentDTO.setId(i.getId());
             appointmentSentDTO.setDoctorId(doctor.getId());
             appointmentSentDTO.setDoctorName(doctor.getAppUser().getFirstName()+" "+doctor.getAppUser().getLastName());
             appointmentSentDTO.setDoctorPic(doctor.getAppUser().getDp());
+            appointmentSentDTO.setDoctorPhone(doctor.getAppUser().getContactNo());
             appointmentSentDTOS.add(appointmentSentDTO);
 
         }
@@ -535,6 +531,70 @@ public class DoctorController {
 
         return new ResponseEntity<>(data,HttpStatus.OK);
     }
+
+    @PreAuthorize("permitAll()")
+    @GetMapping("/doctor/user/appointment")
+    public ResponseEntity<?>getDoctorAppointment(@RequestParam(name ="email") String email)
+    {
+        System.out.println(email);
+
+        Doctor doctor1 = doctorRepository.findByAppUser_Email(email);
+
+        List<Appointment>appointments = appointmentRepository.findByDoctorId(doctor1.getAppUser().getId());
+
+        List<AppointmentSentDTO>appointmentSentDTOS = new ArrayList<>();
+
+        DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("MM/dd/yyyy");
+
+        for(var i : appointments)
+        {
+            LocalDate localDate= LocalDate.parse(i.getDate(),dateFormatter);
+
+            if(localDate.equals(LocalDate.now(ZoneId.of("Asia/Dhaka"))))
+            {
+                AppointmentSentDTO appointmentSentDTO = new AppointmentSentDTO();
+                appointmentSentDTO.setId(i.getId());
+                appointmentSentDTO.setDoctorId(i.getDoctorId());
+                appointmentSentDTO.setUserPhone(i.getUserPhone());
+                appointmentSentDTO.setDate(i.getDate());
+                appointmentSentDTO.setUserName(i.getUserName());
+                appointmentSentDTO.setProblem(i.getProblem());
+
+                Optional<Doctor>optionalDoctor = doctorRepository.findByAppUser_Id(i.getDoctorId());
+
+                if(optionalDoctor.isEmpty())
+                {
+
+                    continue;
+                }
+
+                Doctor doctor = optionalDoctor.get();
+
+                appointmentSentDTO.setDoctorId(doctor.getId());
+                appointmentSentDTO.setDoctorName(doctor.getAppUser().getFirstName()+" "+doctor.getAppUser().getLastName());
+                appointmentSentDTO.setDoctorPic(doctor.getAppUser().getDp());
+                appointmentSentDTOS.add(appointmentSentDTO);
+            }
+
+
+        }
+
+        HashMap<String, List<AppointmentSentDTO>>data = new HashMap<>();
+
+        data.put("appointments",appointmentSentDTOS);
+
+        return new ResponseEntity<>(data,HttpStatus.OK);
+    }
+
+    @PreAuthorize("permitAll()")
+    @DeleteMapping("/delete/appointment")
+    public ResponseEntity<?>deleteAppointment(@RequestParam(name = "id")Long id)
+    {
+        appointmentRepository.deleteById(id);
+
+        return new ResponseEntity<>("OK",HttpStatus.OK);
+    }
+
 
 
 

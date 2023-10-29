@@ -18,5 +18,13 @@ public class AppointmentSentDTO {
 
     private String doctorName;
 
+    private String problem;
+
+    private String userPhone;
+
+    private String doctorPhone;
+
+    private String userName;
+
     private String doctorPic;
 }

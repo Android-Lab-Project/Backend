@@ -27,6 +27,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
+import java.util.HashMap;
 import java.util.Optional;
 
 @CrossOrigin(origins = "*", allowedHeaders = "*", methods = {RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT,
@@ -236,4 +237,28 @@ public class AuthController {
 
         return new ResponseEntity<>(ApiResponse.create("update", "Password is updated"), HttpStatus.OK);
     }
+
+    @GetMapping("/doctor/verify")
+    public ResponseEntity<?>verifyDoctor(@RequestParam(name="email") String email)
+    {
+        System.out.println(email);
+        boolean  data = doctorRepository.existsByAppUser_Email(email);
+
+        HashMap<String, String >hm = new HashMap<>();
+
+        if(data)
+        {
+            hm.put("data","Yes");
+
+        }
+        else
+        {
+            hm.put("data","No");
+
+        }
+        return new ResponseEntity<>(hm,HttpStatus.OK);
+
+
+    }
+
 }

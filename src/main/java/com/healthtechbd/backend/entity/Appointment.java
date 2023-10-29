@@ -17,6 +17,12 @@ public class Appointment {
 
     private String email;
 
+    private String userName;
+
+    private String userPhone;
+
+    private String problem;
+
     private Long doctorId;
 
     private String date;

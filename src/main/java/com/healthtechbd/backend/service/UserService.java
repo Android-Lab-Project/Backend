@@ -55,8 +55,6 @@ public class UserService {
         if (signUpDTO.getFirstName() == null || signUpDTO.getFirstName().trim().length() == 0)
             errorResponse = ApiResponse.create("error", "First Name can not be empty");
 
-        if (signUpDTO.getLastName() == null || signUpDTO.getLastName().trim().length() == 0)
-            errorResponse = ApiResponse.create("error", "Last Name can not be empty");
 
         if (signUpDTO.getEmail() == null || signUpDTO.getEmail().trim().length() == 0)
             errorResponse = ApiResponse.create("error", "Email can not be empty");
