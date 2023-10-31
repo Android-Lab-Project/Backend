@@ -74,7 +74,7 @@ public class MedicineController {
 
     }
 
-    @PreAuthorize("hasAnyAuthority('PHARMACY','USER','ADMIN')")
+    @PreAuthorize("permitAll()")
     @GetMapping("/medicine/all")
     public ResponseEntity<?> showAllMedicineDetails() {
         List<Medicine> medicines = medicineRepository.findAll();
